@@ -5,62 +5,91 @@
     android:id="@+id/LoginPage"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/background"
     tools:context=".screens.LoginActivity">
 
     <TextView
-        android:id="@+id/LoginText"
+        android:id="@+id/HomePage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="109dp"
         android:layout_marginTop="62dp"
         android:layout_marginEnd="190dp"
-        android:layout_marginBottom="72dp"
+        android:layout_marginBottom="105dp"
         android:text="log in to the game"
-        app:layout_constraintBottom_toTopOf="@+id/Login_EnterUsernameText"
+        android:textColor="#E4DBDB"
+        app:layout_constraintBottom_toTopOf="@+id/LoginEnterUserNameText"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-
-    <EditText
-        android:id="@+id/Login_EnterUsername"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="81dp"
-        android:layout_marginTop="73dp"
-        android:layout_marginEnd="120dp"
-        android:layout_marginBottom="85dp"
-        android:ems="10"
-        android:inputType="text"
-        android:text="enter username"
-        app:layout_constraintBottom_toTopOf="@+id/Login_EnterPasswordText"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/LoginText" />
 
     <EditText
         android:id="@+id/Login_EnterPassword"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="89dp"
-        android:layout_marginTop="49dp"
         android:layout_marginEnd="113dp"
+        android:layout_marginBottom="139dp"
         android:ems="10"
         android:inputType="textPassword"
+        app:layout_constraintBottom_toTopOf="@+id/btn_login_check"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/Login_EnterUsername" />
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <Button
-        android:id="@+id/ConfiermLoginEnter"
+        android:id="@+id/btn_login_check"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="157dp"
         android:layout_marginTop="139dp"
         android:layout_marginEnd="166dp"
-        android:layout_marginBottom="215dp"
+        android:backgroundTint="#000000"
         android:text="check"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/Login_EnterPassword" />
+
+    <TextView
+        android:id="@+id/LoginEnterPasswordText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="95dp"
+        android:layout_marginEnd="217dp"
+        android:layout_marginBottom="13dp"
+        android:text="Enter Password"
+        android:textColor="#E0CECE"
+        app:layout_constraintBottom_toTopOf="@+id/Login_EnterPassword"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <EditText
+        android:id="@+id/LoginEnterUserName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="89dp"
+        android:layout_marginTop="41dp"
+        android:layout_marginEnd="112dp"
+        android:layout_marginBottom="40dp"
+        android:ems="10"
+        android:inputType="textPassword"
+        app:layout_constraintBottom_toTopOf="@+id/LoginEnterPasswordText"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/LoginEnterUserNameText" />
+
+    <TextView
+        android:id="@+id/LoginEnterUserNameText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="100dp"
+        android:layout_marginTop="105dp"
+        android:layout_marginEnd="209dp"
+        android:text="Enter UserName"
+        android:textColor="#E2D9D9"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/HomePage" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

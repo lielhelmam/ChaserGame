@@ -1,15 +1,16 @@
 {
   "project_info": {
     "project_number": "1025650034086",
+    "firebase_url": "https://chasergame-d089f-default-rtdb.europe-west1.firebasedatabase.app",
     "project_id": "chasergame-d089f",
     "storage_bucket": "chasergame-d089f.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1025650034086:android:6f7f6ccbee97d46ca3bb67",
+        "mobilesdk_app_id": "1:1025650034086:android:38bd49ec47f62a88a3bb67",
         "android_client_info": {
-          "package_name": "com.example.ChaserGame"
+          "package_name": "com.example.chasergame"
         }
       },
       "oauth_client": [],
