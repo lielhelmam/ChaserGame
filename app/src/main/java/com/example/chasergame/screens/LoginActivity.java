@@ -18,13 +18,9 @@ import com.example.chasergame.models.User;
 import com.example.chasergame.services.DatabaseService;
 import com.example.chasergame.utils.SharedPreferencesUtil;
 import com.example.chasergame.utils.Validator;
-/// Activity for logging in the user
-/// This activity is used to log in the user
-/// It contains fields for the user to enter their email and password
-/// It also contains a button to log in the user
-/// When the user is logged in, they are redirected to the main activity
 
 public class LoginActivity extends BaseActivity implements View.OnClickListener {
+
     private static final String TAG = "LoginActivity";
 
     private EditText etUsername, etPassword;
@@ -36,107 +32,74 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_login);
+
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.HomePage), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
 
-        /// get the views
         etUsername = findViewById(R.id.LoginEnterUserName);
         etPassword = findViewById(R.id.Login_EnterPassword);
         btnLogin = findViewById(R.id.btn_login_check);
         tvRegister = findViewById(R.id.Login_tv_register);
 
-        /// set the click listener
         btnLogin.setOnClickListener(this);
         tvRegister.setOnClickListener(this);
+
     }
-        @Override
-        public void onClick(View v) {
-            if (v.getId() == btnLogin.getId()) {
-                Log.d(TAG, "onClick: Login button clicked");
 
-                /// get the email and password entered by the user
-                String username = etUsername.getText().toString();
-                String password = etPassword.getText().toString();
+    @Override
+    public void onClick(View v) {
+        if (v.getId() == btnLogin.getId()) {
 
-                /// log the email and password
-                Log.d(TAG, "onClick: Email: " + username);
-                Log.d(TAG, "onClick: Password: " + password);
+            String username = etUsername.getText().toString().trim();
+            String password = etPassword.getText().toString().trim();
 
-                Log.d(TAG, "onClick: Validating input...");
-                /// Validate input
-                if (!checkInput(username, password)) {
-                    /// stop if input is invalid
-                    return;
-                }
-                Log.d(TAG, "onClick: Logging in user...");
+            if (!checkInput(username, password)) return;
 
-                /// Login user
-                loginUser(username, password);
-            } else if (v.getId() == tvRegister.getId()) {
-                /// Navigate to Register Activity
-                Intent registerIntent = new Intent(LoginActivity.this, SigninActivity.class);
-                startActivity(registerIntent);
-            }
+            loginUser(username, password);
+
+        } else if (v.getId() == tvRegister.getId()) {
+            startActivity(new Intent(LoginActivity.this, SigninActivity.class));
         }
-    /// Method to check if the input is valid
-    /// It checks if the email and password are valid
-    /// @see Validator#isEmailValid(String)
-    /// @see Validator#isPasswordValid(String)
+    }
+
     private boolean checkInput(String username, String password) {
+
         if (!Validator.isNameValid(username)) {
-            Log.e(TAG, "checkInput: Invalid email address");
-            /// show error message to user
-            etUsername.setError("Invalid username address");
-            /// set focus to email field
+            etUsername.setError("Invalid username");
             etUsername.requestFocus();
             return false;
         }
 
         if (!Validator.isPasswordValid(password)) {
-            Log.e(TAG, "checkInput: Invalid password");
-            /// show error message to user
-            etPassword.setError("Password must be at least 6 characters long");
-            /// set focus to password field
+            etPassword.setError("Password must be at least 6 characters");
             etPassword.requestFocus();
             return false;
         }
 
         return true;
     }
+
     private void loginUser(String username, String password) {
         databaseService.getUserByEmailAndPassword(username, password, new DatabaseService.DatabaseCallback<User>() {
-            /// Callback method called when the operation is completed
-            /// @param user the user object that is logged in
+
             @Override
             public void onCompleted(User user) {
-                Log.d(TAG, "onCompleted: User logged in: " + user.toString());
-                /// save the user data to shared preferences
                 SharedPreferencesUtil.saveUser(LoginActivity.this, user);
-                /// Redirect to main activity and clear back stack to prevent user from going back to login screen
+
                 Intent mainIntent = new Intent(LoginActivity.this, MainActivity.class);
-                /// Clear the back stack (clear history) and start the MainActivity
                 mainIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(mainIntent);
             }
 
             @Override
             public void onFailed(Exception e) {
-                Log.e(TAG, "onFailed: Failed to retrieve user data", e);
-                /// Show error message to user
-                etPassword.setError("Invalid Username or password");
+                etPassword.setError("Invalid username or password");
                 etPassword.requestFocus();
-                /// Sign out the user if failed to retrieve user data
-                /// This is to prevent the user from being logged in again
                 SharedPreferencesUtil.signOutUser(LoginActivity.this);
             }
         });
     }
 }
-
-
-
-
-
