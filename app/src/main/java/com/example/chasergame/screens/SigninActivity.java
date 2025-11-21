@@ -95,7 +95,7 @@ public class SigninActivity extends BaseActivity {
         Log.d(TAG, "Registering user...");
 
         String uid = databaseService.generateUserId();
-        User user = new User(email, password, fName, phone, false);
+        User user = new User(uid, fName, password, email, false);
 
         databaseService.checkIfEmailExists(email, new DatabaseService.DatabaseCallback<Boolean>() {
             @Override

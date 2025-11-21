@@ -12,6 +12,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ChaserGame">
         <activity
+            android:name=".screens.CreatetriviaActivity"
+            android:exported="false" />
+        <activity
             android:name=".screens.MainActivity"
             android:exported="false" />
         <activity

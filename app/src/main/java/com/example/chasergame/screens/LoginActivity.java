@@ -83,7 +83,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     }
 
     private void loginUser(String username, String password) {
-        databaseService.getUserByEmailAndPassword(username, password, new DatabaseService.DatabaseCallback<User>() {
+        databaseService.getUserByUsernameAndPassword(username, password, new DatabaseService.DatabaseCallback<User>() {
 
             @Override
             public void onCompleted(User user) {
