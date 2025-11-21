@@ -12,7 +12,7 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.example.chasergame.R;
 
-public class LandingActivity extends AppCompatActivity {
+public class LandingActivity extends BaseActivity {
     Button BtnReg;
     Button BtnLog;
     @Override

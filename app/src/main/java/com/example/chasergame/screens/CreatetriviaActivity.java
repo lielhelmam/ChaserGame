@@ -11,9 +11,13 @@ import androidx.core.view.WindowInsetsCompat;
 import com.example.chasergame.R;
 import com.example.chasergame.models.Question;
 import java.util.ArrayList;
+import java.util.Random;
 
 
 public class CreatetriviaActivity extends BaseActivity {
+
+    Random rnd = new Random();
+    
     String RightAnswer;
     ArrayList<String> wrongAnswers;
      String q;
@@ -30,5 +34,6 @@ public class CreatetriviaActivity extends BaseActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
     }
 }
