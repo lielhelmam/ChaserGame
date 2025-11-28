@@ -22,7 +22,7 @@ import com.example.chasergame.utils.Validator;
 public class SigninActivity extends BaseActivity {
 
     private static final String TAG = "SigninActivity";
-
+    Button goback;
     Button btnSubmit;
     EditText etUserName, etPassword, etEmail, etPhoneNumber;
 
@@ -32,7 +32,7 @@ public class SigninActivity extends BaseActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_signin);
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.HomePage), (v, insets) -> {
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.SighnUpPage), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
@@ -45,6 +45,14 @@ public class SigninActivity extends BaseActivity {
 
         btnSubmit = findViewById(R.id.btn_signup_submit);
             btnSubmit.setOnClickListener(this::onSubmit);
+
+        goback = findViewById(R.id.btn_signup_goback);
+        goback.setOnClickListener(view -> {
+            Intent intentreg = new Intent(SigninActivity.this, LandingActivity.class);
+            startActivity(intentreg);
+        });
+
+
     }
 
     private void onSubmit(View view) {

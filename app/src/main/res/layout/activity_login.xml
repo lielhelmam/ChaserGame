@@ -9,45 +9,44 @@
     tools:context=".screens.LoginActivity">
 
     <TextView
-        android:id="@+id/HomePage"
+        android:id="@+id/SighnUpPage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="109dp"
-        android:layout_marginTop="62dp"
-        android:layout_marginEnd="190dp"
-        android:layout_marginBottom="105dp"
+        android:layout_marginStart="157dp"
+        android:layout_marginTop="52dp"
+        android:layout_marginEnd="237dp"
         android:text="log in to the game"
         android:textColor="#E4DBDB"
-        app:layout_constraintBottom_toTopOf="@+id/LoginEnterUserNameText"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/btn_login_goback" />
 
     <EditText
         android:id="@+id/Login_EnterPassword"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="89dp"
+        android:layout_marginTop="14dp"
         android:layout_marginEnd="113dp"
-        android:layout_marginBottom="139dp"
         android:ems="10"
         android:inputType="textPassword"
-        app:layout_constraintBottom_toTopOf="@+id/btn_login_check"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/LoginEnterPasswordText" />
 
     <Button
         android:id="@+id/btn_login_check"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="157dp"
-        android:layout_marginTop="139dp"
+        android:layout_marginTop="64dp"
         android:layout_marginEnd="166dp"
         android:backgroundTint="#000000"
         android:text="check"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintHorizontal_bias="0.242"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/Login_EnterPassword" />
 
@@ -56,13 +55,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="95dp"
+        android:layout_marginTop="111dp"
         android:layout_marginEnd="217dp"
-        android:layout_marginBottom="13dp"
         android:text="Enter Password"
         android:textColor="#E0CECE"
-        app:layout_constraintBottom_toTopOf="@+id/Login_EnterPassword"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/LoginEnterUserName" />
 
     <EditText
         android:id="@+id/LoginEnterUserName"
@@ -71,11 +70,10 @@
         android:layout_marginStart="89dp"
         android:layout_marginTop="41dp"
         android:layout_marginEnd="112dp"
-        android:layout_marginBottom="40dp"
         android:ems="10"
         android:inputType="textPassword"
-        app:layout_constraintBottom_toTopOf="@+id/LoginEnterPasswordText"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.715"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/LoginEnterUserNameText" />
 
@@ -84,13 +82,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="100dp"
-        android:layout_marginTop="105dp"
+        android:layout_marginTop="192dp"
         android:layout_marginEnd="209dp"
         android:text="Enter UserName"
         android:textColor="#E2D9D9"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.705"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/HomePage" />
+        app:layout_constraintTop_toBottomOf="@+id/SighnUpPage" />
 
     <TextView
         android:id="@+id/Login_tv_register"
@@ -99,14 +98,25 @@
         android:layout_marginStart="128dp"
         android:layout_marginTop="43dp"
         android:layout_marginEnd="88dp"
-        android:layout_marginBottom="71dp"
         android:text="dont have an account? register!"
         android:textColor="#FFFEFE"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btn_login_check"
-        app:layout_constraintVertical_bias="0.0" />
+        app:layout_constraintTop_toBottomOf="@+id/btn_login_check" />
+
+    <Button
+        android:id="@+id/btn_login_goback"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="67dp"
+        android:layout_marginEnd="340dp"
+        android:layout_marginBottom="201dp"
+        android:backgroundTint="#000000"
+        android:text="go back"
+        app:layout_constraintBottom_toTopOf="@+id/SighnUpPage"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

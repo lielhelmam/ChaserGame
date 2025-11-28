@@ -2,7 +2,6 @@ package com.example.chasergame.screens;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -22,7 +21,7 @@ import com.example.chasergame.utils.Validator;
 public class LoginActivity extends BaseActivity implements View.OnClickListener {
 
     private static final String TAG = "LoginActivity";
-
+    Button goback;
     private EditText etUsername, etPassword;
     private Button btnLogin;
     private TextView tvRegister;
@@ -33,7 +32,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_login);
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.HomePage), (v, insets) -> {
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.SighnUpPage), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
@@ -46,6 +45,13 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
 
         btnLogin.setOnClickListener(this);
         tvRegister.setOnClickListener(this);
+
+        goback = findViewById(R.id.btn_login_goback);
+        goback.setOnClickListener(view -> {
+            Intent intentreg = new Intent(LoginActivity.this, LandingActivity.class);
+            startActivity(intentreg);
+        });
+
 
     }
 
@@ -88,10 +94,17 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
             @Override
             public void onCompleted(User user) {
                 SharedPreferencesUtil.saveUser(LoginActivity.this, user);
-
-                Intent mainIntent = new Intent(LoginActivity.this, MainActivity.class);
-                mainIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(mainIntent);
+                Intent intent;
+                if(user.isAdmin())
+                {
+                    intent = new Intent(LoginActivity.this, AdminActivity.class);
+                }
+                else
+                {
+                    intent = new Intent(LoginActivity.this, MainActivity.class);
+                }
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
             }
 
             @Override

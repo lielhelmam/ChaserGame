@@ -1,5 +1,7 @@
 package com.example.chasergame.models;
 
+import androidx.annotation.NonNull;
+
 import java.util.ArrayList;
 
 public class Question {
@@ -7,6 +9,8 @@ public class Question {
     public ArrayList<String> wrongAnswers;
     public String question;
 
+    public Question() {
+    }
 
     public Question(String rightAnswer, ArrayList<String> wrongAnswers, String question) {
         this.rightAnswer = rightAnswer;
@@ -36,5 +40,15 @@ public class Question {
 
     public void setQuestion(String question) {
         this.question = question;
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        return "Question{" +
+                "rightAnswer='" + rightAnswer + '\'' +
+                ", wrongAnswers=" + wrongAnswers +
+                ", question='" + question + '\'' +
+                '}';
     }
 }
