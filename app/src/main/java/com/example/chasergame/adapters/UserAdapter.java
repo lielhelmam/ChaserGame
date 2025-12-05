@@ -3,6 +3,7 @@ package com.example.chasergame.adapters;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -21,6 +22,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
     public interface OnUserClickListener {
         void onUserClick(User user);
         void onLongUserClick(User user);
+        void onDeleteClick(User user);
     }
 
     private final List<User> userList;
@@ -58,6 +60,15 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
             return true;
         });
 
+        holder.btnDelete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (onUserClickListener != null) {
+                    onUserClickListener.onDeleteClick(user);
+                }
+            }
+        });
+
     }
 
     @Override
@@ -91,12 +102,14 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView tvName, tvEmail;
+        Button btnDelete;
 
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             tvName = itemView.findViewById(R.id.tv_item_user_name);
             tvEmail = itemView.findViewById(R.id.tv_item_user_email);
+            btnDelete = itemView.findViewById(R.id.btn_item_user_delete);
         }
     }
 }

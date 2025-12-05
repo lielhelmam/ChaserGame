@@ -3,15 +3,16 @@ package com.example.chasergame.screens;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import com.google.firebase.database.FirebaseDatabase;
 
 import androidx.activity.EdgeToEdge;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.widget.TextView;
-import android.widget.Toolbar;
 
 import com.example.chasergame.R;
 import com.example.chasergame.adapters.UserAdapter;
@@ -38,6 +39,12 @@ public class UsersListActivity extends BaseActivity {
             return insets;
         });
 
+        tb = findViewById(R.id.toolbar);
+        tb.setOnClickListener(view -> {
+            Intent intent = new Intent(UsersListActivity.this, AdminActivity.class);
+            startActivity(intent);
+        });
+
         RecyclerView usersList = findViewById(R.id.rv_users_list);
         usersList.setLayoutManager(new LinearLayoutManager(this));
         userAdapter = new UserAdapter(new UserAdapter.OnUserClickListener() {
@@ -54,6 +61,20 @@ public class UsersListActivity extends BaseActivity {
             public void onLongUserClick(User user) {
                 // Handle long user click
                 Log.d(TAG, "User long clicked: " + user);
+            }
+
+            @Override
+            public void onDeleteClick(User user) {
+                FirebaseDatabase database = FirebaseDatabase.getInstance();
+                database.getReference("users").child(user.username)
+                        .removeValue()
+                        .addOnSuccessListener(aVoid -> {
+                            Log.d(TAG, "User data deleted from Realtime Database.");
+                        })
+                        .addOnFailureListener(e -> {
+                            Log.e(TAG, "Error deleting user data: " + e.getMessage());
+                        });
+
             }
         });
         usersList.setAdapter(userAdapter);
