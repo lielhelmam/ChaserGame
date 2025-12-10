@@ -18,6 +18,7 @@ import java.util.List;
 
 public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
 
+    private final List<User> fullList = new ArrayList<>();
 
     public interface OnUserClickListener {
         void onUserClick(User user);
@@ -79,6 +80,10 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
     public void setUserList(List<User> users) {
         userList.clear();
         userList.addAll(users);
+
+        fullList.clear();
+        fullList.addAll(users);
+
         notifyDataSetChanged();
     }
 
@@ -112,4 +117,22 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
             btnDelete = itemView.findViewById(R.id.btn_item_user_delete);
         }
     }
+    public void filter(String text) {
+        userList.clear();
+
+        if (text == null || text.trim().isEmpty()) {
+            userList.addAll(fullList);
+        } else {
+            String query = text.toLowerCase().trim();
+            for (User user : fullList) {
+                if (user.getUsername() != null &&
+                        user.getUsername().toLowerCase().contains(query)) {
+                    userList.add(user);
+                }
+            }
+        }
+
+        notifyDataSetChanged();
+    }
+
 }

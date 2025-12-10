@@ -12,6 +12,8 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import android.widget.SearchView;
 import android.widget.TextView;
 
 import com.example.chasergame.R;
@@ -38,6 +40,22 @@ public class UsersListActivity extends BaseActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+        SearchView searchView = findViewById(R.id.searchView);
+
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                userAdapter.filter(query);
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                userAdapter.filter(newText);
+                return true;
+            }
+        });
+
 
         tb = findViewById(R.id.toolbar);
         tb.setOnClickListener(view -> {
@@ -65,16 +83,19 @@ public class UsersListActivity extends BaseActivity {
 
             @Override
             public void onDeleteClick(User user) {
+
                 FirebaseDatabase database = FirebaseDatabase.getInstance();
-                database.getReference("users").child(user.username)
+
+                database.getReference("users")
+                        .child(user.getId())  // <-- FIXED
                         .removeValue()
                         .addOnSuccessListener(aVoid -> {
-                            Log.d(TAG, "User data deleted from Realtime Database.");
+                            Log.d(TAG, "User deleted.");
+                            userAdapter.removeUser(user);   // <-- UPDATE UI
                         })
                         .addOnFailureListener(e -> {
-                            Log.e(TAG, "Error deleting user data: " + e.getMessage());
+                            Log.e(TAG, "Delete failed: " + e.getMessage());
                         });
-
             }
         });
         usersList.setAdapter(userAdapter);

@@ -28,6 +28,14 @@
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
             app:title="All Users" />
 
+        <SearchView
+            android:id="@+id/searchView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:drawable/alert_light_frame"
+            android:backgroundTint="@color/black"
+            android:queryHint="Search by username..." />
+
     </com.google.android.material.appbar.AppBarLayout>
 
 
@@ -47,6 +55,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView2" />
+
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_users_list"
