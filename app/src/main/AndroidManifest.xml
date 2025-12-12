@@ -12,6 +12,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ChaserGame">
         <activity
+            android:name=".screens.QuestionsListActivity"
+            android:exported="false" />
+        <activity
+            android:name=".screens.AddQuestionActivity"
+            android:exported="false" />
+        <activity
             android:name=".screens.UserProfileActivity"
             android:exported="false" />
         <activity

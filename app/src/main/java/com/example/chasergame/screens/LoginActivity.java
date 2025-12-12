@@ -32,11 +32,27 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_login);
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.SighnUpPage), (v, insets) -> {
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.MainPage), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
+        User user = SharedPreferencesUtil.getUser(this);
+
+        if (SharedPreferencesUtil.isUserLoggedIn(this)) {
+            Intent intent;
+
+            if (user != null && user.isAdmin()) {
+                intent = new Intent(this, AdminActivity.class);
+            } else {
+                intent = new Intent(this, MainActivity.class);
+            }
+
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+        }
+
 
         etUsername = findViewById(R.id.LoginEnterUserName);
         etPassword = findViewById(R.id.Login_EnterPassword);

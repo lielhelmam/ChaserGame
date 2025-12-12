@@ -1,128 +1,101 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/LoginPage"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/background"
-    tools:context=".screens.LoginActivity">
+    android:background="#C62828"
+    tools:context=".screens.LoginActivity"
+    android:padding="16dp">
 
-    <TextView
-        android:id="@+id/SighnUpPage"
-        android:layout_width="wrap_content"
+    <androidx.cardview.widget.CardView
+        android:id="@+id/card_login"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="157dp"
-        android:layout_marginEnd="237dp"
-        android:layout_marginBottom="152dp"
-        android:text="log in to the game"
-        android:textColor="#E4DBDB"
-        app:layout_constraintBottom_toTopOf="@+id/LoginEnterUserNameText"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.252"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <EditText
-        android:id="@+id/Login_EnterPassword"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="89dp"
-        android:layout_marginTop="15dp"
-        android:layout_marginEnd="113dp"
-        android:layout_marginBottom="55dp"
-        android:ems="10"
-        android:inputType="textEmailAddress"
-        app:layout_constraintBottom_toTopOf="@+id/btn_login_check"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
+        app:cardBackgroundColor="#1E1E1E"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="6dp"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/LoginEnterPasswordText" />
-
-    <Button
-        android:id="@+id/btn_login_check"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="157dp"
-        android:layout_marginEnd="166dp"
-        android:layout_marginBottom="28dp"
-        android:backgroundTint="#000000"
-        android:text="check"
-        app:layout_constraintBottom_toTopOf="@+id/Login_tv_register"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent" />
+        android:layout_marginTop="48dp">
 
-    <TextView
-        android:id="@+id/LoginEnterPasswordText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="95dp"
-        android:layout_marginTop="9dp"
-        android:layout_marginEnd="217dp"
-        android:layout_marginBottom="15dp"
-        android:text="Enter Password"
-        android:textColor="#E0CECE"
-        app:layout_constraintBottom_toTopOf="@+id/Login_EnterPassword"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/LoginEnterUserName" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp">
 
-    <EditText
-        android:id="@+id/LoginEnterUserName"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="89dp"
-        android:layout_marginTop="1dp"
-        android:layout_marginEnd="112dp"
-        android:layout_marginBottom="9dp"
-        android:ems="10"
-        android:inputType="textEmailAddress"
-        app:layout_constraintBottom_toTopOf="@+id/LoginEnterPasswordText"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/LoginEnterUserNameText" />
+            <TextView
+                android:id="@+id/MainPage"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="log in to the game"
+                android:textColor="#FFFFFF"
+                android:textSize="20sp"
+                android:textStyle="bold"/>
 
-    <TextView
-        android:id="@+id/LoginEnterUserNameText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="117dp"
-        android:layout_marginTop="89dp"
-        android:layout_marginEnd="192dp"
-        android:text="Enter UserName"
-        android:textColor="#E2D9D9"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/SighnUpPage" />
+            <TextView
+                android:id="@+id/LoginEnterUserNameText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Enter UserName"
+                android:textColor="#FFCDD2"/>
 
-    <TextView
-        android:id="@+id/Login_tv_register"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="128dp"
-        android:layout_marginTop="29dp"
-        android:layout_marginEnd="88dp"
-        android:text="dont have an account? register!"
-        android:textColor="#FFFEFE"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btn_login_check" />
+            <EditText
+                android:id="@+id/LoginEnterUserName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="text"
+                android:backgroundTint="#333333"
+                android:textColor="#FFFFFF"/>
 
-    <Button
-        android:id="@+id/btn_login_goback"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="67dp"
-        android:layout_marginEnd="340dp"
-        android:layout_marginBottom="276dp"
-        android:backgroundTint="#000000"
-        android:text="go back"
-        app:layout_constraintBottom_toTopOf="@+id/LoginEnterUserName"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.515"
-        app:layout_constraintStart_toStartOf="parent" />
+            <TextView
+                android:id="@+id/LoginEnterPasswordText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="Enter Password"
+                android:textColor="#FFCDD2"/>
+
+            <EditText
+                android:id="@+id/Login_EnterPassword"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPassword"
+                android:backgroundTint="#333333"
+                android:textColor="#FFFFFF"/>
+
+            <Button
+                android:id="@+id/btn_login_check"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:backgroundTint="#B71C1C"
+                android:text="check"
+                android:textColor="#FFFFFF"/>
+
+            <TextView
+                android:id="@+id/Login_tv_register"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="dont have an account? register!"
+                android:textColor="#FFFFFF"/>
+
+            <Button
+                android:id="@+id/btn_login_goback"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:backgroundTint="#333333"
+                android:text="go back"
+                android:textColor="#FFFFFF"/>
+
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

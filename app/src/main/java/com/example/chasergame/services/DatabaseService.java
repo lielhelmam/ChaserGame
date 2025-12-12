@@ -344,4 +344,44 @@ public class DatabaseService {
         getDataList(QUESTIONS_PATH, Question.class, callback);
     }
 
+    public void deleteQuestion(@NonNull String key, @Nullable DatabaseCallback<Void> callback) {
+        deleteData(QUESTIONS_PATH + "/" + key, callback);
+    }
+
+    public void updateQuestion(@NonNull String key, @NonNull Question question, @Nullable DatabaseCallback<Void> callback) {
+        writeData(QUESTIONS_PATH + "/" + key, question, callback);
+    }
+
+    public void addQuestion(@NotNull Question question,
+                            @Nullable DatabaseCallback<Void> callback) {
+
+        readData(QUESTIONS_PATH)
+                .runTransaction(new Transaction.Handler() {
+
+                    @NonNull
+                    @Override
+                    public Transaction.Result doTransaction(@NonNull MutableData currentData) {
+                        Long index = currentData.getChildrenCount();
+                        currentData.child(String.valueOf(index)).setValue(question);
+                        return Transaction.success(currentData);
+                    }
+
+                    @Override
+                    public void onComplete(@Nullable DatabaseError error,
+                                           boolean committed,
+                                           @Nullable DataSnapshot currentData) {
+                        if (error != null) {
+                            if (callback != null) {
+                                callback.onFailed(error.toException());
+                            }
+                        } else {
+                            if (callback != null) {
+                                callback.onCompleted(null);
+                            }
+                        }
+                    }
+                });
+    }
+
+
 }

@@ -12,10 +12,10 @@ public class Question {
     public Question() {
     }
 
-    public Question(String rightAnswer, ArrayList<String> wrongAnswers, String question) {
+    public Question(String question, String rightAnswer, ArrayList<String> wrongAnswers) {
+        this.question = question;
         this.rightAnswer = rightAnswer;
         this.wrongAnswers = wrongAnswers;
-        this.question = question;
     }
 
     public String getRightAnswer() {

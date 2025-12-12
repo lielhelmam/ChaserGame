@@ -1,171 +1,146 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/SighnUpPage"
+    android:id="@+id/MainPage"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/background"
-    tools:context=".screens.SigninActivity">
+    android:background="#C62828"
+    tools:context=".screens.SigninActivity"
+    android:padding="16dp">
 
-    <TextView
-        android:id="@+id/SighupText"
-        android:layout_width="338dp"
-        android:layout_height="47dp"
-        android:layout_marginStart="36dp"
-        android:layout_marginTop="77dp"
-        android:layout_marginEnd="37dp"
-        android:layout_marginBottom="608dp"
-        android:text="Sign up to the game"
-        android:textColor="#EBDDDD"
-        android:textSize="25dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
+    <!-- Card-like container -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/card_signup"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="12dp"
+        app:cardUseCompatPadding="true"
+        app:cardElevation="6dp"
+        app:cardBackgroundColor="#1E1E1E"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0" />
-
-    <EditText
-        android:id="@+id/EnterUserName"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="65dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="136dp"
-        android:layout_marginBottom="47dp"
-        android:ems="10"
-        android:inputType="textEmailAddress"
-        app:layout_constraintBottom_toTopOf="@+id/EnterPasswordText"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/EnterUserNameText" />
-
-    <EditText
-        android:id="@+id/EnterPassword"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="66dp"
-        android:layout_marginTop="25dp"
-        android:layout_marginEnd="135dp"
-        android:layout_marginBottom="19dp"
-        android:ems="10"
-        android:inputType="textPassword"
-        app:layout_constraintBottom_toTopOf="@+id/EnterEmailText"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/EnterPasswordText" />
+        android:layout_marginTop="24dp"
+        android:layout_marginBottom="24dp">
 
-    <EditText
-        android:id="@+id/EnterEmail"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="65dp"
-        android:layout_marginTop="11dp"
-        android:layout_marginEnd="136dp"
-        android:layout_marginBottom="55dp"
-        android:ems="10"
-        android:inputType="textEmailAddress"
-        app:layout_constraintBottom_toTopOf="@+id/EnterPhoneNumberText"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/EnterEmailText" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp">
 
-    <EditText
-        android:id="@+id/EnterPhoneNumber"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="64dp"
-        android:layout_marginTop="17dp"
-        android:layout_marginEnd="137dp"
-        android:ems="10"
-        android:inputType="phone"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/EnterPhoneNumberText" />
+            <TextView
+                android:id="@+id/SighupText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Sign up to the game"
+                android:textColor="#FFFFFF"
+                android:textSize="22sp"
+                android:textStyle="bold" />
 
-    <TextView
-        android:id="@+id/EnterUserNameText"
-        android:layout_width="148dp"
-        android:layout_height="20dp"
-        android:layout_marginStart="75dp"
-        android:layout_marginTop="34dp"
-        android:layout_marginEnd="188dp"
-        android:layout_marginBottom="8dp"
-        android:text="Enter UserName"
-        android:textColor="#E4D5D5"
-        app:layout_constraintBottom_toTopOf="@+id/EnterUserName"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/SighupText" />
+            <!-- Label + field pairs -->
+            <TextView
+                android:id="@+id/EnterUserNameText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Enter UserName"
+                android:textColor="#FFCDD2"/>
 
-    <TextView
-        android:id="@+id/EnterPasswordText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="83dp"
-        android:layout_marginTop="49dp"
-        android:layout_marginEnd="229dp"
-        android:text="Enter Password"
-        android:textColor="#EDE4E4"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/EnterUserName" />
+            <EditText
+                android:id="@+id/EnterUserName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint=""
+                android:inputType="text"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                android:backgroundTint="#333333"
+                android:textColor="#FFFFFF" />
 
-    <TextView
-        android:id="@+id/EnterEmailText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="83dp"
-        android:layout_marginTop="19dp"
-        android:layout_marginEnd="258dp"
-        android:text="Enter Email"
-        android:textColor="#EDDBDB"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/EnterPassword" />
+            <TextView
+                android:id="@+id/EnterPasswordText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="Enter Password"
+                android:textColor="#FFCDD2" />
 
-    <TextView
-        android:id="@+id/EnterPhoneNumberText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="80dp"
-        android:layout_marginTop="55dp"
-        android:layout_marginEnd="205dp"
-        android:text="Enter PhoneNumber"
-        android:textColor="#E0D6D6"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/EnterEmail" />
+            <EditText
+                android:id="@+id/EnterPassword"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPassword"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                android:backgroundTint="#333333"
+                android:textColor="#FFFFFF" />
 
-    <Button
-        android:id="@+id/btn_signup_submit"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="120dp"
-        android:layout_marginTop="26dp"
-        android:layout_marginEnd="198dp"
-        android:layout_marginBottom="46dp"
-        android:backgroundTint="#000000"
-        android:text="Submit"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/EnterPhoneNumber" />
+            <TextView
+                android:id="@+id/EnterEmailText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="Enter Email"
+                android:textColor="#FFCDD2" />
 
-    <Button
-        android:id="@+id/btn_signup_goback"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="28dp"
-        android:layout_marginTop="13dp"
-        android:layout_marginEnd="293dp"
-        android:layout_marginBottom="16dp"
-        android:backgroundTint="#000000"
-        android:text="go back"
-        app:layout_constraintBottom_toTopOf="@+id/SighupText"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+            <EditText
+                android:id="@+id/EnterEmail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textEmailAddress"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                android:backgroundTint="#333333"
+                android:textColor="#FFFFFF" />
+
+            <TextView
+                android:id="@+id/EnterPhoneNumberText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="Enter PhoneNumber"
+                android:textColor="#FFCDD2" />
+
+            <EditText
+                android:id="@+id/EnterPhoneNumber"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="phone"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                android:backgroundTint="#333333"
+                android:textColor="#FFFFFF" />
+
+            <!-- Buttons row -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:orientation="horizontal"
+                android:gravity="end">
+
+                <Button
+                    android:id="@+id/btn_signup_goback"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="#333333"
+                    android:text="go back"
+                    android:textColor="#FFFFFF" />
+
+                <Button
+                    android:id="@+id/btn_signup_submit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:backgroundTint="#B71C1C"
+                    android:text="Submit"
+                    android:textColor="#FFFFFF" />
+            </LinearLayout>
+
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

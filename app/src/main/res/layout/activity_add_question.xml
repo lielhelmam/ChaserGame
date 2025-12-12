@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#C62828"
+    android:padding="16dp"
+    tools:context=".screens.AddQuestionActivity">
+
+    <ScrollView
+        android:id="@+id/scroll"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tvTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Add New Question"
+                android:textColor="#FFFFFF"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="24dp"/>
+
+            <!-- Question -->
+            <EditText
+                android:id="@+id/etQuestion"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Enter question"
+                android:padding="14dp"
+                android:textSize="18sp"
+                android:textColor="#FFFFFF"
+                android:textColorHint="#E6FFFFFF"
+                android:backgroundTint="#333333"
+                android:layout_marginTop="0dp"/>
+
+            <!-- Right Answer -->
+            <EditText
+                android:id="@+id/etRightAnswer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Correct answer"
+                android:padding="14dp"
+                android:layout_marginTop="12dp"
+                android:textSize="18sp"
+                android:textColor="#FFFFFF"
+                android:textColorHint="#E6FFFFFF"
+                android:backgroundTint="#333333"/>
+
+            <!-- Wrong Answer 1 -->
+            <EditText
+                android:id="@+id/etWrong1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Wrong answer 1"
+                android:padding="14dp"
+                android:layout_marginTop="12dp"
+                android:textSize="18sp"
+                android:textColor="#FFFFFF"
+                android:textColorHint="#E6FFFFFF"
+                android:backgroundTint="#333333"/>
+
+            <!-- Wrong Answer 2 -->
+            <EditText
+                android:id="@+id/etWrong2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Wrong answer 2"
+                android:padding="14dp"
+                android:layout_marginTop="12dp"
+                android:textSize="18sp"
+                android:textColor="#FFFFFF"
+                android:textColorHint="#E6FFFFFF"
+                android:backgroundTint="#333333"/>
+
+            <!-- Save -->
+            <Button
+                android:id="@+id/btnSaveQuestion"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Save Question"
+                android:textStyle="bold"
+                android:textColor="#FFFFFF"
+                android:backgroundTint="#333333"
+                android:layout_marginTop="24dp"
+                android:padding="14dp"
+                android:textSize="18sp" />
+
+        </LinearLayout>
+    </ScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

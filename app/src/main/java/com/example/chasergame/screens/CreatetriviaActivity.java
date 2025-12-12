@@ -21,7 +21,7 @@ public class CreatetriviaActivity extends BaseActivity {
     ArrayList<String> wrongAnswers;
      String q;
 
-    Question question = new Question(RightAnswer,wrongAnswers,q);
+    Question question = new Question(q,RightAnswer,wrongAnswers);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

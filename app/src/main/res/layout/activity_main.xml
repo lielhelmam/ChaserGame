@@ -1,88 +1,78 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/SighnUpPage"
+    android:id="@+id/MainPage"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/background"
-    tools:context=".screens.MainActivity">
+    android:background="#C62828"
+    tools:context=".screens.MainActivity"
+    android:padding="16dp">
 
+    <!-- Top row: greeting + logout -->
     <TextView
-        android:id="@+id/textView"
-        android:layout_width="258dp"
-        android:layout_height="41dp"
-        android:layout_marginStart="67dp"
-        android:layout_marginTop="49dp"
-        android:layout_marginEnd="86dp"
-        android:layout_marginBottom="550dp"
-        android:text="In what mode whould you like to play?"
-        android:textColor="#E7D9D9"
-        android:textSize="40px"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:id="@+id/text_main_hitouser"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="hi +username+"
+        android:textColor="#FFFFFF"
+        android:textSize="18sp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btn_main_logout" />
+        app:layout_constraintEnd_toStartOf="@+id/btn_main_logout"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintHorizontal_bias="0"
+        android:layout_marginTop="20dp" />
 
     <Button
         android:id="@+id/btn_main_logout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="291dp"
-        android:layout_marginTop="43dp"
-        android:layout_marginEnd="27dp"
-        android:layout_marginBottom="49dp"
-        android:backgroundTint="#070606"
         android:text="Logout"
+        android:backgroundTint="#333333"
         android:textColor="#FFFFFF"
-        app:layout_constraintBottom_toTopOf="@+id/textView"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/text_main_hitouser"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="35dp"
-        android:layout_marginTop="34dp"
-        android:layout_marginEnd="214dp"
-        android:layout_marginBottom="112dp"
-        android:text="hi +username+"
-        android:textColor="#FFFFFF"
-        app:layout_constraintBottom_toTopOf="@+id/textView"
-        app:layout_constraintEnd_toStartOf="@+id/btn_main_logout"
-        app:layout_constraintHorizontal_bias="0.372"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0" />
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="12dp"/>
 
+    <!-- Title -->
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="In what mode would you like to play?"
+        android:textColor="#FFFFFF"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        app:layout_constraintTop_toBottomOf="@id/text_main_hitouser"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="24dp"/>
+
+    <!-- Buttons -->
     <Button
         android:id="@+id/btn_main_playagainstabot"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="147dp"
-        android:layout_marginTop="48dp"
-        android:layout_marginEnd="131dp"
-        android:layout_marginBottom="99dp"
-        android:backgroundTint="#000000"
         android:text="Against a bot"
-        app:layout_constraintBottom_toTopOf="@+id/btn_main_playononedevice"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
+        android:backgroundTint="#B71C1C"
+        android:textColor="#FFFFFF"
+        app:layout_constraintTop_toBottomOf="@id/textView"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView" />
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="18dp" />
 
     <Button
         android:id="@+id/btn_main_playononedevice"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="147dp"
-        android:layout_marginEnd="126dp"
-        android:layout_marginBottom="282dp"
-        android:backgroundTint="#000000"
         android:text="On one device"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:backgroundTint="#333333"
+        android:textColor="#FFFFFF"
+        app:layout_constraintTop_toBottomOf="@id/btn_main_playagainstabot"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        android:layout_marginTop="12dp"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

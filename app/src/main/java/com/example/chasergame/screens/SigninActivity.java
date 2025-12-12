@@ -32,11 +32,28 @@ public class SigninActivity extends BaseActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_signin);
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.SighnUpPage), (v, insets) -> {
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.MainPage), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
+        User user = SharedPreferencesUtil.getUser(this);
+
+        if (SharedPreferencesUtil.isUserLoggedIn(this)) {
+            Intent intent;
+
+            if (user != null && user.isAdmin()) {
+                intent = new Intent(this, AdminActivity.class);
+            } else {
+                intent = new Intent(this, MainActivity.class);
+            }
+
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+        }
+
+
 
         etUserName = findViewById(R.id.EnterUserName);
         etPassword = findViewById(R.id.EnterPassword);

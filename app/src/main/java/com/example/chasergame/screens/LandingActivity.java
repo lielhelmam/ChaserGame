@@ -15,7 +15,9 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.example.chasergame.R;
 import com.example.chasergame.models.Question;
+import com.example.chasergame.models.User;
 import com.example.chasergame.services.DatabaseService;
+import com.example.chasergame.utils.SharedPreferencesUtil;
 
 import java.util.List;
 
@@ -33,7 +35,26 @@ public class LandingActivity extends BaseActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-        BtnReg = findViewById(R.id.btn_main_gotosignup);
+
+        User user = SharedPreferencesUtil.getUser(this);
+
+        if (SharedPreferencesUtil.isUserLoggedIn(this)) {
+            Intent intent;
+
+            if (user != null && user.isAdmin()) {
+                intent = new Intent(this, AdminActivity.class);
+            } else {
+                intent = new Intent(this, MainActivity.class);
+            }
+
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+        }
+
+
+
+
+    BtnReg = findViewById(R.id.btn_main_gotosignup);
         BtnReg.setOnClickListener(view -> {
             Intent intentreg = new Intent(LandingActivity.this, SigninActivity.class);
             startActivity(intentreg);

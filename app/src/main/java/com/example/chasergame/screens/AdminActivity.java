@@ -19,7 +19,6 @@ import com.example.chasergame.utils.SharedPreferencesUtil;
 
 public class AdminActivity extends AppCompatActivity {
     Button Logout;
-
     Button btn;
 
     @Override
@@ -32,6 +31,22 @@ public class AdminActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
+
+        Button btnAddQuestion = findViewById(R.id.btnAddQuestion);
+
+        btnAddQuestion.setOnClickListener(v -> {
+            Intent intent = new Intent(AdminActivity.this, AddQuestionActivity.class);
+            startActivity(intent);
+        });
+
+        Button btnQuestionsList = findViewById(R.id.btn_admin_questions_list);
+
+        btnQuestionsList.setOnClickListener(v -> {
+            Intent intent = new Intent(AdminActivity.this, QuestionsListActivity.class);
+            startActivity(intent);
+        });
+
         btn = findViewById(R.id.btn_admin_gotouserlist);
         Log.d(TAG, "Navigating to UsersListActivity");
 
