@@ -17,7 +17,7 @@ import androidx.core.view.WindowInsetsCompat;
 import com.example.chasergame.R;
 import com.example.chasergame.utils.SharedPreferencesUtil;
 
-public class AdminActivity extends AppCompatActivity {
+public class AdminActivity extends BaseActivity {
     Button Logout;
     Button btn;
 

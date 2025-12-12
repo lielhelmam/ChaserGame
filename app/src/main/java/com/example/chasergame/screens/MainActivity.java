@@ -19,7 +19,8 @@ import com.example.chasergame.utils.SharedPreferencesUtil;
 public class MainActivity extends BaseActivity {
 
     private static final String TAG = "MainActivity";
-    Button Logout;
+
+    Button Logout,PlayAgainstBot,PlayOnOneDevice;
     TextView hitouser;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,6 +33,18 @@ public class MainActivity extends BaseActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+        PlayAgainstBot = findViewById(R.id.btn_main_playagainstabot);
+        PlayAgainstBot.setOnClickListener(view -> {
+            Intent intent = new Intent(MainActivity.this, PlayAgainstBotActivity.class);
+            startActivity(intent);
+        });
+        PlayOnOneDevice = findViewById(R.id.btn_main_playononedevice);
+        PlayOnOneDevice.setOnClickListener(view -> {
+            Intent intent = new Intent(MainActivity.this, PlayOnOneDeviceActivity.class);
+            startActivity(intent);
+        });
+
+
 
         Logout = findViewById(R.id.btn_main_logout);
         Logout.setOnClickListener(new View.OnClickListener() {
