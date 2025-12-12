@@ -37,6 +37,9 @@ public class Validator {
     /// @param name name to validate
     /// @return true if the name is valid, false otherwise
     public static boolean isNameValid(@Nullable String name) {
-        return name != null && name.length() >= 3;
+        if (name == null) return false;
+        String n = name.trim();
+        if (n.length() < 3) return false;
+        return n.matches("^[A-Za-z0-9_]+$"); // only letters/numbers/underscore
     }
 }

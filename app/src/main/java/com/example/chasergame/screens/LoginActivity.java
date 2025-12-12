@@ -106,29 +106,33 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
 
     private void loginUser(String username, String password) {
         databaseService.getUserByUsernameAndPassword(username, password, new DatabaseService.DatabaseCallback<User>() {
-
             @Override
             public void onCompleted(User user) {
+
+                if (user == null) { // ✅ THIS is the real "invalid credentials" case
+                    etPassword.setError("Invalid username or password");
+                    etPassword.requestFocus();
+                    SharedPreferencesUtil.signOutUser(LoginActivity.this);
+                    return;
+                }
+
                 SharedPreferencesUtil.saveUser(LoginActivity.this, user);
-                Intent intent;
-                if(user.isAdmin())
-                {
-                    intent = new Intent(LoginActivity.this, AdminActivity.class);
-                }
-                else
-                {
-                    intent = new Intent(LoginActivity.this, MainActivity.class);
-                }
+
+                Intent intent = user.isAdmin()
+                        ? new Intent(LoginActivity.this, AdminActivity.class)
+                        : new Intent(LoginActivity.this, MainActivity.class);
+
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
             }
 
             @Override
             public void onFailed(Exception e) {
-                etPassword.setError("Invalid username or password");
+                etPassword.setError("Login failed: " + e.getMessage());
                 etPassword.requestFocus();
                 SharedPreferencesUtil.signOutUser(LoginActivity.this);
             }
         });
     }
-}
+    }
+

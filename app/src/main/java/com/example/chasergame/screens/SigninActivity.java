@@ -76,10 +76,10 @@ public class SigninActivity extends BaseActivity {
 
         Log.d(TAG, "Submit clicked.");
 
-        String email = etEmail.getText().toString();
-        String password = etPassword.getText().toString();
-        String fName = etUserName.getText().toString();
-        String phone = etPhoneNumber.getText().toString();
+        String email = etEmail.getText().toString().trim();
+        String password = etPassword.getText().toString().trim();
+        String fName = etUserName.getText().toString().trim();
+        String phone = etPhoneNumber.getText().toString().trim();
 
         if (!checkInput(email, password, fName, phone))
             return;

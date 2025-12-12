@@ -384,4 +384,46 @@ public class DatabaseService {
     }
 
 
+    public void deleteQuestionAndReindex(@NonNull String deleteKey,
+                                         @Nullable DatabaseCallback<Void> callback) {
+
+        readData(QUESTIONS_PATH).runTransaction(new Transaction.Handler() {
+            @NonNull
+            @Override
+            public Transaction.Result doTransaction(@NonNull MutableData currentData) {
+
+                // collect all questions sorted by numeric key
+                ArrayList<Question> list = new ArrayList<>();
+
+                for (MutableData child : currentData.getChildren()) {
+                    String k = child.getKey();
+                    if (k == null) continue;
+                    if (k.equals(deleteKey)) continue; // skip deleted item
+
+                    Question q = child.getValue(Question.class);
+                    if (q != null) list.add(q);
+                }
+
+                // wipe node and rewrite as 0..n-1
+                currentData.setValue(null);
+                for (int i = 0; i < list.size(); i++) {
+                    currentData.child(String.valueOf(i)).setValue(list.get(i));
+                }
+
+                return Transaction.success(currentData);
+            }
+
+            @Override
+            public void onComplete(@Nullable DatabaseError error, boolean committed, @Nullable DataSnapshot dataSnapshot) {
+                if (error != null) {
+                    if (callback != null) callback.onFailed(error.toException());
+                } else {
+                    if (callback != null) callback.onCompleted(null);
+                }
+            }
+        });
+    }
+
+
+
 }

@@ -20,6 +20,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class QuestionsListActivity extends BaseActivity {
@@ -43,7 +45,6 @@ public class QuestionsListActivity extends BaseActivity {
         adapter = new QuestionsAdapter(new QuestionsAdapter.Listener() {
             @Override
             public void onEditClicked(String key, Question question) {
-                // simplest: show dialog + update
                 showEditDialog(key, question);
             }
 
@@ -71,11 +72,23 @@ public class QuestionsListActivity extends BaseActivity {
                     @Override
                     public void onDataChange(DataSnapshot snapshot) {
                         List<QuestionsAdapter.Item> items = new ArrayList<>();
+
                         for (DataSnapshot child : snapshot.getChildren()) {
                             String key = child.getKey(); // "0","1",...
                             Question q = child.getValue(Question.class);
                             items.add(new QuestionsAdapter.Item(key, q));
                         }
+
+                        // ✅ sort by numeric key so list order is correct
+                        Collections.sort(items, new Comparator<QuestionsAdapter.Item>() {
+                            @Override
+                            public int compare(QuestionsAdapter.Item a, QuestionsAdapter.Item b) {
+                                int ka = safeParseInt(a.key, Integer.MAX_VALUE);
+                                int kb = safeParseInt(b.key, Integer.MAX_VALUE);
+                                return Integer.compare(ka, kb);
+                            }
+                        });
+
                         adapter.setItems(items);
                     }
 
@@ -86,23 +99,37 @@ public class QuestionsListActivity extends BaseActivity {
                 });
     }
 
+    private int safeParseInt(String s, int fallback) {
+        try { return Integer.parseInt(s); }
+        catch (Exception e) { return fallback; }
+    }
+
     private void confirmDelete(String key) {
         new AlertDialog.Builder(this)
                 .setTitle("Delete question")
                 .setMessage("Are you sure?")
                 .setPositiveButton("Delete", (d, w) -> {
-                    databaseService.deleteQuestion(key, new DatabaseService.DatabaseCallback<Void>() {
-                        @Override public void onCompleted(Void object) { Toast.makeText(QuestionsListActivity.this, "Deleted", Toast.LENGTH_SHORT).show(); loadQuestions(); }
-                        @Override public void onFailed(Exception e) { Toast.makeText(QuestionsListActivity.this, "Delete failed: " + e.getMessage(), Toast.LENGTH_LONG).show(); }
+
+                    // ✅ Delete + reindex so DB becomes 0..n-1 again
+                    databaseService.deleteQuestionAndReindex(key, new DatabaseService.DatabaseCallback<Void>() {
+                        @Override
+                        public void onCompleted(Void object) {
+                            Toast.makeText(QuestionsListActivity.this, "Deleted", Toast.LENGTH_SHORT).show();
+                            loadQuestions();
+                        }
+
+                        @Override
+                        public void onFailed(Exception e) {
+                            Toast.makeText(QuestionsListActivity.this, "Delete failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                        }
                     });
+
                 })
                 .setNegativeButton("Cancel", null)
                 .show();
     }
 
     private void showEditDialog(String key, Question q) {
-        // simplest starter: reuse AddQuestion UI later.
-        // For now: just quick edit of question text + right answer.
         android.view.View v = getLayoutInflater().inflate(R.layout.dialog_edit_question, null);
 
         android.widget.EditText etQ = v.findViewById(R.id.et_edit_question);
@@ -119,6 +146,7 @@ public class QuestionsListActivity extends BaseActivity {
                 .setTitle("Edit question")
                 .setView(v)
                 .setPositiveButton("Save", (d, w) -> {
+
                     Question updated = new Question(
                             etQ.getText().toString().trim(),
                             etR.getText().toString().trim(),
@@ -129,8 +157,16 @@ public class QuestionsListActivity extends BaseActivity {
                     );
 
                     databaseService.updateQuestion(key, updated, new DatabaseService.DatabaseCallback<Void>() {
-                        @Override public void onCompleted(Void object) { Toast.makeText(QuestionsListActivity.this, "Updated", Toast.LENGTH_SHORT).show(); loadQuestions(); }
-                        @Override public void onFailed(Exception e) { Toast.makeText(QuestionsListActivity.this, "Update failed: " + e.getMessage(), Toast.LENGTH_LONG).show(); }
+                        @Override
+                        public void onCompleted(Void object) {
+                            Toast.makeText(QuestionsListActivity.this, "Updated", Toast.LENGTH_SHORT).show();
+                            loadQuestions();
+                        }
+
+                        @Override
+                        public void onFailed(Exception e) {
+                            Toast.makeText(QuestionsListActivity.this, "Update failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                        }
                     });
                 })
                 .setNegativeButton("Cancel", null)
