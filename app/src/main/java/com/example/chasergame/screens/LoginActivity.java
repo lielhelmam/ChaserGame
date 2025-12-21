@@ -19,9 +19,8 @@ import com.example.chasergame.utils.SharedPreferencesUtil;
 import com.example.chasergame.utils.Validator;
 
 public class LoginActivity extends BaseActivity implements View.OnClickListener {
-
     private static final String TAG = "LoginActivity";
-    Button goback;
+    private Button goback;
     private EditText etUsername, etPassword;
     private Button btnLogin;
     private TextView tvRegister;
@@ -53,7 +52,6 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
             startActivity(intent);
         }
 
-
         etUsername = findViewById(R.id.LoginEnterUserName);
         etPassword = findViewById(R.id.Login_EnterPassword);
         btnLogin = findViewById(R.id.btn_login_check);
@@ -67,14 +65,11 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
             Intent intentreg = new Intent(LoginActivity.this, LandingActivity.class);
             startActivity(intentreg);
         });
-
-
     }
 
     @Override
     public void onClick(View v) {
         if (v.getId() == btnLogin.getId()) {
-
             String username = etUsername.getText().toString().trim();
             String password = etPassword.getText().toString().trim();
 
@@ -88,7 +83,6 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     }
 
     private boolean checkInput(String username, String password) {
-
         if (!Validator.isNameValid(username)) {
             etUsername.setError("Invalid username");
             etUsername.requestFocus();
@@ -109,7 +103,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
             @Override
             public void onCompleted(User user) {
 
-                if (user == null) { // ✅ THIS is the real "invalid credentials" case
+                if (user == null) {
                     etPassword.setError("Invalid username or password");
                     etPassword.requestFocus();
                     SharedPreferencesUtil.signOutUser(LoginActivity.this);
@@ -134,5 +128,4 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
             }
         });
     }
-    }
-
+}

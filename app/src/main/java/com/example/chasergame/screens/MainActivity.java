@@ -17,11 +17,11 @@ import com.example.chasergame.models.User;
 import com.example.chasergame.utils.SharedPreferencesUtil;
 
 public class MainActivity extends BaseActivity {
-
     private static final String TAG = "MainActivity";
+    private Button Logout,PlayAgainstBot,PlayOnOneDevice, btnEditProfile;
+    private TextView hitouser;
+    private User user;
 
-    Button Logout,PlayAgainstBot,PlayOnOneDevice;
-    TextView hitouser;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -33,22 +33,27 @@ public class MainActivity extends BaseActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
         PlayAgainstBot = findViewById(R.id.btn_main_playagainstabot);
         PlayAgainstBot.setOnClickListener(view -> {
             Intent intent = new Intent(MainActivity.this, PlayAgainstBotActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
         });
+
         PlayOnOneDevice = findViewById(R.id.btn_main_playononedevice);
         PlayOnOneDevice.setOnClickListener(view -> {
             Intent intent = new Intent(MainActivity.this, PlayOnOneDeviceActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
         });
-        Button btnEditProfile = findViewById(R.id.btn_main_edit_profile);
-        btnEditProfile.setOnClickListener(v ->
-                startActivity(new Intent(MainActivity.this, EditProfileActivity.class))
-        );
 
-
+        btnEditProfile = findViewById(R.id.btn_main_edit_profile);
+        btnEditProfile.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, EditProfileActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+        });
 
         Logout = findViewById(R.id.btn_main_logout);
         Logout.setOnClickListener(new View.OnClickListener() {
@@ -57,12 +62,12 @@ public class MainActivity extends BaseActivity {
                 signOut();
             }
         });
+
         hitouser = findViewById(R.id.text_main_hitouser);
-        User user = SharedPreferencesUtil.getUser(this);
-        if (user != null) {
+        user = SharedPreferencesUtil.getUser(this);
+        if (SharedPreferencesUtil.isUserLoggedIn(this)) {
             hitouser.setText("hi " + user.getUsername());
         }
-
 
     } // oncreate function
 
@@ -75,7 +80,4 @@ public class MainActivity extends BaseActivity {
         landingIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(landingIntent);
     }
-
-
-
 }// end of class

@@ -84,6 +84,7 @@ public class LandingActivity extends BaseActivity {
             }
         });
 
+        /*
         DatabaseService.getInstance().getQuestionList(new DatabaseService.DatabaseCallback<List<Question>>() {
             @Override
             public void onCompleted(List<Question> questions) {
@@ -98,5 +99,6 @@ public class LandingActivity extends BaseActivity {
 
             }
         });
+         */
     }
 }

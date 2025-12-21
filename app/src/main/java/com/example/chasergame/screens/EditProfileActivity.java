@@ -1,5 +1,6 @@
 package com.example.chasergame.screens;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
@@ -18,9 +19,9 @@ import com.example.chasergame.utils.SharedPreferencesUtil;
 import com.example.chasergame.utils.Validator;
 
 public class EditProfileActivity extends BaseActivity {
-
     private EditText etUsername, etEmail, etPassword;
     private Button btnSave, btnCancel;
+    private User user;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -39,17 +40,22 @@ public class EditProfileActivity extends BaseActivity {
         btnSave = findViewById(R.id.btn_save_profile);
         btnCancel = findViewById(R.id.btn_cancel_profile);
 
-        User current = SharedPreferencesUtil.getUser(this);
-        if (current == null) {
+        user = SharedPreferencesUtil.getUser(this);
+        if (!SharedPreferencesUtil.isUserLoggedIn(this)) {
             Toast.makeText(this, "Not logged in", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
 
-        etUsername.setText(current.getUsername());
-        etEmail.setText(current.getEmail());
+        etUsername.setText(user.getUsername());
+        etEmail.setText(user.getEmail());
+        etPassword.setText(user.getPassword());
 
-        btnCancel.setOnClickListener(v -> finish());
+        btnCancel.setOnClickListener(v -> {
+            Intent intent = new Intent(EditProfileActivity.this, MainActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+        });
 
         btnSave.setOnClickListener(v -> {
             String newName = etUsername.getText().toString().trim();
@@ -74,7 +80,7 @@ public class EditProfileActivity extends BaseActivity {
                 return;
             }
 
-            boolean emailChanged = current.getEmail() == null || !current.getEmail().equalsIgnoreCase(newEmail);
+            boolean emailChanged = user.getEmail() == null || !user.getEmail().equalsIgnoreCase(newEmail);
 
             if (emailChanged) {
                 databaseService.checkIfEmailExists(newEmail, new DatabaseService.DatabaseCallback<Boolean>() {
@@ -84,7 +90,7 @@ public class EditProfileActivity extends BaseActivity {
                             etEmail.setError("Email already exists");
                             etEmail.requestFocus();
                         } else {
-                            saveUser(current, newName, newEmail, newPass);
+                            saveUser(newName, newEmail, newPass);
                         }
                     }
 
@@ -94,26 +100,24 @@ public class EditProfileActivity extends BaseActivity {
                     }
                 });
             } else {
-                saveUser(current, newName, newEmail, newPass);
+                saveUser(newName, newEmail, newPass);
             }
         });
     }
 
-    private void saveUser(User current, String newName, String newEmail, String newPass) {
-        User updated = new User(
-                current.getId(),
-                newName,
-                newPass.isEmpty() ? current.getPassword() : newPass,
-                newEmail,
-                current.isAdmin()
-        );
+    private void saveUser(String newName, String newEmail, String newPass) {
+        user.setUsername(newName);
+        user.setEmail(newEmail);
+        user.setPassword(newPass);
 
-        databaseService.updateUser(updated, new DatabaseService.DatabaseCallback<Void>() {
+        databaseService.updateUser(user, new DatabaseService.DatabaseCallback<Void>() {
             @Override
             public void onCompleted(Void object) {
-                SharedPreferencesUtil.saveUser(EditProfileActivity.this, updated);
+                SharedPreferencesUtil.saveUser(EditProfileActivity.this, user);
                 Toast.makeText(EditProfileActivity.this, "Profile updated", Toast.LENGTH_SHORT).show();
-                finish();
+                Intent intent = new Intent(EditProfileActivity.this, MainActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
             }
 
             @Override

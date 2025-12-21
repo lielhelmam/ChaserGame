@@ -20,11 +20,9 @@ import com.example.chasergame.utils.SharedPreferencesUtil;
 import com.example.chasergame.utils.Validator;
 
 public class SigninActivity extends BaseActivity {
-
     private static final String TAG = "SigninActivity";
-    Button goback;
-    Button btnSubmit;
-    EditText etUserName, etPassword, etEmail, etPhoneNumber;
+    private Button goback, btnSubmit;
+    private EditText etUserName, etPassword, etEmail, etPhoneNumber;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,10 +86,9 @@ public class SigninActivity extends BaseActivity {
     }
 
     private boolean checkInput(String email, String password, String fName, String phone) {
-
-        if (!Validator.isEmailValid(email)) {
-            etEmail.setError("Invalid email");
-            etEmail.requestFocus();
+        if (!Validator.isNameValid(fName)) {
+            etUserName.setError("Name must be at least 3 chars");
+            etUserName.requestFocus();
             return false;
         }
 
@@ -101,9 +98,9 @@ public class SigninActivity extends BaseActivity {
             return false;
         }
 
-        if (!Validator.isNameValid(fName)) {
-            etUserName.setError("Name must be at least 3 chars");
-            etUserName.requestFocus();
+        if (!Validator.isEmailValid(email)) {
+            etEmail.setError("Invalid email");
+            etEmail.requestFocus();
             return false;
         }
 
