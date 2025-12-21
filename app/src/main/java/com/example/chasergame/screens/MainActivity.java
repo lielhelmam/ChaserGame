@@ -43,6 +43,10 @@ public class MainActivity extends BaseActivity {
             Intent intent = new Intent(MainActivity.this, PlayOnOneDeviceActivity.class);
             startActivity(intent);
         });
+        Button btnEditProfile = findViewById(R.id.btn_main_edit_profile);
+        btnEditProfile.setOnClickListener(v ->
+                startActivity(new Intent(MainActivity.this, EditProfileActivity.class))
+        );
 
 
 
