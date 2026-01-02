@@ -12,6 +12,24 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ChaserGame">
         <activity
+            android:name=".screens.ChooseTimeOnlineActivity"
+            android:exported="false" />
+        <activity
+            android:name=".screens.OnlineGameActivity"
+            android:exported="false" />
+        <activity
+            android:name=".screens.JoinGameActivity"
+            android:exported="false" />
+        <activity
+            android:name=".screens.WaitingRoomActivity"
+            android:exported="false" />
+        <activity
+            android:name=".screens.OnlineMenuActivity"
+            android:exported="false" />
+        <activity
+            android:name=".screens.ChooseTimeActivity"
+            android:exported="false" />
+        <activity
             android:name=".screens.EditProfileActivity"
             android:exported="false" />
         <activity

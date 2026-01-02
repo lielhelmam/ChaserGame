@@ -40,11 +40,14 @@ public class MainActivity extends BaseActivity {
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
         });
-
+        Button playOnline = findViewById(R.id.btn_main_playonline);
+        playOnline.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, OnlineMenuActivity.class);
+            startActivity(intent);
+        });
         PlayOnOneDevice = findViewById(R.id.btn_main_playononedevice);
         PlayOnOneDevice.setOnClickListener(view -> {
-            Intent intent = new Intent(MainActivity.this, PlayOnOneDeviceActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            Intent intent = new Intent(MainActivity.this, ChooseTimeActivity.class);
             startActivity(intent);
         });
 

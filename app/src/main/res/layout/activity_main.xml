@@ -10,18 +10,17 @@
     tools:context=".screens.MainActivity"
     android:padding="16dp">
 
-    <!-- Top row: greeting + logout -->
+    <!-- Greeting -->
     <TextView
         android:id="@+id/text_main_hitouser"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="hi +username+"
+        android:text="hi username"
         android:textColor="#FFFFFF"
         android:textSize="18sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/btn_main_logout"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintHorizontal_bias="0"
         android:layout_marginTop="20dp" />
 
     <Button
@@ -50,42 +49,56 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="24dp"/>
 
-    <!-- Buttons -->
+    <!-- Against bot -->
     <Button
         android:id="@+id/btn_main_playagainstabot"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="18dp"
+        android:backgroundTint="#8E0000"
         android:text="Against a bot"
-        android:backgroundTint="#B71C1C"
         android:textColor="#FFFFFF"
-        app:layout_constraintTop_toBottomOf="@id/textView"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="18dp" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/textView" />
 
+    <!-- 🔥 ONLINE GAME -->
+    <Button
+        android:id="@+id/btn_main_playonline"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:backgroundTint="#333333"
+        android:text="Online game"
+        android:textColor="#FFFFFF"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btn_main_playagainstabot" />
+
+    <!-- One device -->
     <Button
         android:id="@+id/btn_main_playononedevice"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:backgroundTint="#8E0000"
         android:text="On one device"
-        android:backgroundTint="#333333"
         android:textColor="#FFFFFF"
-        app:layout_constraintTop_toBottomOf="@id/btn_main_playagainstabot"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="12dp"/>
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btn_main_playonline" />
 
+    <!-- Edit profile -->
     <Button
         android:id="@+id/btn_main_edit_profile"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:backgroundTint="#333333"
         android:text="Edit profile"
-        android:backgroundTint="#B71C1C"
         android:textColor="#FFFFFF"
-        app:layout_constraintTop_toBottomOf="@id/btn_main_playononedevice"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="12dp"/>
-
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btn_main_playononedevice" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

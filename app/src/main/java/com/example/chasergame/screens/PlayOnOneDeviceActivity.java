@@ -59,7 +59,8 @@ public class PlayOnOneDeviceActivity extends BaseActivity {
 
     // ===== Timer =====
     private CountDownTimer turnTimer;
-    private long millisLeft = 120_000;
+    private long turnDurationMillis;
+    private long millisLeft;
 
     // ===== Firebase =====
     private int questionsCount = -1;
@@ -71,6 +72,8 @@ public class PlayOnOneDeviceActivity extends BaseActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_play_on_one_device);
+
+
 
         // bind top bar
         progressContainer = findViewById(R.id.One_Device_progressContainer);
@@ -104,6 +107,15 @@ public class PlayOnOneDeviceActivity extends BaseActivity {
         btnA.setOnClickListener(v -> onAnswerClicked(btnA));
         btnB.setOnClickListener(v -> onAnswerClicked(btnB));
         btnC.setOnClickListener(v -> onAnswerClicked(btnC));
+
+        turnDurationMillis = getIntent().getLongExtra(
+                "TURN_TIME_MS",
+                120_000 // ברירת מחדל אם משהו השתבש
+        );
+
+        millisLeft = turnDurationMillis;
+        tvTimer.setText(formatTime(millisLeft));
+
 
         setInputsEnabled(false);
         tvQuestion.setText("Loading questions...");
@@ -206,7 +218,7 @@ public class PlayOnOneDeviceActivity extends BaseActivity {
 
         new AlertDialog.Builder(this)
                 .setTitle("Ready?")
-                .setMessage("Start Player " + currentPlayer + " turn? (2 minutes)")
+                .setMessage("Start Player " + currentPlayer + " turn?")
                 .setCancelable(false)
                 .setPositiveButton("Yes", (d, w) -> startTurn())
                 .setNegativeButton("No", (d, w) -> {
@@ -227,8 +239,10 @@ public class PlayOnOneDeviceActivity extends BaseActivity {
         tvTimer.setText(formatTime(millisLeft));
 
         setInputsEnabled(true);
+        millisLeft = turnDurationMillis;
         startTimer();
         loadRandomQuestion();
+
     }
 
     private void endTurn() {
@@ -375,12 +389,14 @@ public class PlayOnOneDeviceActivity extends BaseActivity {
         updateTargetUI();
 
         // wait a bit so user sees colors, then continue
+        long delay = correct ? 700 : 2000; // ✅ wrong = 3 seconds, correct = 0.7
+
         clickedButton.postDelayed(() -> {
             if (!isTurnRunning) return;
             resetAnswerButtonsColors();
             setInputsEnabled(true);
             loadRandomQuestion();
-        }, 700);
+        }, delay);
     }
 
     private Button findCorrectButton() {
