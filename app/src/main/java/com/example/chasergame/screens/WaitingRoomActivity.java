@@ -15,6 +15,9 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class WaitingRoomActivity extends BaseActivity {
 
     private String roomId;
@@ -24,7 +27,9 @@ public class WaitingRoomActivity extends BaseActivity {
     private Button btnCancel;
 
     private DatabaseReference roomRef;
-    private boolean navigated = false;
+    private ValueEventListener roomListener;
+
+    private boolean navigatedToGame = false;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -47,58 +52,90 @@ public class WaitingRoomActivity extends BaseActivity {
 
         tvRoomCode.setText("Room: " + roomId);
         tvStatus.setText("Waiting for another player...");
-        tvPlayers.setText("Players: 1 / 2");
+        tvPlayers.setText("Players: 1/2");
 
-        roomRef = FirebaseDatabase.getInstance()
-                .getReference("rooms")
-                .child(roomId);
+        roomRef = FirebaseDatabase.getInstance().getReference("rooms").child(roomId);
 
-        btnCancel.setOnClickListener(v -> leaveRoom());
+        // ✅ אם האפליקציה נסגרת/נופלת – למחוק חדר אוטומטית (rooms וגם games)
+        roomRef.onDisconnect().removeValue();
+        FirebaseDatabase.getInstance().getReference("games").child(roomId).onDisconnect().removeValue();
+
+        btnCancel.setOnClickListener(v -> leaveRoomAndGoBack());
 
         startListening();
     }
 
     private void startListening() {
-        roomRef.child("players").addValueEventListener(new ValueEventListener() {
+        roomListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
-                long count = snapshot.getChildrenCount();
-                tvPlayers.setText("Players: " + count + " / 2");
 
-                if (count >= 2 && !navigated) {
-                    navigated = true;
-                    goToGame();
+                // אם החדר לא קיים → משהו מחק אותו
+                if (!snapshot.exists()) {
+                    Toast.makeText(WaitingRoomActivity.this, "Room closed", Toast.LENGTH_SHORT).show();
+                    goBack();
+                    return;
+                }
+
+                String status = snapshot.child("status").getValue(String.class);
+                long playersCount = snapshot.child("players").getChildrenCount();
+
+                tvPlayers.setText("Players: " + playersCount + "/2");
+
+                if ("ready".equals(status)) {
+                    // ✅ עוברים למשחק
+                    navigatedToGame = true;
+
+                    Intent i = new Intent(WaitingRoomActivity.this, OnlineGameActivity.class);
+                    i.putExtra("ROOM_ID", roomId);
+                    i.putExtra("PLAYER_ID", playerId);
+                    startActivity(i);
+                    finish();
                 }
             }
 
             @Override
             public void onCancelled(DatabaseError error) {
-                Toast.makeText(WaitingRoomActivity.this,
-                        "Database error", Toast.LENGTH_SHORT).show();
+                Toast.makeText(WaitingRoomActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
             }
-        });
+        };
+
+        roomRef.addValueEventListener(roomListener);
     }
 
-    private void goToGame() {
-        roomRef.child("status").setValue("playing");
+    private void leaveRoomAndGoBack() {
+        // ✅ מוחק גם rooms וגם games בבת אחת
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("/rooms/" + roomId, null);
+        updates.put("/games/" + roomId, null);
 
-        Intent i = new Intent(this, OnlineGameActivity.class);
-        i.putExtra("ROOM_ID", roomId);
-        i.putExtra("PLAYER_ID", playerId);
-        startActivity(i);
+        FirebaseDatabase.getInstance().getReference()
+                .updateChildren(updates)
+                .addOnCompleteListener(task -> goBack());
+    }
+
+    private void goBack() {
         finish();
     }
 
-    private void leaveRoom() {
-        roomRef.removeValue();
-        finish();
+    @Override
+    public void onBackPressed() {
+        leaveRoomAndGoBack();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (!navigated) {
-            roomRef.removeValue();
+        if (roomListener != null && roomRef != null) {
+            roomRef.removeEventListener(roomListener);
+        }
+
+        // ✅ אם יצאנו בלי לעבור למשחק – למחוק (גם אם לא לחצנו cancel)
+        if (!navigatedToGame) {
+            Map<String, Object> updates = new HashMap<>();
+            updates.put("/rooms/" + roomId, null);
+            updates.put("/games/" + roomId, null);
+            FirebaseDatabase.getInstance().getReference().updateChildren(updates);
         }
     }
 }
