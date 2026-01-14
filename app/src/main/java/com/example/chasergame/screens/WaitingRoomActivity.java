@@ -6,6 +6,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.example.chasergame.R;
@@ -20,7 +21,7 @@ public class WaitingRoomActivity extends BaseActivity {
     private String roomId;
     private String playerId;
 
-    private TextView tvRoomCode, tvPlayers, tvStatus;
+    private TextView tvRoomCode, tvStatus, tvPlayers;
     private Button btnCancel;
 
     private DatabaseReference roomRef;
@@ -44,20 +45,17 @@ public class WaitingRoomActivity extends BaseActivity {
         }
 
         tvRoomCode = findViewById(R.id.tvRoomCode);
-        tvPlayers = findViewById(R.id.tvPlayers);
         tvStatus = findViewById(R.id.tvStatus);
+        tvPlayers = findViewById(R.id.tvPlayers);
         btnCancel = findViewById(R.id.btnCancelRoom);
 
         tvRoomCode.setText("Room: " + roomId);
-        tvStatus.setText("Waiting for other player...");
+        tvStatus.setText("Waiting for another player...");
         tvPlayers.setText("Players: 1/2");
 
         roomRef = FirebaseDatabase.getInstance().getReference("rooms").child(roomId);
 
-        // ❌ לא מוסיפים onDisconnect כאן
-        // ❌ לא מוחקים חדרים כאן
-
-        btnCancel.setOnClickListener(v -> leaveRoom());
+        btnCancel.setOnClickListener(v -> leaveRoomAndGoBack());
 
         startListening();
     }
@@ -65,7 +63,7 @@ public class WaitingRoomActivity extends BaseActivity {
     private void startListening() {
         roomListener = new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot snapshot) {
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
 
                 if (!snapshot.exists()) {
                     if (!destroyed) {
@@ -82,18 +80,12 @@ public class WaitingRoomActivity extends BaseActivity {
 
                 if ("ready".equals(status) && playersCount == 2 && !navigatedToGame) {
                     navigatedToGame = true;
-
-                    Intent i = new Intent(WaitingRoomActivity.this, OnlineGameActivity.class);
-                    i.putExtra("ROOM_ID", roomId);
-                    i.putExtra("PLAYER_ID", playerId);
-                    startActivity(i);
-
-                    finish();
+                    goToGame();
                 }
             }
 
             @Override
-            public void onCancelled(DatabaseError error) {
+            public void onCancelled(@NonNull DatabaseError error) {
                 Toast.makeText(WaitingRoomActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
             }
         };
@@ -101,27 +93,36 @@ public class WaitingRoomActivity extends BaseActivity {
         roomRef.addValueEventListener(roomListener);
     }
 
-    private void leaveRoom() {
-        FirebaseDatabase.getInstance().getReference("rooms").child(roomId).removeValue();
-        FirebaseDatabase.getInstance().getReference("games").child(roomId).removeValue();
+    private void goToGame() {
+        Intent i = new Intent(WaitingRoomActivity.this, OnlineGameActivity.class);
+        i.putExtra("ROOM_ID", roomId);
+        i.putExtra("PLAYER_ID", playerId);
+        startActivity(i);
         finish();
     }
 
-    @Override
-    public void onBackPressed() {
-        leaveRoom();
+    private void leaveRoomAndGoBack() {
+        roomRef.removeValue()
+                .addOnCompleteListener(task -> finish());
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-
         destroyed = true;
 
         if (roomListener != null && roomRef != null) {
             roomRef.removeEventListener(roomListener);
         }
 
-        // ❌ לא מוחקים חדרים כאן — זה פתר את הבעיה!
+        // אם לא התקדמנו למשחק — מחיקה
+        if (!navigatedToGame) {
+            roomRef.removeValue();
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        leaveRoomAndGoBack();
     }
 }

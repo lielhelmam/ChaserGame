@@ -6,6 +6,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.example.chasergame.R;
@@ -21,11 +22,12 @@ public class OnlineGameActivity extends BaseActivity {
     private String playerId;
 
     private TextView tvTurnInfo, tvTimer, tvScore, tvQuestion;
-    private Button btnA, btnB, btnC, btnEndGame;
+    private Button btnAnswerA, btnAnswerB, btnAnswerC, btnEndGame;
 
-    private DatabaseReference gameRef;
+    private DatabaseReference roomRef;
+    private ValueEventListener gameListener;
 
-    private boolean ending = false;
+    private boolean finishing = false;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -36,7 +38,7 @@ public class OnlineGameActivity extends BaseActivity {
         playerId = getIntent().getStringExtra("PLAYER_ID");
 
         if (roomId == null || playerId == null) {
-            Toast.makeText(this, "Missing game data", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Missing room data", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
@@ -46,78 +48,85 @@ public class OnlineGameActivity extends BaseActivity {
         tvScore = findViewById(R.id.tvScore);
         tvQuestion = findViewById(R.id.tvQuestion);
 
-        btnA = findViewById(R.id.btnAnswerA);
-        btnB = findViewById(R.id.btnAnswerB);
-        btnC = findViewById(R.id.btnAnswerC);
+        btnAnswerA = findViewById(R.id.btnAnswerA);
+        btnAnswerB = findViewById(R.id.btnAnswerB);
+        btnAnswerC = findViewById(R.id.btnAnswerC);
         btnEndGame = findViewById(R.id.btnEndGame);
 
-        gameRef = FirebaseDatabase.getInstance().getReference("games").child(roomId);
+        roomRef = FirebaseDatabase.getInstance().getReference("rooms").child(roomId);
 
-        // ❌ לא עושים onDisconnect כאן
-        // ❌ לא מוחקים את החדר אוטומטית
+        startGameListener();
 
-        setupGameState();
-
-        btnEndGame.setOnClickListener(v -> endGame());
+        btnEndGame.setOnClickListener(v -> endGameAndDeleteRoom());
     }
 
-    private void setupGameState() {
-
-        gameRef.addListenerForSingleValueEvent(new ValueEventListener() {
+    private void startGameListener() {
+        gameListener = new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot snapshot) {
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
 
                 if (!snapshot.exists()) {
-                    Toast.makeText(OnlineGameActivity.this, "Game not found", Toast.LENGTH_SHORT).show();
-                    goHome();
+                    if (!finishing) {
+                        Toast.makeText(OnlineGameActivity.this, "Game closed", Toast.LENGTH_SHORT).show();
+                        goHome();
+                    }
                     return;
                 }
 
                 Long timeMs = snapshot.child("timeMs").getValue(Long.class);
                 if (timeMs == null) timeMs = 120_000L;
 
-                tvTurnInfo.setText("Game Started");
-                tvTimer.setText(format(timeMs));
+                tvTurnInfo.setText("Online Game");
+                tvTimer.setText(formatTime(timeMs));
                 tvScore.setText("P1: 0 | P2: 0");
-                tvQuestion.setText("Game logic coming soon...");
+                tvQuestion.setText("Waiting for game logic...");
             }
 
             @Override
-            public void onCancelled(DatabaseError error) {
+            public void onCancelled(@NonNull DatabaseError error) {
                 Toast.makeText(OnlineGameActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
             }
-        });
+        };
+
+        roomRef.addValueEventListener(gameListener);
     }
 
-    private void endGame() {
-        if (ending) return;
-        ending = true;
+    private void endGameAndDeleteRoom() {
+        finishing = true;
 
-        gameRef.removeValue().addOnCompleteListener(t -> goHome());
+        roomRef.removeValue()
+                .addOnCompleteListener(task -> goHome());
     }
 
     private void goHome() {
         Intent i = new Intent(this, MainActivity.class);
-        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(i);
         finish();
     }
 
-    private String format(long ms) {
-        long sec = ms / 1000;
-        long m = sec / 60;
-        long s = sec % 60;
-        return String.format("%02d:%02d", m, s);
-    }
-
     @Override
     public void onBackPressed() {
-        endGame();
+        endGameAndDeleteRoom();
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
-        // ❌ לא מוחקים חדר כדי לא להרוס משחק
+    protected void onDestroy() {
+        super.onDestroy();
+
+        if (gameListener != null && roomRef != null) {
+            roomRef.removeEventListener(gameListener);
+        }
+
+        if (!finishing) {
+            roomRef.removeValue();
+        }
+    }
+
+    private String formatTime(long ms) {
+        long totalSec = ms / 1000;
+        long min = totalSec / 60;
+        long sec = totalSec % 60;
+        return String.format("%02d:%02d", min, sec);
     }
 }
