@@ -56,7 +56,6 @@ public class WaitingRoomActivity extends BaseActivity {
 
         roomRef = FirebaseDatabase.getInstance().getReference("rooms").child(roomId);
 
-        // ✅ אם האפליקציה נסגרת/נופלת – למחוק חדר אוטומטית (rooms וגם games)
         roomRef.onDisconnect().removeValue();
         FirebaseDatabase.getInstance().getReference("games").child(roomId).onDisconnect().removeValue();
 
@@ -70,7 +69,6 @@ public class WaitingRoomActivity extends BaseActivity {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
 
-                // אם החדר לא קיים → משהו מחק אותו
                 if (!snapshot.exists()) {
                     Toast.makeText(WaitingRoomActivity.this, "Room closed", Toast.LENGTH_SHORT).show();
                     goBack();
@@ -83,7 +81,6 @@ public class WaitingRoomActivity extends BaseActivity {
                 tvPlayers.setText("Players: " + playersCount + "/2");
 
                 if ("ready".equals(status)) {
-                    // ✅ עוברים למשחק
                     navigatedToGame = true;
 
                     Intent i = new Intent(WaitingRoomActivity.this, OnlineGameActivity.class);
@@ -104,7 +101,6 @@ public class WaitingRoomActivity extends BaseActivity {
     }
 
     private void leaveRoomAndGoBack() {
-        // ✅ מוחק גם rooms וגם games בבת אחת
         Map<String, Object> updates = new HashMap<>();
         updates.put("/rooms/" + roomId, null);
         updates.put("/games/" + roomId, null);
@@ -130,7 +126,6 @@ public class WaitingRoomActivity extends BaseActivity {
             roomRef.removeEventListener(roomListener);
         }
 
-        // ✅ אם יצאנו בלי לעבור למשחק – למחוק (גם אם לא לחצנו cancel)
         if (!navigatedToGame) {
             Map<String, Object> updates = new HashMap<>();
             updates.put("/rooms/" + roomId, null);
