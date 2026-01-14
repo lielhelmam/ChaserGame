@@ -27,6 +27,7 @@ public class JoinGameActivity extends BaseActivity {
         findViewById(R.id.btnJoinRoom).setOnClickListener(v -> {
 
             String roomId = etRoomCode.getText().toString().trim().toUpperCase();
+
             if (roomId.isEmpty()) {
                 Toast.makeText(this, "Enter room code", Toast.LENGTH_SHORT).show();
                 return;
@@ -38,31 +39,38 @@ public class JoinGameActivity extends BaseActivity {
                     .getReference("rooms")
                     .child(roomId)
                     .addListenerForSingleValueEvent(new ValueEventListener() {
-
                         @Override
                         public void onDataChange(DataSnapshot snapshot) {
+
                             if (!snapshot.exists()) {
                                 Toast.makeText(JoinGameActivity.this, "Room not found", Toast.LENGTH_SHORT).show();
                                 return;
                             }
 
-                            long playersCount = snapshot.child("players").getChildrenCount();
-                            if (playersCount >= 2) {
+                            long players = snapshot.child("players").getChildrenCount();
+
+                            if (players >= 2) {
                                 Toast.makeText(JoinGameActivity.this, "Room full", Toast.LENGTH_SHORT).show();
                                 return;
                             }
 
+                            // הוספת שחקן
                             snapshot.getRef()
                                     .child("players")
                                     .child(playerId)
-                                    .setValue(true)
-                                    .addOnSuccessListener(unused -> {
-                                        Intent i = new Intent(JoinGameActivity.this, WaitingRoomActivity.class);
-                                        i.putExtra("ROOM_ID", roomId);
-                                        i.putExtra("PLAYER_ID", playerId);
-                                        startActivity(i);
-                                        finish();
-                                    });
+                                    .setValue(true);
+
+                            // אם זה שחקן 2 → הפעל משחק
+                            if (players == 1) {
+                                snapshot.getRef().child("status").setValue("ready");
+                            }
+
+                            // מעבר לחדר המתנה
+                            Intent i = new Intent(JoinGameActivity.this, WaitingRoomActivity.class);
+                            i.putExtra("ROOM_ID", roomId);
+                            i.putExtra("PLAYER_ID", playerId);
+                            startActivity(i);
+                            finish();
                         }
 
                         @Override

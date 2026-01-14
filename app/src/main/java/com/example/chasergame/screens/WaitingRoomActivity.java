@@ -15,21 +15,19 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class WaitingRoomActivity extends BaseActivity {
 
     private String roomId;
     private String playerId;
 
-    private TextView tvRoomCode, tvStatus, tvPlayers;
+    private TextView tvRoomCode, tvPlayers, tvStatus;
     private Button btnCancel;
 
     private DatabaseReference roomRef;
     private ValueEventListener roomListener;
 
     private boolean navigatedToGame = false;
+    private boolean destroyed = false;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -46,20 +44,20 @@ public class WaitingRoomActivity extends BaseActivity {
         }
 
         tvRoomCode = findViewById(R.id.tvRoomCode);
-        tvStatus = findViewById(R.id.tvStatus);
         tvPlayers = findViewById(R.id.tvPlayers);
+        tvStatus = findViewById(R.id.tvStatus);
         btnCancel = findViewById(R.id.btnCancelRoom);
 
         tvRoomCode.setText("Room: " + roomId);
-        tvStatus.setText("Waiting for another player...");
+        tvStatus.setText("Waiting for other player...");
         tvPlayers.setText("Players: 1/2");
 
         roomRef = FirebaseDatabase.getInstance().getReference("rooms").child(roomId);
 
-        roomRef.onDisconnect().removeValue();
-        FirebaseDatabase.getInstance().getReference("games").child(roomId).onDisconnect().removeValue();
+        // ❌ לא מוסיפים onDisconnect כאן
+        // ❌ לא מוחקים חדרים כאן
 
-        btnCancel.setOnClickListener(v -> leaveRoomAndGoBack());
+        btnCancel.setOnClickListener(v -> leaveRoom());
 
         startListening();
     }
@@ -70,23 +68,26 @@ public class WaitingRoomActivity extends BaseActivity {
             public void onDataChange(DataSnapshot snapshot) {
 
                 if (!snapshot.exists()) {
-                    Toast.makeText(WaitingRoomActivity.this, "Room closed", Toast.LENGTH_SHORT).show();
-                    goBack();
+                    if (!destroyed) {
+                        Toast.makeText(WaitingRoomActivity.this, "Room closed", Toast.LENGTH_SHORT).show();
+                        finish();
+                    }
                     return;
                 }
 
-                String status = snapshot.child("status").getValue(String.class);
                 long playersCount = snapshot.child("players").getChildrenCount();
-
                 tvPlayers.setText("Players: " + playersCount + "/2");
 
-                if ("ready".equals(status)) {
+                String status = snapshot.child("status").getValue(String.class);
+
+                if ("ready".equals(status) && playersCount == 2 && !navigatedToGame) {
                     navigatedToGame = true;
 
                     Intent i = new Intent(WaitingRoomActivity.this, OnlineGameActivity.class);
                     i.putExtra("ROOM_ID", roomId);
                     i.putExtra("PLAYER_ID", playerId);
                     startActivity(i);
+
                     finish();
                 }
             }
@@ -100,37 +101,27 @@ public class WaitingRoomActivity extends BaseActivity {
         roomRef.addValueEventListener(roomListener);
     }
 
-    private void leaveRoomAndGoBack() {
-        Map<String, Object> updates = new HashMap<>();
-        updates.put("/rooms/" + roomId, null);
-        updates.put("/games/" + roomId, null);
-
-        FirebaseDatabase.getInstance().getReference()
-                .updateChildren(updates)
-                .addOnCompleteListener(task -> goBack());
-    }
-
-    private void goBack() {
+    private void leaveRoom() {
+        FirebaseDatabase.getInstance().getReference("rooms").child(roomId).removeValue();
+        FirebaseDatabase.getInstance().getReference("games").child(roomId).removeValue();
         finish();
     }
 
     @Override
     public void onBackPressed() {
-        leaveRoomAndGoBack();
+        leaveRoom();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+
+        destroyed = true;
+
         if (roomListener != null && roomRef != null) {
             roomRef.removeEventListener(roomListener);
         }
 
-        if (!navigatedToGame) {
-            Map<String, Object> updates = new HashMap<>();
-            updates.put("/rooms/" + roomId, null);
-            updates.put("/games/" + roomId, null);
-            FirebaseDatabase.getInstance().getReference().updateChildren(updates);
-        }
+        // ❌ לא מוחקים חדרים כאן — זה פתר את הבעיה!
     }
 }
