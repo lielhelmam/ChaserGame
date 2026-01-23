@@ -36,7 +36,11 @@ public class OnlineGameActivity extends BaseActivity {
     private boolean answerLocked = false;
     private boolean finishing = false;
 
-    private long defaultTurnMs = 60_000L; // ברירת מחדל – 60 שניות לתור
+    private long defaultTurnMs = 60_000L;
+
+    // Track changes so we can unlock locally
+    private String lastTurnSeen = null;
+    private Long lastQuestionNonceSeen = null;
 
     // -------- UI --------
     private TextView tvTurnInfo, tvTimer, tvScore, tvQuestion;
@@ -49,9 +53,6 @@ public class OnlineGameActivity extends BaseActivity {
 
     private CountDownTimer turnTimer;
 
-    // =========================
-    // onCreate
-    // =========================
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -78,9 +79,6 @@ public class OnlineGameActivity extends BaseActivity {
 
         roomRef = FirebaseDatabase.getInstance().getReference("rooms").child(roomId);
         gameRef = roomRef.child("game");
-
-        // במקרה של התנתקות – למחוק חדר
-        roomRef.onDisconnect().removeValue();
 
         btnA.setOnClickListener(v -> onAnswerClicked("A", btnA));
         btnB.setOnClickListener(v -> onAnswerClicked("B", btnB));
@@ -111,6 +109,11 @@ public class OnlineGameActivity extends BaseActivity {
                     defaultTurnMs = timeMs;
                 }
 
+                // IMPORTANT: רק ה-host מוחק חדר על disconnect (אחרת כל ניתוק של אורח מוחק הכל)
+                if (isPlayer1) {
+                    roomRef.onDisconnect().removeValue();
+                }
+
                 // רק ה־host ייצור משחק אם אין עדיין
                 if (!snap.hasChild("game") && isPlayer1) {
                     createInitialGame();
@@ -130,7 +133,7 @@ public class OnlineGameActivity extends BaseActivity {
         Map<String, Object> base = new HashMap<>();
         base.put("p1Score", 0);
         base.put("p2Score", 0);
-        base.put("currentTurn", "p1");          // מתחילים בשחקן 1
+        base.put("currentTurn", "p1");
         base.put("timeMs", defaultTurnMs);
         base.put("turnEndAt", now + defaultTurnMs);
 
@@ -164,7 +167,13 @@ public class OnlineGameActivity extends BaseActivity {
 
                 ArrayList<String> wrong = new ArrayList<>();
                 for (DataSnapshot w : qSnap.child("wrongAnswers").getChildren()) {
-                    wrong.add(w.getValue(String.class));
+                    String val = w.getValue(String.class);
+                    if (val != null) wrong.add(val);
+                }
+
+                if (q == null || right == null || wrong.size() < 2) {
+                    tvQuestion.setText("Bad question data");
+                    return;
                 }
 
                 ArrayList<String> all = new ArrayList<>();
@@ -172,11 +181,13 @@ public class OnlineGameActivity extends BaseActivity {
                 all.addAll(wrong);
                 Collections.shuffle(all);
 
-                String correctKey =
-                        all.indexOf(right) == 0 ? "A" :
-                                all.indexOf(right) == 1 ? "B" : "C";
+                int correctIdx = all.indexOf(right);
+                String correctKey = correctIdx == 0 ? "A" : (correctIdx == 1 ? "B" : "C");
+
+                long nonce = System.currentTimeMillis(); // identify "new question" across devices
 
                 Map<String, Object> qMap = new HashMap<>();
+                qMap.put("nonce", nonce);
                 qMap.put("text", q);
                 qMap.put("a", all.get(0));
                 qMap.put("b", all.get(1));
@@ -192,18 +203,27 @@ public class OnlineGameActivity extends BaseActivity {
     }
 
     // =========================
-    // 3) GAME LISTENER – סנכרון UI
+    // 3) GAME LISTENER – UI SYNC
     // =========================
     private void startGameListener() {
         gameListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snap) {
 
+                if (snap.child("gameOver").getValue(Boolean.class) != null &&
+                        snap.child("gameOver").getValue(Boolean.class)) {
+
+                    String winner = snap.child("winner").getValue(String.class);
+                    showGameOverDialog(winner);
+                    return;
+                }
+
+
                 if (!snap.exists()) {
-                    if (!finishing) {
-                        Toast.makeText(OnlineGameActivity.this, "Game finished", Toast.LENGTH_SHORT).show();
-                        goHome();
-                    }
+                    if (finishing) return;
+
+                    Toast.makeText(OnlineGameActivity.this, "Game finished", Toast.LENGTH_SHORT).show();
+                    goHome();
                     return;
                 }
 
@@ -216,19 +236,36 @@ public class OnlineGameActivity extends BaseActivity {
                 String turn = snap.child("currentTurn").getValue(String.class);
                 if (turn == null) turn = "p1";
 
+                boolean newTurn = (lastTurnSeen == null) || !turn.equals(lastTurnSeen);
+                lastTurnSeen = turn;
+
                 isMyTurn = (isPlayer1 && turn.equals("p1")) || (!isPlayer1 && turn.equals("p2"));
 
-                if (isMyTurn) {
-                    tvTurnInfo.setText("Your turn");
-                } else {
-                    tvTurnInfo.setText("Opponent's turn");
-                }
+                tvTurnInfo.setText(isMyTurn ? "Your turn" : "Opponent's turn");
 
                 // שאלה
                 if (snap.hasChild("question")) {
                     loadQuestionFromSnapshot(snap);
+
+                    Long nonce = snap.child("question").child("nonce").getValue(Long.class);
+                    boolean newQuestion = (nonce != null) && (lastQuestionNonceSeen == null || !nonce.equals(lastQuestionNonceSeen));
+                    if (newQuestion) {
+                        lastQuestionNonceSeen = nonce;
+                        answerLocked = false;     // IMPORTANT: unlock on new question
+                        resetButtonColors();
+                    }
                 } else {
                     tvQuestion.setText("Loading question...");
+                }
+
+                // אם התור התחלף לתור שלי – נפתח נעילה
+                if (newTurn && isMyTurn) {
+                    answerLocked = false;
+                    resetButtonColors();
+                }
+                // אם לא התור שלי – אין סיבה שאוכל ללחוץ
+                if (!isMyTurn) {
+                    answerLocked = true;
                 }
 
                 // טיימר
@@ -242,7 +279,6 @@ public class OnlineGameActivity extends BaseActivity {
                     tvTimer.setText("--:--");
                 }
 
-                // כפתורים רק בתור שלי
                 setButtonsEnabled(isMyTurn && !answerLocked);
             }
 
@@ -263,9 +299,6 @@ public class OnlineGameActivity extends BaseActivity {
         btnA.setText(a == null ? "" : a);
         btnB.setText(b == null ? "" : b);
         btnC.setText(c == null ? "" : c);
-
-        resetButtonColors();
-        // לא פותחים כאן את התשובה – answerLocked ייפתח רק כשמגיעה שאלה חדשה / תור חדש
     }
 
     // =========================
@@ -277,7 +310,6 @@ public class OnlineGameActivity extends BaseActivity {
         answerLocked = true;
         setButtonsEnabled(false);
 
-        // מי השחקן המתור?
         final String playerKey = isPlayer1 ? "p1" : "p2";
 
         gameRef.child("question").child("correct")
@@ -289,18 +321,15 @@ public class OnlineGameActivity extends BaseActivity {
 
                         boolean isCorrect = key.equals(correct);
 
-                        // צבעים
                         showAnswerColors(key, correct, clickedBtn);
 
-                        // ניקוד – רק אם צדק
                         if (isCorrect) {
                             incrementScore(playerKey);
                         }
 
-                        // שאלה חדשה – רק למי שבתור (גם P1 וגם P2)
+                        // שאלה חדשה – רק מי שבתור מייצר, והיא תפתח את הנעילה דרך nonce בליסנר
                         if (isMyTurn) {
                             setNewQuestionInGame();
-                            answerLocked = false; // נאפשר לענות שוב על החדשה
                         }
                     }
 
@@ -310,7 +339,6 @@ public class OnlineGameActivity extends BaseActivity {
     }
 
     private void incrementScore(String playerKey) {
-        // טרנזקציה רק על הצומת של הניקוד
         gameRef.child(playerKey + "Score")
                 .runTransaction(new Transaction.Handler() {
                     @NonNull
@@ -328,7 +356,7 @@ public class OnlineGameActivity extends BaseActivity {
     }
 
     // =========================
-    // 5) TIMER – מסיים תור
+    // 5) TIMER – END TURN
     // =========================
     private void startLocalTimer(long ms) {
         if (turnTimer != null) {
@@ -348,7 +376,6 @@ public class OnlineGameActivity extends BaseActivity {
                 answerLocked = true;
                 setButtonsEnabled(false);
 
-                // רק זה שבתור סוגר את התור בבסיס הנתונים
                 if (!finishing && isMyTurn) {
                     endTurnInDatabase();
                 }
@@ -365,9 +392,7 @@ public class OnlineGameActivity extends BaseActivity {
                 String turn = snap.child("currentTurn").getValue(String.class);
                 if (turn == null) turn = "p1";
 
-                // נגמר תור של P1 -> עוברים ל־P2
                 if (turn.equals("p1")) {
-
                     long newEnd = System.currentTimeMillis() + defaultTurnMs;
 
                     Map<String, Object> updates = new HashMap<>();
@@ -375,16 +400,26 @@ public class OnlineGameActivity extends BaseActivity {
                     updates.put("turnEndAt", newEnd);
 
                     gameRef.updateChildren(updates).addOnCompleteListener(t -> {
-                        // שאלה ראשונה לתור של P2 – נייצר כאן
+                        // שאלה ראשונה לתור של P2
                         setNewQuestionInGame();
-                        answerLocked = false;
                     });
 
                 } else {
-                    // נגמר תור של P2 – מסיימים משחק
-                    Toast.makeText(OnlineGameActivity.this, "Game over", Toast.LENGTH_SHORT).show();
-                    deleteRoomAndExit();
+                    long p1 = getLong(snap.child("p1Score"), 0);
+                    long p2 = getLong(snap.child("p2Score"), 0);
+
+                    String message;
+                    if (p1 > p2) {
+                        message = "🏆 Player 1 Wins!";
+                    } else if (p2 > p1) {
+                        message = "🏆 Player 2 Wins!";
+                    } else {
+                        message = "🤝 It's a Draw!";
+                    }
+
+                    showGameOverDialog(message);
                 }
+
             }
 
             @Override
@@ -458,4 +493,32 @@ public class OnlineGameActivity extends BaseActivity {
             correctBtn.setBackgroundTintList(ColorStateList.valueOf(Color.GREEN));
         }
     }
+    private void showGameOverDialog(String winner) {
+        if (finishing) return;
+        finishing = true;
+
+        if (turnTimer != null) turnTimer.cancel();
+
+        String message;
+        if ("DRAW".equals(winner)) {
+            message = "🤝 It's a Draw!";
+        } else if ("P1".equals(winner)) {
+            message = isPlayer1 ? "🏆 You Win!" : "😢 You Lose";
+        } else {
+            message = isPlayer1 ? "😢 You Lose" : "🏆 You Win!";
+        }
+
+        runOnUiThread(() -> {
+            new androidx.appcompat.app.AlertDialog.Builder(this)
+                    .setTitle("Game Over")
+                    .setMessage(message)
+                    .setCancelable(false)
+                    .setPositiveButton("OK", (d, w) -> {
+                        roomRef.removeValue(); // כמו שרצית
+                        goHome();
+                    })
+                    .show();
+        });
+    }
+
 }

@@ -1,62 +1,99 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/ChooseTimePage"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#7F0000"
-    android:gravity="center"
-    android:orientation="vertical"
-    android:padding="32dp">
+    android:padding="24dp">
 
-    <!-- Title -->
+    <!-- ===== TITLE ===== -->
+
     <TextView
-        android:layout_width="wrap_content"
+        android:id="@+id/tvTitle"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="32dp"
         android:text="Set Time Per Player"
         android:textColor="#FFFFFF"
-        android:textSize="22sp"
-        android:textStyle="bold" />
-
-    <!-- Time picker container -->
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="40dp"
-        android:background="#550000"
+        android:textSize="26sp"
+        android:textStyle="bold"
         android:gravity="center"
-        android:orientation="horizontal"
-        android:padding="24dp">
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="32dp"/>
 
-        <NumberPicker
-            android:id="@+id/pickerMinutes"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+    <!-- ===== TIME CARD ===== -->
 
-        <TextView
-            android:layout_width="wrap_content"
+    <androidx.cardview.widget.CardView
+        android:id="@+id/timeCard"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="48dp"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="10dp"
+        app:layout_constraintTop_toBottomOf="@id/tvTitle"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="16dp"
-            android:text=":"
-            android:textColor="#FFFFFF"
-            android:textSize="28sp"
-            android:textStyle="bold" />
+            android:orientation="vertical"
+            android:gravity="center"
+            android:padding="24dp">
 
-        <NumberPicker
-            android:id="@+id/pickerSeconds"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-    </LinearLayout>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Minutes : Seconds"
+                android:textSize="16sp"
+                android:textColor="#444444"
+                android:layout_marginBottom="16dp"/>
 
-    <!-- Start button -->
+            <LinearLayout
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <NumberPicker
+                    android:id="@+id/pickerMinutes"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="16dp"
+                    android:text=":"
+                    android:textSize="28sp"
+                    android:textStyle="bold"
+                    android:textColor="#000000" />
+
+                <NumberPicker
+                    android:id="@+id/pickerSeconds"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- ===== START BUTTON ===== -->
+
     <Button
         android:id="@+id/btnStartGame"
-        android:layout_width="200dp"
-        android:layout_height="wrap_content"
-        android:backgroundTint="#B71C1C"
-        android:padding="12dp"
+        android:layout_width="0dp"
+        android:layout_height="56dp"
         android:text="Start Game"
+        android:textSize="16sp"
         android:textColor="#FFFFFF"
-        android:textSize="16sp" />
+        android:backgroundTint="#B71C1C"
+        app:layout_constraintTop_toBottomOf="@id/timeCard"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="40dp"/>
 
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
