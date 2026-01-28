@@ -36,10 +36,10 @@ public class MainActivity extends BaseActivity {
 
         PlayAgainstBot = findViewById(R.id.btn_main_playagainstabot);
         PlayAgainstBot.setOnClickListener(view -> {
-            Intent intent = new Intent(MainActivity.this, PlayAgainstBotActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            Intent intent = new Intent(MainActivity.this, ChooseTimeBotActivity.class);
             startActivity(intent);
         });
+
         Button playOnline = findViewById(R.id.btn_main_playonline);
         playOnline.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, OnlineMenuActivity.class);
@@ -54,7 +54,6 @@ public class MainActivity extends BaseActivity {
         btnEditProfile = findViewById(R.id.btn_main_edit_profile);
         btnEditProfile.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, EditProfileActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
         });
 

@@ -2,29 +2,124 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/PlayAgainstBot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/background"
     android:padding="16dp">
 
     <!-- Progress bar container -->
-    <LinearLayout
+    <!-- Progress bar container -->
+    <FrameLayout
         android:id="@+id/One_Device_progressContainer"
         android:layout_width="0dp"
         android:layout_height="50dp"
         android:background="#C62828"
-        android:orientation="horizontal"
-        android:padding="4dp"
+        android:padding="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-    </LinearLayout>
+        <!-- The track -->
+        <View
+            android:id="@+id/progressTrack"
+            android:layout_width="match_parent"
+            android:layout_height="10dp"
+            android:layout_gravity="center_vertical"
+            android:background="#333333" />
 
-    <!-- Question card (pushed lower) -->
+        <!-- Player 1 marker -->
+        <TextView
+            android:id="@+id/markerP1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="P1"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF"
+            android:layout_gravity="center_vertical"
+            android:translationX="0dp" />
+
+        <!-- Player 2 marker -->
+        <TextView
+            android:id="@+id/markerP2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="P2"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF"
+            android:layout_gravity="center_vertical"
+            android:translationX="0dp" />
+
+    </FrameLayout>
+
+    <!-- ADDED: Turn indicator -->
+    <TextView
+        android:id="@+id/One_Device_tvTurn"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Player 1 Turn"
+        android:textColor="#FFFFFF"
+        android:textStyle="bold"
+        android:textSize="18sp"
+        app:layout_constraintTop_toBottomOf="@id/One_Device_progressContainer"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="12dp"
+        android:gravity="center"/>
+
+    <!-- ADDED: Timer text -->
+    <TextView
+        android:id="@+id/One_Device_tvTimer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="02:00"
+        android:textColor="#FFFFFF"
+        android:textStyle="bold"
+        android:textSize="18sp"
+        app:layout_constraintTop_toBottomOf="@id/One_Device_tvTurn"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="8dp"/>
+
+    <!-- ADDED: Scores -->
+    <TextView
+        android:id="@+id/One_Device_tvScoreP1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="P1: 0"
+        android:textColor="#FFFFFF"
+        android:textStyle="bold"
+        android:textSize="16sp"
+        app:layout_constraintTop_toBottomOf="@id/One_Device_tvTurn"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="8dp"/>
+
+    <TextView
+        android:id="@+id/One_Device_tvScoreP2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="P2: 0"
+        android:textColor="#FFFFFF"
+        android:textStyle="bold"
+        android:textSize="16sp"
+        app:layout_constraintTop_toBottomOf="@id/One_Device_tvScoreP1"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="6dp"/>
+
+    <!-- ADDED: Target for player 2 -->
+    <TextView
+        android:id="@+id/One_Device_tvTarget"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Target: 0"
+        android:textColor="#FFFFFF"
+        android:textStyle="bold"
+        android:textSize="16sp"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/One_Device_tvTimer"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="6dp"/>
 
     <!-- Answers: 3 buttons next to each other -->
-
     <LinearLayout
         android:id="@+id/answersRow"
         android:layout_width="0dp"
@@ -84,6 +179,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/One_Device_progressContainer" />
+        app:layout_constraintTop_toBottomOf="@id/One_Device_progressContainer" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
