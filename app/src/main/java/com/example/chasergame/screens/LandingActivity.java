@@ -3,7 +3,6 @@ package com.example.chasergame.screens;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
@@ -14,17 +13,14 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.chasergame.R;
-import com.example.chasergame.models.Question;
 import com.example.chasergame.models.User;
-import com.example.chasergame.services.DatabaseService;
 import com.example.chasergame.utils.SharedPreferencesUtil;
-
-import java.util.List;
 
 public class LandingActivity extends BaseActivity {
     Button BtnReg;
     Button exitBtn;
     Button BtnLog;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,9 +48,7 @@ public class LandingActivity extends BaseActivity {
         }
 
 
-
-
-    BtnReg = findViewById(R.id.btn_main_gotosignup);
+        BtnReg = findViewById(R.id.btn_main_gotosignup);
         BtnReg.setOnClickListener(view -> {
             Intent intentreg = new Intent(LandingActivity.this, SigninActivity.class);
             startActivity(intentreg);

@@ -44,10 +44,10 @@
         android:text="Questions will appear here"
         android:textColor="?android:attr/detailsElementBackground"
         android:textSize="14sp"
-        app:layout_constraintTop_toBottomOf="@+id/appBarLayout"
         app:layout_constraintBottom_toTopOf="@+id/titleQuestions"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/appBarLayout" />
 
     <TextView
         android:id="@+id/titleQuestions"
@@ -57,10 +57,10 @@
         android:textColor="?attr/colorSecondaryContainer"
         android:textSize="24sp"
         android:textStyle="bold"
-        app:layout_constraintTop_toBottomOf="@+id/textViewHint"
         app:layout_constraintBottom_toTopOf="@+id/rv_questions_list"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/textViewHint" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_questions_list"
@@ -68,10 +68,10 @@
         android:layout_height="0dp"
         android:clipToPadding="false"
         android:padding="8dp"
-        app:layout_constraintTop_toBottomOf="@+id/titleQuestions"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/titleQuestions"
         tools:listitem="@layout/item_question" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

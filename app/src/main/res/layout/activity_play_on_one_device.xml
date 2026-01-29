@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/PlayOnOneDevice"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -33,10 +32,10 @@
             android:id="@+id/markerP1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="P1"
-            android:textStyle="bold"
-            android:textColor="#FFFFFF"
             android:layout_gravity="center_vertical"
+            android:text="P1"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold"
             android:translationX="0dp" />
 
         <!-- Player 2 marker -->
@@ -44,10 +43,10 @@
             android:id="@+id/markerP2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="P2"
-            android:textStyle="bold"
-            android:textColor="#FFFFFF"
             android:layout_gravity="center_vertical"
+            android:text="P2"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold"
             android:translationX="0dp" />
 
     </FrameLayout>
@@ -57,67 +56,67 @@
         android:id="@+id/One_Device_tvTurn"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:gravity="center"
         android:text="Player 1 Turn"
         android:textColor="#FFFFFF"
-        android:textStyle="bold"
         android:textSize="18sp"
-        app:layout_constraintTop_toBottomOf="@id/One_Device_progressContainer"
-        app:layout_constraintStart_toStartOf="parent"
+        android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="12dp"
-        android:gravity="center"/>
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/One_Device_progressContainer" />
 
     <!-- ADDED: Timer text -->
     <TextView
         android:id="@+id/One_Device_tvTimer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
         android:text="02:00"
         android:textColor="#FFFFFF"
-        android:textStyle="bold"
         android:textSize="18sp"
-        app:layout_constraintTop_toBottomOf="@id/One_Device_tvTurn"
+        android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginTop="8dp"/>
+        app:layout_constraintTop_toBottomOf="@id/One_Device_tvTurn" />
 
     <!-- ADDED: Scores -->
     <TextView
         android:id="@+id/One_Device_tvScoreP1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
         android:text="P1: 0"
         android:textColor="#FFFFFF"
-        android:textStyle="bold"
         android:textSize="16sp"
-        app:layout_constraintTop_toBottomOf="@id/One_Device_tvTurn"
+        android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="8dp"/>
+        app:layout_constraintTop_toBottomOf="@id/One_Device_tvTurn" />
 
     <TextView
         android:id="@+id/One_Device_tvScoreP2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
         android:text="P2: 0"
         android:textColor="#FFFFFF"
-        android:textStyle="bold"
         android:textSize="16sp"
-        app:layout_constraintTop_toBottomOf="@id/One_Device_tvScoreP1"
+        android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="6dp"/>
+        app:layout_constraintTop_toBottomOf="@id/One_Device_tvScoreP1" />
 
     <!-- ADDED: Target for player 2 -->
     <TextView
         android:id="@+id/One_Device_tvTarget"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
         android:text="Target: 0"
         android:textColor="#FFFFFF"
-        android:textStyle="bold"
         android:textSize="16sp"
+        android:textStyle="bold"
         android:visibility="gone"
-        app:layout_constraintTop_toBottomOf="@id/One_Device_tvTimer"
         app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginTop="6dp"/>
+        app:layout_constraintTop_toBottomOf="@id/One_Device_tvTimer" />
 
     <!-- Answers: 3 buttons next to each other -->
     <LinearLayout

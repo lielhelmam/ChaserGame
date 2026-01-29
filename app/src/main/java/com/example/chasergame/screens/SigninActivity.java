@@ -4,8 +4,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -52,14 +52,13 @@ public class SigninActivity extends BaseActivity {
         }
 
 
-
         etUserName = findViewById(R.id.EnterUserName);
         etPassword = findViewById(R.id.EnterPassword);
         etEmail = findViewById(R.id.EnterEmail);
         etPhoneNumber = findViewById(R.id.EnterPhoneNumber);
 
         btnSubmit = findViewById(R.id.btn_signup_submit);
-            btnSubmit.setOnClickListener(this::onSubmit);
+        btnSubmit.setOnClickListener(this::onSubmit);
 
         goback = findViewById(R.id.btn_signup_goback);
         goback.setOnClickListener(view -> {

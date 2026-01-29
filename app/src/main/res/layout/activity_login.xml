@@ -1,26 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/LoginPage"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#C62828"
-    tools:context=".screens.LoginActivity"
-    android:padding="16dp">
+    android:padding="16dp"
+    tools:context=".screens.LoginActivity">
 
     <androidx.cardview.widget.CardView
         android:id="@+id/card_login"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="48dp"
         app:cardBackgroundColor="#1E1E1E"
         app:cardCornerRadius="12dp"
         app:cardElevation="6dp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="48dp">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -35,7 +34,7 @@
                 android:text="log in to the game"
                 android:textColor="#FFFFFF"
                 android:textSize="20sp"
-                android:textStyle="bold"/>
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/LoginEnterUserNameText"
@@ -43,15 +42,15 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:text="Enter UserName"
-                android:textColor="#FFCDD2"/>
+                android:textColor="#FFCDD2" />
 
             <EditText
                 android:id="@+id/LoginEnterUserName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="text"
                 android:backgroundTint="#333333"
-                android:textColor="#FFFFFF"/>
+                android:inputType="text"
+                android:textColor="#FFFFFF" />
 
             <TextView
                 android:id="@+id/LoginEnterPasswordText"
@@ -59,15 +58,15 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
                 android:text="Enter Password"
-                android:textColor="#FFCDD2"/>
+                android:textColor="#FFCDD2" />
 
             <EditText
                 android:id="@+id/Login_EnterPassword"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="textPassword"
                 android:backgroundTint="#333333"
-                android:textColor="#FFFFFF"/>
+                android:inputType="textPassword"
+                android:textColor="#FFFFFF" />
 
             <Button
                 android:id="@+id/btn_login_check"
@@ -76,7 +75,7 @@
                 android:layout_marginTop="16dp"
                 android:backgroundTint="#B71C1C"
                 android:text="check"
-                android:textColor="#FFFFFF"/>
+                android:textColor="#FFFFFF" />
 
             <TextView
                 android:id="@+id/Login_tv_register"
@@ -84,7 +83,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
                 android:text="dont have an account? register!"
-                android:textColor="#FFFFFF"/>
+                android:textColor="#FFFFFF" />
 
             <Button
                 android:id="@+id/btn_login_goback"
@@ -93,7 +92,7 @@
                 android:layout_marginTop="12dp"
                 android:backgroundTint="#333333"
                 android:text="go back"
-                android:textColor="#FFFFFF"/>
+                android:textColor="#FFFFFF" />
 
         </LinearLayout>
     </androidx.cardview.widget.CardView>

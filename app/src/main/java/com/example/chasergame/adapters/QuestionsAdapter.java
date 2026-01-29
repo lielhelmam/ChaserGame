@@ -17,29 +17,13 @@ import java.util.List;
 
 public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.VH> {
 
-    public interface Listener {
-        void onEditClicked(String key, Question question);
-        void onDeleteClicked(String key);
-    }
-
     private final Listener listener;
-
     // list shown in UI
     private final List<Item> visible = new ArrayList<>();
     // master list for filtering
     private final List<Item> all = new ArrayList<>();
-
     public QuestionsAdapter(Listener listener) {
         this.listener = listener;
-    }
-
-    public static class Item {
-        public final String key;     // "0", "1", ...
-        public final Question value; // Question object
-        public Item(String key, Question value) {
-            this.key = key;
-            this.value = value;
-        }
     }
 
     public void setItems(List<Item> items) {
@@ -110,7 +94,8 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.VH> 
         try {
             int num = Integer.parseInt(item.key) + 1;
             numberText = "#" + num;
-        } catch (Exception ignored) { }
+        } catch (Exception ignored) {
+        }
 
         h.tvNumber.setText(numberText);
 
@@ -144,6 +129,22 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.VH> 
             sb.append(s);
         }
         return sb.toString();
+    }
+
+    public interface Listener {
+        void onEditClicked(String key, Question question);
+
+        void onDeleteClicked(String key);
+    }
+
+    public static class Item {
+        public final String key;     // "0", "1", ...
+        public final Question value; // Question object
+
+        public Item(String key, Question value) {
+            this.key = key;
+            this.value = value;
+        }
     }
 
     static class VH extends RecyclerView.ViewHolder {

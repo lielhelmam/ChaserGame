@@ -29,32 +29,25 @@ import java.util.Random;
 
 public class PlayOnOneDeviceActivity extends BaseActivity {
 
+    // ===== Chase-style track (like "The Chase") =====
+    private static final int VISIBLE_STEPS = 14; // כמה תאים רואים על המסך (תשנה 12-16 לפי טעם)
+    // ===== Game =====
+    private final Random rnd = new Random();
     // ===== UI =====
     private FrameLayout progressContainer;
     private View progressTrack;
     private TextView markerP1, markerP2;
-
     private TextView tvTurn, tvTimer, tvScoreP1, tvScoreP2, tvTarget;
     private TextView tvQuestion;
     private Button btnA, btnB, btnC;
-
     private int defaultBtnColor;
-
-    // ===== Game =====
-    private final Random rnd = new Random();
-
     private int currentPlayer = 1;            // 1 ואז 2
     private boolean isTurnRunning = false;
-
     private int scoreP1 = 0;
     private int scoreP2 = 0;
-
     // positions on the "infinite" chase track (absolute steps, not screen)
     private int p1Pos = 0;
     private int p2Pos = 0;
-
-    // ===== Chase-style track (like "The Chase") =====
-    private static final int VISIBLE_STEPS = 14; // כמה תאים רואים על המסך (תשנה 12-16 לפי טעם)
     private int trackOffset = 0;                 // כמה המסלול "המשיך" קדימה (כדי ש-P1 לא יתקע בקצה)
 
     // ===== Timer =====
@@ -72,7 +65,6 @@ public class PlayOnOneDeviceActivity extends BaseActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_play_on_one_device);
-
 
 
         // bind top bar
@@ -196,7 +188,8 @@ public class PlayOnOneDeviceActivity extends BaseActivity {
         FirebaseDatabase.getInstance()
                 .getReference("questions")
                 .addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override public void onDataChange(DataSnapshot snapshot) {
+                    @Override
+                    public void onDataChange(DataSnapshot snapshot) {
                         questionsCount = (int) snapshot.getChildrenCount();
                         if (questionsCount <= 0) {
                             Toast.makeText(PlayOnOneDeviceActivity.this, "No questions in database", Toast.LENGTH_LONG).show();
@@ -206,7 +199,8 @@ public class PlayOnOneDeviceActivity extends BaseActivity {
                         askReadyToStart();
                     }
 
-                    @Override public void onCancelled(DatabaseError error) {
+                    @Override
+                    public void onCancelled(DatabaseError error) {
                         Toast.makeText(PlayOnOneDeviceActivity.this, "DB error: " + error.getMessage(), Toast.LENGTH_LONG).show();
                         goHome();
                     }
@@ -264,12 +258,14 @@ public class PlayOnOneDeviceActivity extends BaseActivity {
         cancelTimer();
 
         turnTimer = new CountDownTimer(millisLeft, 1000) {
-            @Override public void onTick(long millisUntilFinished) {
+            @Override
+            public void onTick(long millisUntilFinished) {
                 millisLeft = millisUntilFinished;
                 tvTimer.setText(formatTime(millisLeft));
             }
 
-            @Override public void onFinish() {
+            @Override
+            public void onFinish() {
                 millisLeft = 0;
                 tvTimer.setText(formatTime(0));
                 endTurn();
@@ -302,7 +298,8 @@ public class PlayOnOneDeviceActivity extends BaseActivity {
                 .getReference("questions")
                 .child(String.valueOf(index))
                 .addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override public void onDataChange(DataSnapshot snapshot) {
+                    @Override
+                    public void onDataChange(DataSnapshot snapshot) {
                         if (!isTurnRunning) return;
 
                         Question q = snapshot.getValue(Question.class);
@@ -313,7 +310,8 @@ public class PlayOnOneDeviceActivity extends BaseActivity {
                         showQuestion(q);
                     }
 
-                    @Override public void onCancelled(DatabaseError error) {
+                    @Override
+                    public void onCancelled(DatabaseError error) {
                         if (isTurnRunning) loadRandomQuestion();
                     }
                 });
@@ -352,7 +350,7 @@ public class PlayOnOneDeviceActivity extends BaseActivity {
         setInputsEnabled(false);
 
         int green = 0xFF2E7D32; // dark green
-        int red   = 0xFFC62828; // your theme red
+        int red = 0xFFC62828; // your theme red
 
         // paint clicked
         clickedButton.setBackgroundTintList(ColorStateList.valueOf(correct ? green : red));

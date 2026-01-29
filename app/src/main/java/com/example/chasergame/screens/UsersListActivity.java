@@ -3,7 +3,7 @@ package com.example.chasergame.screens;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import com.google.firebase.database.FirebaseDatabase;
+import android.widget.SearchView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.widget.Toolbar;
@@ -13,13 +13,11 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.widget.SearchView;
-import android.widget.TextView;
-
 import com.example.chasergame.R;
 import com.example.chasergame.adapters.UserAdapter;
 import com.example.chasergame.models.User;
 import com.example.chasergame.services.DatabaseService;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.List;
 

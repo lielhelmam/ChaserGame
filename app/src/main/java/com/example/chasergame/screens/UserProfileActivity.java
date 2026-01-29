@@ -1,16 +1,13 @@
 package com.example.chasergame.screens;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -56,22 +53,22 @@ public class UserProfileActivity extends BaseActivity {
 
         loadUser();
 
-       // btnEdit.setOnClickListener(v -> {
-            // Open edit screen — you can create one or use the same profile view in editable mode
-         //   Intent i = new Intent(UserProfileActivity.this, EditUserActivity.class);
-         //   i.putExtra("USER_UID", userId);
-         //   startActivity(i);
-       // });
+        // btnEdit.setOnClickListener(v -> {
+        // Open edit screen — you can create one or use the same profile view in editable mode
+        //   Intent i = new Intent(UserProfileActivity.this, EditUserActivity.class);
+        //   i.putExtra("USER_UID", userId);
+        //   startActivity(i);
+        // });
 
-      //  btnDelete.setOnClickListener(v -> {
-            // confirm deletion
-          //  new AlertDialog.Builder(this)
-               //     .setTitle("Delete user")
-               //     .setMessage("Are you sure you want to delete this user?")
-                //    .setPositiveButton("Delete", (dialog, which) -> deleteUser())
-              //      .setNegativeButton("Cancel", null)
-               //     .show();
-       // });
+        //  btnDelete.setOnClickListener(v -> {
+        // confirm deletion
+        //  new AlertDialog.Builder(this)
+        //     .setTitle("Delete user")
+        //     .setMessage("Are you sure you want to delete this user?")
+        //    .setPositiveButton("Delete", (dialog, which) -> deleteUser())
+        //      .setNegativeButton("Cancel", null)
+        //     .show();
+        // });
     }
 
     private void loadUser() {
@@ -110,28 +107,28 @@ public class UserProfileActivity extends BaseActivity {
     }
 
     // private void deleteUser() {
-       // if (currentUser == null) {
-          //  Toast.makeText(this, "No user to delete", Toast.LENGTH_SHORT).show();
-          //  return;
-      //  }
+    // if (currentUser == null) {
+    //  Toast.makeText(this, "No user to delete", Toast.LENGTH_SHORT).show();
+    //  return;
+    //  }
 
-      //  progressBar.setVisibility(View.VISIBLE);
+    //  progressBar.setVisibility(View.VISIBLE);
 
-      //  databaseService.deleteUserById(currentUser.getId(), new DatabaseService.DatabaseCallback<Void>() {
-        //    @Override
-        //    public void onCompleted(Void unused) {
-          //      progressBar.setVisibility(View.GONE);
-           //     Toast.makeText(UserProfileActivity.this, "User deleted", Toast.LENGTH_SHORT).show();
-          //      finish(); // go back to users list
-          //  }
+    //  databaseService.deleteUserById(currentUser.getId(), new DatabaseService.DatabaseCallback<Void>() {
+    //    @Override
+    //    public void onCompleted(Void unused) {
+    //      progressBar.setVisibility(View.GONE);
+    //     Toast.makeText(UserProfileActivity.this, "User deleted", Toast.LENGTH_SHORT).show();
+    //      finish(); // go back to users list
+    //  }
 
-         //   @Override
-         //   public void onFailed(Exception e) {
-         //       progressBar.setVisibility(View.GONE);
-          //      Log.e(TAG, "Delete failed", e);
-         //       Toast.makeText(UserProfileActivity.this, "Delete failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-          //  }
-      //  });
-   // }
+    //   @Override
+    //   public void onFailed(Exception e) {
+    //       progressBar.setVisibility(View.GONE);
+    //      Log.e(TAG, "Delete failed", e);
+    //       Toast.makeText(UserProfileActivity.this, "Delete failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+    //  }
+    //  });
+    // }
 
-    }
+}

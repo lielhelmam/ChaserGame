@@ -16,36 +16,35 @@ import androidx.annotation.Nullable;
 
 import com.example.chasergame.R;
 import com.example.chasergame.models.Question;
-import com.google.firebase.database.*;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
 
 public class PlayAgainstBotActivity extends BaseActivity {
 
+    private static final int VISIBLE_STEPS = 14;
+    // ===== Game =====
+    private final Random rnd = new Random();
     // ===== UI =====
     private FrameLayout progressContainer;
     private TextView markerP1, markerP2;
     private TextView tvTurn, tvTimer, tvScoreP1, tvScoreP2, tvTarget, tvQuestion;
     private Button btnA, btnB, btnC;
-
     private int defaultBtnColor;
-
-    // ===== Game =====
-    private final Random rnd = new Random();
     private int currentPlayer = 1;
     private boolean isTurnRunning = false;
-
     private int scoreP1 = 0;
     private int scoreBot = 0;
     private View progressTrack;
-
     private int p1Pos = 0;
-
     private int p2Pos = 0;
-
     private int botPos = 0;
-
-    private static final int VISIBLE_STEPS = 14;
     private int trackOffset = 0;
 
     // ===== Timer =====
@@ -114,7 +113,8 @@ public class PlayAgainstBotActivity extends BaseActivity {
         FirebaseDatabase.getInstance()
                 .getReference("questions")
                 .addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override public void onDataChange(DataSnapshot snapshot) {
+                    @Override
+                    public void onDataChange(DataSnapshot snapshot) {
                         questionsCount = (int) snapshot.getChildrenCount();
                         if (questionsCount <= 0) {
                             Toast.makeText(PlayAgainstBotActivity.this, "No questions", Toast.LENGTH_LONG).show();
@@ -124,7 +124,8 @@ public class PlayAgainstBotActivity extends BaseActivity {
                         startTurn();
                     }
 
-                    @Override public void onCancelled(DatabaseError error) {
+                    @Override
+                    public void onCancelled(DatabaseError error) {
                         goHome();
                     }
                 });
@@ -158,11 +159,14 @@ public class PlayAgainstBotActivity extends BaseActivity {
     private void startTimer() {
         cancelTimer();
         turnTimer = new CountDownTimer(millisLeft, 1000) {
-            @Override public void onTick(long ms) {
+            @Override
+            public void onTick(long ms) {
                 millisLeft = ms;
                 tvTimer.setText(formatTime(ms));
             }
-            @Override public void onFinish() {
+
+            @Override
+            public void onFinish() {
                 endTurn();
             }
         }.start();
@@ -185,12 +189,16 @@ public class PlayAgainstBotActivity extends BaseActivity {
                 .getReference("questions")
                 .child(String.valueOf(index))
                 .addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override public void onDataChange(DataSnapshot snap) {
+                    @Override
+                    public void onDataChange(DataSnapshot snap) {
                         Question q = snap.getValue(Question.class);
                         if (q != null) showQuestion(q);
                         else loadRandomQuestion();
                     }
-                    @Override public void onCancelled(DatabaseError error) {}
+
+                    @Override
+                    public void onCancelled(DatabaseError error) {
+                    }
                 });
     }
 
@@ -235,9 +243,11 @@ public class PlayAgainstBotActivity extends BaseActivity {
 
         if (correct) {
             if (currentPlayer == 1) {
-                scoreP1++; p1Pos++;
+                scoreP1++;
+                p1Pos++;
             } else {
-                scoreBot++; botPos++;
+                scoreBot++;
+                botPos++;
             }
             updateScoresUI();
             updateMarkersUI();
@@ -344,6 +354,7 @@ public class PlayAgainstBotActivity extends BaseActivity {
         markerP1.bringToFront();
         markerP2.bringToFront();
     }
+
     private void updateMarkersUI() {
         int containerW = progressContainer.getWidth();
         if (containerW <= 0) return;
@@ -371,10 +382,12 @@ public class PlayAgainstBotActivity extends BaseActivity {
         if (Math.abs(x1 - x2) < 10f) markerP2.setTranslationY(-18f);
         else markerP2.setTranslationY(0f);
     }
+
     private void endGame(String msg) {
         Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
         goHome();
     }
+
     private int dp(int v) {
         float d = getResources().getDisplayMetrics().density;
         return Math.round(v * d);

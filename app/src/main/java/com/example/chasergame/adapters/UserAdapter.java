@@ -19,13 +19,6 @@ import java.util.List;
 public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
 
     private final List<User> fullList = new ArrayList<>();
-
-    public interface OnUserClickListener {
-        void onUserClick(User user);
-        void onLongUserClick(User user);
-        void onDeleteClick(User user);
-    }
-
     private final List<User> userList;
     private final OnUserClickListener onUserClickListener;
     public UserAdapter(@Nullable final OnUserClickListener onUserClickListener) {
@@ -91,6 +84,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
         userList.add(user);
         notifyItemInserted(userList.size() - 1);
     }
+
     public void updateUser(User user) {
         int index = userList.indexOf(user);
         if (index == -1) return;
@@ -105,18 +99,6 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
         notifyItemRemoved(index);
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView tvName, tvEmail;
-        Button btnDelete;
-
-
-        public ViewHolder(@NonNull View itemView) {
-            super(itemView);
-            tvName = itemView.findViewById(R.id.tv_item_user_name);
-            tvEmail = itemView.findViewById(R.id.tv_item_user_email);
-            btnDelete = itemView.findViewById(R.id.btn_item_user_delete);
-        }
-    }
     public void filter(String text) {
         userList.clear();
 
@@ -133,6 +115,27 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
         }
 
         notifyDataSetChanged();
+    }
+
+    public interface OnUserClickListener {
+        void onUserClick(User user);
+
+        void onLongUserClick(User user);
+
+        void onDeleteClick(User user);
+    }
+
+    public static class ViewHolder extends RecyclerView.ViewHolder {
+        TextView tvName, tvEmail;
+        Button btnDelete;
+
+
+        public ViewHolder(@NonNull View itemView) {
+            super(itemView);
+            tvName = itemView.findViewById(R.id.tv_item_user_name);
+            tvEmail = itemView.findViewById(R.id.tv_item_user_email);
+            btnDelete = itemView.findViewById(R.id.btn_item_user_delete);
+        }
     }
 
 }

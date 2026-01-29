@@ -18,7 +18,7 @@ import com.example.chasergame.utils.SharedPreferencesUtil;
 
 public class MainActivity extends BaseActivity {
     private static final String TAG = "MainActivity";
-    private Button Logout,PlayAgainstBot,PlayOnOneDevice, btnEditProfile;
+    private Button Logout, PlayAgainstBot, PlayOnOneDevice, btnEditProfile;
     private TextView hitouser;
     private User user;
 

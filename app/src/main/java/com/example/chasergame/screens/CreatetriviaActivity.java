@@ -9,6 +9,7 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.example.chasergame.R;
 import com.example.chasergame.models.Question;
+
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -16,12 +17,12 @@ import java.util.Random;
 public class CreatetriviaActivity extends BaseActivity {
 
     Random rnd = new Random();
-    
+
     String RightAnswer;
     ArrayList<String> wrongAnswers;
-     String q;
+    String q;
 
-    Question question = new Question(q,RightAnswer,wrongAnswers);
+    Question question = new Question(q, RightAnswer, wrongAnswers);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

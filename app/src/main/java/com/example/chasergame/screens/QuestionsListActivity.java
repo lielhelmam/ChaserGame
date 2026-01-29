@@ -58,8 +58,17 @@ public class QuestionsListActivity extends BaseActivity {
         rv.setAdapter(adapter);
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override public boolean onQueryTextSubmit(String query) { adapter.filter(query); return true; }
-            @Override public boolean onQueryTextChange(String newText) { adapter.filter(newText); return true; }
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                adapter.filter(query);
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                adapter.filter(newText);
+                return true;
+            }
         });
 
         loadQuestions();
@@ -100,8 +109,11 @@ public class QuestionsListActivity extends BaseActivity {
     }
 
     private int safeParseInt(String s, int fallback) {
-        try { return Integer.parseInt(s); }
-        catch (Exception e) { return fallback; }
+        try {
+            return Integer.parseInt(s);
+        } catch (Exception e) {
+            return fallback;
+        }
     }
 
     private void confirmDelete(String key) {
@@ -139,8 +151,10 @@ public class QuestionsListActivity extends BaseActivity {
 
         etQ.setText(q.getQuestion());
         etR.setText(q.getRightAnswer());
-        if (q.getWrongAnswers() != null && q.getWrongAnswers().size() > 0) etW1.setText(q.getWrongAnswers().get(0));
-        if (q.getWrongAnswers() != null && q.getWrongAnswers().size() > 1) etW2.setText(q.getWrongAnswers().get(1));
+        if (q.getWrongAnswers() != null && q.getWrongAnswers().size() > 0)
+            etW1.setText(q.getWrongAnswers().get(0));
+        if (q.getWrongAnswers() != null && q.getWrongAnswers().size() > 1)
+            etW2.setText(q.getWrongAnswers().get(1));
 
         new AlertDialog.Builder(this)
                 .setTitle("Edit question")

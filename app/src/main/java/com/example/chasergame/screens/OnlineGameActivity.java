@@ -17,9 +17,9 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.database.Transaction;
 import com.google.firebase.database.MutableData;
+import com.google.firebase.database.Transaction;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -58,7 +58,7 @@ public class OnlineGameActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_online_game);
 
-        roomId   = getIntent().getStringExtra("ROOM_ID");
+        roomId = getIntent().getStringExtra("ROOM_ID");
         playerId = getIntent().getStringExtra("PLAYER_ID");
 
         if (roomId == null || playerId == null) {
@@ -68,8 +68,8 @@ public class OnlineGameActivity extends BaseActivity {
         }
 
         tvTurnInfo = findViewById(R.id.tvTurnInfo);
-        tvTimer    = findViewById(R.id.tvTimer);
-        tvScore    = findViewById(R.id.tvScore);
+        tvTimer = findViewById(R.id.tvTimer);
+        tvScore = findViewById(R.id.tvScore);
         tvQuestion = findViewById(R.id.tvQuestion);
 
         btnA = findViewById(R.id.btnAnswerA);
@@ -123,7 +123,8 @@ public class OnlineGameActivity extends BaseActivity {
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError error) { }
+            public void onCancelled(@NonNull DatabaseError error) {
+            }
         });
     }
 
@@ -162,7 +163,7 @@ public class OnlineGameActivity extends BaseActivity {
                 int index = (int) (Math.random() * count);
                 DataSnapshot qSnap = snap.child(String.valueOf(index));
 
-                String q     = qSnap.child("question").getValue(String.class);
+                String q = qSnap.child("question").getValue(String.class);
                 String right = qSnap.child("rightAnswer").getValue(String.class);
 
                 ArrayList<String> wrong = new ArrayList<>();
@@ -198,7 +199,8 @@ public class OnlineGameActivity extends BaseActivity {
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError error) { }
+            public void onCancelled(@NonNull DatabaseError error) {
+            }
         });
     }
 
@@ -283,7 +285,8 @@ public class OnlineGameActivity extends BaseActivity {
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError error) { }
+            public void onCancelled(@NonNull DatabaseError error) {
+            }
         };
 
         gameRef.addValueEventListener(gameListener);
@@ -291,9 +294,9 @@ public class OnlineGameActivity extends BaseActivity {
 
     private void loadQuestionFromSnapshot(DataSnapshot snap) {
         String text = snap.child("question").child("text").getValue(String.class);
-        String a    = snap.child("question").child("a").getValue(String.class);
-        String b    = snap.child("question").child("b").getValue(String.class);
-        String c    = snap.child("question").child("c").getValue(String.class);
+        String a = snap.child("question").child("a").getValue(String.class);
+        String b = snap.child("question").child("b").getValue(String.class);
+        String c = snap.child("question").child("c").getValue(String.class);
 
         tvQuestion.setText(text == null ? "" : text);
         btnA.setText(a == null ? "" : a);
@@ -334,7 +337,8 @@ public class OnlineGameActivity extends BaseActivity {
                     }
 
                     @Override
-                    public void onCancelled(@NonNull DatabaseError error) { }
+                    public void onCancelled(@NonNull DatabaseError error) {
+                    }
                 });
     }
 
@@ -351,7 +355,8 @@ public class OnlineGameActivity extends BaseActivity {
                     }
 
                     @Override
-                    public void onComplete(DatabaseError error, boolean committed, DataSnapshot snapshot) { }
+                    public void onComplete(DatabaseError error, boolean committed, DataSnapshot snapshot) {
+                    }
                 });
     }
 
@@ -423,7 +428,8 @@ public class OnlineGameActivity extends BaseActivity {
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError error) { }
+            public void onCancelled(@NonNull DatabaseError error) {
+            }
         });
     }
 
@@ -493,6 +499,7 @@ public class OnlineGameActivity extends BaseActivity {
             correctBtn.setBackgroundTintList(ColorStateList.valueOf(Color.GREEN));
         }
     }
+
     private void showGameOverDialog(String winner) {
         if (finishing) return;
         finishing = true;

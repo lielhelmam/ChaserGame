@@ -1,10 +1,10 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/background"
     android:gravity="center"
     android:orientation="vertical"
-    android:padding="32dp"
-    android:background="@drawable/background">
+    android:padding="32dp">
 
     <TextView
         android:layout_width="5dp"
@@ -16,28 +16,28 @@
         android:textStyle="bold" />
 
     <Button
-        android:text="Easy"
-        android:onClick="easy"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:backgroundTint="#388E3C"
-        android:textColor="#FFFFFF"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:onClick="easy"
+        android:text="Easy"
+        android:textColor="#FFFFFF" />
 
     <Button
-        android:text="Normal"
-        android:onClick="normal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
         android:backgroundTint="#FBC02D"
-        android:textColor="#000000"
-        android:layout_marginTop="16dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:onClick="normal"
+        android:text="Normal"
+        android:textColor="#000000" />
 
     <Button
-        android:text="Hard"
-        android:onClick="hard"
-        android:backgroundTint="#D32F2F"
-        android:textColor="#FFFFFF"
-        android:layout_marginTop="16dp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:backgroundTint="#D32F2F"
+        android:onClick="hard"
+        android:text="Hard"
+        android:textColor="#FFFFFF" />
 </LinearLayout>

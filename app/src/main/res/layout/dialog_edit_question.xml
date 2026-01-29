@@ -15,20 +15,20 @@
         android:id="@+id/et_edit_right"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Right answer"
-        android:layout_marginTop="8dp"/>
+        android:layout_marginTop="8dp"
+        android:hint="Right answer" />
 
     <EditText
         android:id="@+id/et_edit_wrong1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Wrong answer 1"
-        android:layout_marginTop="8dp"/>
+        android:layout_marginTop="8dp"
+        android:hint="Wrong answer 1" />
 
     <EditText
         android:id="@+id/et_edit_wrong2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Wrong answer 2"
-        android:layout_marginTop="8dp"/>
+        android:layout_marginTop="8dp"
+        android:hint="Wrong answer 2" />
 </LinearLayout>
