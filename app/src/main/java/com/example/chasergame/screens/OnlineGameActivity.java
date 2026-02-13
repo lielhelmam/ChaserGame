@@ -28,29 +28,35 @@ import java.util.Map;
 
 public class OnlineGameActivity extends BaseActivity {
 
-    // -------- STATE --------
+    // ================= STATE =================
     private String roomId;
     private String playerId;
-    private boolean isPlayer1 = false;   // host
+    private boolean isPlayer1 = false;
     private boolean isMyTurn = false;
     private boolean answerLocked = false;
     private boolean finishing = false;
 
-    private long defaultTurnMs = 60_000L;
+    private static final long DEFAULT_TURN_MS = 60_000;
+    private static final long WRONG_COOLDOWN_MS = 2000;
+
+    private long defaultTurnMs = DEFAULT_TURN_MS;
 
     private String lastTurnSeen = null;
     private Long lastQuestionNonceSeen = null;
 
-    // -------- UI --------
+    private boolean inCooldown = false;
+
+    // ================= UI =================
     private TextView tvTurnInfo, tvTimer, tvScore, tvQuestion;
     private Button btnA, btnB, btnC, btnEndGame;
 
-    // -------- FIREBASE --------
+    // ================= FIREBASE =================
     private DatabaseReference roomRef;
     private DatabaseReference gameRef;
     private ValueEventListener gameListener;
 
     private CountDownTimer turnTimer;
+    private CountDownTimer cooldownTimer;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -87,15 +93,12 @@ public class OnlineGameActivity extends BaseActivity {
         initRoom();
     }
 
-    // =========================
-    // 1) INIT ROOM + CREATE GAME
-    // =========================
+    // ================= INIT =================
     private void initRoom() {
         roomRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snap) {
                 if (!snap.exists()) {
-                    Toast.makeText(OnlineGameActivity.this, "Room not found", Toast.LENGTH_SHORT).show();
                     goHome();
                     return;
                 }
@@ -103,12 +106,9 @@ public class OnlineGameActivity extends BaseActivity {
                 String hostId = snap.child("hostId").getValue(String.class);
                 isPlayer1 = playerId.equals(hostId);
 
-                Long timeMs = snap.child("timeMs").getValue(Long.class);
-                if (timeMs != null && timeMs > 0) {
-                    defaultTurnMs = timeMs;
-                }
+                Long t = snap.child("timeMs").getValue(Long.class);
+                if (t != null && t > 0) defaultTurnMs = t;
 
-                // רק host מוחק חדר בדיסקונקט
                 if (isPlayer1) {
                     roomRef.onDisconnect().removeValue();
                 }
@@ -121,7 +121,7 @@ public class OnlineGameActivity extends BaseActivity {
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError error) { }
+            public void onCancelled(@NonNull DatabaseError error) {}
         });
     }
 
@@ -132,59 +132,45 @@ public class OnlineGameActivity extends BaseActivity {
         base.put("p1Score", 0);
         base.put("p2Score", 0);
         base.put("currentTurn", "p1");
-        base.put("timeMs", defaultTurnMs);
         base.put("turnEndAt", now + defaultTurnMs);
-
-        // מצב סיום אחיד
         base.put("gameOver", false);
-        base.put("winner", ""); // "P1" / "P2" / "DRAW"
+        base.put("winner", "");
 
         gameRef.setValue(base);
-        setNewQuestionInGame(); // שאלה ראשונה
+        setNewQuestionInGame();
     }
 
-    // =========================
-    // 2) LOAD RANDOM QUESTION (יותר עמיד ממפתחות 0..N)
-    // =========================
+    // ================= QUESTIONS =================
     private void setNewQuestionInGame() {
         DatabaseReference qRef = FirebaseDatabase.getInstance().getReference("questions");
 
         qRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snap) {
-                long count = snap.getChildrenCount();
-                if (count == 0) {
-                    tvQuestion.setText("No questions in DB");
-                    return;
-                }
+                if (!snap.exists()) return;
 
-                int index = (int) (Math.random() * count);
-
-                DataSnapshot chosen = null;
+                int index = (int) (Math.random() * snap.getChildrenCount());
                 int i = 0;
-                for (DataSnapshot child : snap.getChildren()) {
-                    if (i == index) { chosen = child; break; }
-                    i++;
+                DataSnapshot qSnap = null;
+
+                for (DataSnapshot c : snap.getChildren()) {
+                    if (i++ == index) {
+                        qSnap = c;
+                        break;
+                    }
                 }
 
-                if (chosen == null) {
-                    tvQuestion.setText("Failed to pick question");
-                    return;
-                }
+                if (qSnap == null) return;
 
-                String q = chosen.child("question").getValue(String.class);
-                String right = chosen.child("rightAnswer").getValue(String.class);
+                String q = qSnap.child("question").getValue(String.class);
+                String right = qSnap.child("rightAnswer").getValue(String.class);
 
                 ArrayList<String> wrong = new ArrayList<>();
-                for (DataSnapshot w : chosen.child("wrongAnswers").getChildren()) {
-                    String val = w.getValue(String.class);
-                    if (val != null) wrong.add(val);
+                for (DataSnapshot w : qSnap.child("wrongAnswers").getChildren()) {
+                    wrong.add(w.getValue(String.class));
                 }
 
-                if (q == null || right == null || wrong.size() < 2) {
-                    tvQuestion.setText("Bad question data");
-                    return;
-                }
+                if (q == null || right == null || wrong.size() < 2) return;
 
                 ArrayList<String> all = new ArrayList<>();
                 all.add(right);
@@ -192,47 +178,33 @@ public class OnlineGameActivity extends BaseActivity {
                 Collections.shuffle(all);
 
                 int correctIdx = all.indexOf(right);
-                String correctKey = correctIdx == 0 ? "A" : (correctIdx == 1 ? "B" : "C");
+                String correctKey = correctIdx == 0 ? "A" : correctIdx == 1 ? "B" : "C";
 
-                long nonce = System.currentTimeMillis();
+                Map<String, Object> qm = new HashMap<>();
+                qm.put("nonce", System.currentTimeMillis());
+                qm.put("text", q);
+                qm.put("a", all.get(0));
+                qm.put("b", all.get(1));
+                qm.put("c", all.get(2));
+                qm.put("correct", correctKey);
 
-                Map<String, Object> qMap = new HashMap<>();
-                qMap.put("nonce", nonce);
-                qMap.put("text", q);
-                qMap.put("a", all.get(0));
-                qMap.put("b", all.get(1));
-                qMap.put("c", all.get(2));
-                qMap.put("correct", correctKey);
-
-                gameRef.child("question").setValue(qMap);
+                gameRef.child("question").setValue(qm);
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError error) { }
+            public void onCancelled(@NonNull DatabaseError error) {}
         });
     }
 
-    // =========================
-    // 3) GAME LISTENER – UI SYNC
-    // =========================
+    // ================= LISTENER =================
     private void startGameListener() {
         gameListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snap) {
 
-                // snap פה הוא /game (לא כל החדר!)
                 Boolean over = snap.child("gameOver").getValue(Boolean.class);
                 if (over != null && over) {
-                    String winner = snap.child("winner").getValue(String.class);
-                    if (winner == null) winner = "";
-                    showGameOverDialog(winner);
-                    return;
-                }
-
-                if (!snap.exists()) {
-                    if (finishing) return;
-                    Toast.makeText(OnlineGameActivity.this, "Game finished", Toast.LENGTH_SHORT).show();
-                    goHome();
+                    showGameOverDialog(snap.child("winner").getValue(String.class));
                     return;
                 }
 
@@ -243,204 +215,224 @@ public class OnlineGameActivity extends BaseActivity {
                 String turn = snap.child("currentTurn").getValue(String.class);
                 if (turn == null) turn = "p1";
 
-                boolean newTurn = (lastTurnSeen == null) || !turn.equals(lastTurnSeen);
+                boolean newTurn = !turn.equals(lastTurnSeen);
                 lastTurnSeen = turn;
 
-                isMyTurn = (isPlayer1 && turn.equals("p1")) || (!isPlayer1 && turn.equals("p2"));
+                isMyTurn = (isPlayer1 && turn.equals("p1")) ||
+                        (!isPlayer1 && turn.equals("p2"));
+
                 tvTurnInfo.setText(isMyTurn ? "Your turn" : "Opponent's turn");
 
                 if (snap.hasChild("question")) {
                     loadQuestionFromSnapshot(snap);
 
                     Long nonce = snap.child("question").child("nonce").getValue(Long.class);
-                    boolean newQuestion = (nonce != null) && (lastQuestionNonceSeen == null || !nonce.equals(lastQuestionNonceSeen));
-                    if (newQuestion) {
+                    if (nonce != null && !nonce.equals(lastQuestionNonceSeen)) {
                         lastQuestionNonceSeen = nonce;
                         answerLocked = false;
                         resetButtonColors();
                     }
-                } else {
-                    tvQuestion.setText("Loading question...");
                 }
 
                 if (newTurn && isMyTurn) {
                     answerLocked = false;
+                    inCooldown = false;
                     resetButtonColors();
-                }
-                if (!isMyTurn) {
-                    answerLocked = true;
                 }
 
                 Long endAt = snap.child("turnEndAt").getValue(Long.class);
                 if (endAt != null) {
-                    long now = System.currentTimeMillis();
-                    long remain = Math.max(0, endAt - now);
-                    startLocalTimer(remain);
-                } else {
-                    tvTimer.setText("--:--");
+                    startLocalTimer(Math.max(0, endAt - System.currentTimeMillis()));
                 }
 
-                setButtonsEnabled(isMyTurn && !answerLocked);
+                setButtonsEnabled(isMyTurn && !answerLocked && !inCooldown);
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError error) { }
+            public void onCancelled(@NonNull DatabaseError error) {}
         };
 
         gameRef.addValueEventListener(gameListener);
     }
 
     private void loadQuestionFromSnapshot(DataSnapshot snap) {
-        String text = snap.child("question").child("text").getValue(String.class);
-        String a = snap.child("question").child("a").getValue(String.class);
-        String b = snap.child("question").child("b").getValue(String.class);
-        String c = snap.child("question").child("c").getValue(String.class);
-
-        tvQuestion.setText(text == null ? "" : text);
-        btnA.setText(a == null ? "" : a);
-        btnB.setText(b == null ? "" : b);
-        btnC.setText(c == null ? "" : c);
+        tvQuestion.setText(snap.child("question/text").getValue(String.class));
+        btnA.setText(snap.child("question/a").getValue(String.class));
+        btnB.setText(snap.child("question/b").getValue(String.class));
+        btnC.setText(snap.child("question/c").getValue(String.class));
     }
 
-    // =========================
-    // 4) ANSWER CLICK
-    // =========================
+    // ================= ANSWERS =================
     private void onAnswerClicked(String key, Button clickedBtn) {
-        if (!isMyTurn || answerLocked || finishing) return;
+        if (!isMyTurn || answerLocked || inCooldown || finishing) return;
 
         answerLocked = true;
         setButtonsEnabled(false);
 
-        final String playerKey = isPlayer1 ? "p1" : "p2";
-
-        gameRef.child("question").child("correct")
+        gameRef.child("question/correct")
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot s) {
                         String correct = s.getValue(String.class);
-                        if (correct == null) correct = "A";
+                        boolean ok = key.equals(correct);
 
-                        boolean isCorrect = key.equals(correct);
                         showAnswerColors(key, correct, clickedBtn);
 
-                        if (isCorrect) {
-                            incrementScore(playerKey);
-                        }
-
-                        // רק מי שבתור מייצר שאלה חדשה
-                        if (isMyTurn) {
+                        if (ok) {
+                            incrementScore(isPlayer1 ? "p1" : "p2");
                             setNewQuestionInGame();
+                        } else {
+                            startWrongCooldown();
                         }
                     }
 
                     @Override
-                    public void onCancelled(@NonNull DatabaseError error) { }
+                    public void onCancelled(@NonNull DatabaseError error) {}
                 });
     }
 
-    private void incrementScore(String playerKey) {
-        gameRef.child(playerKey + "Score")
-                .runTransaction(new Transaction.Handler() {
-                    @NonNull
-                    @Override
-                    public Transaction.Result doTransaction(@NonNull MutableData currentData) {
-                        Long v = currentData.getValue(Long.class);
-                        if (v == null) v = 0L;
-                        currentData.setValue(v + 1);
-                        return Transaction.success(currentData);
-                    }
+    private void startWrongCooldown() {
+        inCooldown = true;
+        tvTurnInfo.setText("⏳ Cooldown...");
 
-                    @Override
-                    public void onComplete(DatabaseError error, boolean committed, DataSnapshot snapshot) { }
-                });
+        cooldownTimer = new CountDownTimer(WRONG_COOLDOWN_MS, 1000) {
+            @Override
+            public void onTick(long ms) {
+                tvTimer.setText("⏳ " + ((ms / 1000) + 1));
+            }
+
+            @Override
+            public void onFinish() {
+                inCooldown = false;
+                if (isMyTurn && !finishing) {
+                    setNewQuestionInGame();
+                }
+            }
+        };
+        cooldownTimer.start();
     }
 
-    // =========================
-    // 5) TIMER – END TURN (עם טרנזקציה כדי למנוע רייס)
-    // =========================
+    private void incrementScore(String key) {
+        gameRef.child(key + "Score").runTransaction(new Transaction.Handler() {
+            @NonNull
+            @Override
+            public Transaction.Result doTransaction(@NonNull MutableData d) {
+                Long v = d.getValue(Long.class);
+                d.setValue((v == null ? 0 : v) + 1);
+                return Transaction.success(d);
+            }
+
+            @Override
+            public void onComplete(DatabaseError e, boolean c, DataSnapshot s) {}
+        });
+    }
+
+    // ================= TIMER =================
     private void startLocalTimer(long ms) {
         if (turnTimer != null) turnTimer.cancel();
 
         turnTimer = new CountDownTimer(ms, 1000) {
             @Override
-            public void onTick(long millisUntilFinished) {
-                long sec = millisUntilFinished / 1000;
-                tvTimer.setText(String.format("%02d:%02d", sec / 60, sec % 60));
+            public void onTick(long ms) {
+                if (!inCooldown) {
+                    long sec = ms / 1000;
+                    tvTimer.setText(String.format("%02d:%02d", sec / 60, sec % 60));
+                }
             }
 
             @Override
             public void onFinish() {
-                tvTimer.setText("00:00");
-                answerLocked = true;
-                setButtonsEnabled(false);
-
-                if (!finishing && isMyTurn) {
-                    endTurnInDatabase();
-                }
+                if (isMyTurn) endTurn();
             }
         };
         turnTimer.start();
     }
 
-    private void endTurnInDatabase() {
+    private void endTurn() {
         gameRef.runTransaction(new Transaction.Handler() {
             @NonNull
             @Override
-            public Transaction.Result doTransaction(@NonNull MutableData currentData) {
-                if (currentData.getValue() == null) return Transaction.abort();
-
-                Boolean over = currentData.child("gameOver").getValue(Boolean.class);
-                if (over != null && over) return Transaction.abort();
-
-                String turn = currentData.child("currentTurn").getValue(String.class);
-                if (turn == null) turn = "p1";
-
-                long p1 = getLong(currentData.child("p1Score"), 0);
-                long p2 = getLong(currentData.child("p2Score"), 0);
-
+            public Transaction.Result doTransaction(@NonNull MutableData d) {
+                String turn = d.child("currentTurn").getValue(String.class);
                 if ("p1".equals(turn)) {
-                    currentData.child("currentTurn").setValue("p2");
-                    currentData.child("turnEndAt").setValue(System.currentTimeMillis() + defaultTurnMs);
+                    d.child("currentTurn").setValue("p2");
+                    d.child("turnEndAt").setValue(System.currentTimeMillis() + defaultTurnMs);
                 } else {
-                    // סיום משחק בסוף תור p2
-                    currentData.child("gameOver").setValue(true);
-                    if (p1 > p2) currentData.child("winner").setValue("P1");
-                    else if (p2 > p1) currentData.child("winner").setValue("P2");
-                    else currentData.child("winner").setValue("DRAW");
+                    d.child("gameOver").setValue(true);
+                    long p1 = getLong(d.child("p1Score"), 0);
+                    long p2 = getLong(d.child("p2Score"), 0);
+                    d.child("winner").setValue(p1 > p2 ? "P1" : p2 > p1 ? "P2" : "DRAW");
                 }
-
-                return Transaction.success(currentData);
+                return Transaction.success(d);
             }
 
             @Override
-            public void onComplete(DatabaseError error, boolean committed, DataSnapshot currentData) {
-                if (!committed || error != null || currentData == null) return;
-
-                String turn = currentData.child("currentTurn").getValue(String.class);
-                if ("p2".equals(turn)) {
-                    // מתחילים תור p2 עם שאלה חדשה (מי שכרגע בתור ייצור)
-                    setNewQuestionInGame();
-                }
-            }
+            public void onComplete(DatabaseError e, boolean c, DataSnapshot s) {}
         });
     }
 
-    // =========================
-    // 6) EXIT / CLEANUP
-    // =========================
-    private void deleteRoomAndExit() {
+    // ================= UI HELPERS =================
+    private void setButtonsEnabled(boolean e) {
+        btnA.setEnabled(e);
+        btnB.setEnabled(e);
+        btnC.setEnabled(e);
+    }
+
+    private long getLong(DataSnapshot s, long d) {
+        Long v = s.getValue(Long.class);
+        return v == null ? d : v;
+    }
+
+    private long getLong(MutableData d, long def) {
+        Long v = d.getValue(Long.class);
+        return v == null ? def : v;
+    }
+
+    private void resetButtonColors() {
+        ColorStateList n = ColorStateList.valueOf(Color.parseColor("#333333"));
+        btnA.setBackgroundTintList(n);
+        btnB.setBackgroundTintList(n);
+        btnC.setBackgroundTintList(n);
+    }
+
+    private void showAnswerColors(String chosen, String correct, Button clicked) {
+        resetButtonColors();
+        Button c = "A".equals(correct) ? btnA : "B".equals(correct) ? btnB : btnC;
+        if (chosen.equals(correct)) {
+            clicked.setBackgroundTintList(ColorStateList.valueOf(Color.GREEN));
+        } else {
+            clicked.setBackgroundTintList(ColorStateList.valueOf(Color.RED));
+            c.setBackgroundTintList(ColorStateList.valueOf(Color.GREEN));
+        }
+    }
+
+    private void showGameOverDialog(String w) {
         if (finishing) return;
         finishing = true;
 
-        if (turnTimer != null) turnTimer.cancel();
+        String msg =
+                "DRAW".equals(w) ? "🤝 Draw" :
+                        ("P1".equals(w) == isPlayer1) ? "🏆 You Win!" : "😢 You Lose";
 
+        new androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle("Game Over")
+                .setMessage(msg)
+                .setCancelable(false)
+                .setPositiveButton("OK", (d, i) -> {
+                    roomRef.removeValue();
+                    goHome();
+                })
+                .show();
+    }
+
+    private void deleteRoomAndExit() {
+        finishing = true;
         roomRef.removeValue().addOnCompleteListener(t -> goHome());
     }
 
     private void goHome() {
-        Intent i = new Intent(this, MainActivity.class);
-        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(i);
+        startActivity(new Intent(this, MainActivity.class)
+                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
         finish();
     }
 
@@ -448,79 +440,7 @@ public class OnlineGameActivity extends BaseActivity {
     protected void onDestroy() {
         super.onDestroy();
         if (turnTimer != null) turnTimer.cancel();
-        if (gameListener != null && gameRef != null) gameRef.removeEventListener(gameListener);
-    }
-
-    // =========================
-    // HELPERS
-    // =========================
-    private void setButtonsEnabled(boolean enabled) {
-        btnA.setEnabled(enabled);
-        btnB.setEnabled(enabled);
-        btnC.setEnabled(enabled);
-    }
-
-    private long getLong(DataSnapshot snap, long def) {
-        Long v = snap.getValue(Long.class);
-        return v == null ? def : v;
-    }
-
-    // overload ל-MutableData
-    private long getLong(MutableData data, long def) {
-        Long v = data.getValue(Long.class);
-        return v == null ? def : v;
-    }
-
-    private void resetButtonColors() {
-        int normal = Color.parseColor("#333333");
-        ColorStateList list = ColorStateList.valueOf(normal);
-        btnA.setBackgroundTintList(list);
-        btnB.setBackgroundTintList(list);
-        btnC.setBackgroundTintList(list);
-    }
-
-    private void showAnswerColors(String chosen, String correct, Button clicked) {
-        resetButtonColors();
-
-        Button correctBtn =
-                "A".equals(correct) ? btnA :
-                        "B".equals(correct) ? btnB : btnC;
-
-        if (chosen.equals(correct)) {
-            clicked.setBackgroundTintList(ColorStateList.valueOf(Color.GREEN));
-        } else {
-            clicked.setBackgroundTintList(ColorStateList.valueOf(Color.RED));
-            correctBtn.setBackgroundTintList(ColorStateList.valueOf(Color.GREEN));
-        }
-    }
-
-    private void showGameOverDialog(String winner) {
-        if (finishing) return;
-        finishing = true;
-
-        if (turnTimer != null) turnTimer.cancel();
-
-        String message;
-        if ("DRAW".equals(winner)) {
-            message = "🤝 It's a Draw!";
-        } else if ("P1".equals(winner)) {
-            message = isPlayer1 ? "🏆 You Win!" : "😢 You Lose";
-        } else if ("P2".equals(winner)) {
-            message = isPlayer1 ? "😢 You Lose" : "🏆 You Win!";
-        } else {
-            message = "Game Over";
-        }
-
-        runOnUiThread(() -> {
-            new androidx.appcompat.app.AlertDialog.Builder(this)
-                    .setTitle("Game Over")
-                    .setMessage(message)
-                    .setCancelable(false)
-                    .setPositiveButton("OK", (d, w) -> {
-                        roomRef.removeValue();
-                        goHome();
-                    })
-                    .show();
-        });
+        if (cooldownTimer != null) cooldownTimer.cancel();
+        if (gameListener != null) gameRef.removeEventListener(gameListener);
     }
 }
