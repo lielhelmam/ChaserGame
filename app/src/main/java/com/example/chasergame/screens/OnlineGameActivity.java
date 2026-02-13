@@ -38,7 +38,6 @@ public class OnlineGameActivity extends BaseActivity {
 
     private long defaultTurnMs = 60_000L;
 
-    // Track changes so we can unlock locally
     private String lastTurnSeen = null;
     private Long lastQuestionNonceSeen = null;
 
@@ -109,12 +108,11 @@ public class OnlineGameActivity extends BaseActivity {
                     defaultTurnMs = timeMs;
                 }
 
-                // IMPORTANT: רק ה-host מוחק חדר על disconnect (אחרת כל ניתוק של אורח מוחק הכל)
+                // רק host מוחק חדר בדיסקונקט
                 if (isPlayer1) {
                     roomRef.onDisconnect().removeValue();
                 }
 
-                // רק ה־host ייצור משחק אם אין עדיין
                 if (!snap.hasChild("game") && isPlayer1) {
                     createInitialGame();
                 }
@@ -123,8 +121,7 @@ public class OnlineGameActivity extends BaseActivity {
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-            }
+            public void onCancelled(@NonNull DatabaseError error) { }
         });
     }
 
@@ -138,14 +135,16 @@ public class OnlineGameActivity extends BaseActivity {
         base.put("timeMs", defaultTurnMs);
         base.put("turnEndAt", now + defaultTurnMs);
 
-        gameRef.setValue(base);
+        // מצב סיום אחיד
+        base.put("gameOver", false);
+        base.put("winner", ""); // "P1" / "P2" / "DRAW"
 
-        // שאלה ראשונה לתור של P1
-        setNewQuestionInGame();
+        gameRef.setValue(base);
+        setNewQuestionInGame(); // שאלה ראשונה
     }
 
     // =========================
-    // 2) LOAD RANDOM QUESTION
+    // 2) LOAD RANDOM QUESTION (יותר עמיד ממפתחות 0..N)
     // =========================
     private void setNewQuestionInGame() {
         DatabaseReference qRef = FirebaseDatabase.getInstance().getReference("questions");
@@ -153,7 +152,6 @@ public class OnlineGameActivity extends BaseActivity {
         qRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snap) {
-
                 long count = snap.getChildrenCount();
                 if (count == 0) {
                     tvQuestion.setText("No questions in DB");
@@ -161,13 +159,24 @@ public class OnlineGameActivity extends BaseActivity {
                 }
 
                 int index = (int) (Math.random() * count);
-                DataSnapshot qSnap = snap.child(String.valueOf(index));
 
-                String q = qSnap.child("question").getValue(String.class);
-                String right = qSnap.child("rightAnswer").getValue(String.class);
+                DataSnapshot chosen = null;
+                int i = 0;
+                for (DataSnapshot child : snap.getChildren()) {
+                    if (i == index) { chosen = child; break; }
+                    i++;
+                }
+
+                if (chosen == null) {
+                    tvQuestion.setText("Failed to pick question");
+                    return;
+                }
+
+                String q = chosen.child("question").getValue(String.class);
+                String right = chosen.child("rightAnswer").getValue(String.class);
 
                 ArrayList<String> wrong = new ArrayList<>();
-                for (DataSnapshot w : qSnap.child("wrongAnswers").getChildren()) {
+                for (DataSnapshot w : chosen.child("wrongAnswers").getChildren()) {
                     String val = w.getValue(String.class);
                     if (val != null) wrong.add(val);
                 }
@@ -185,7 +194,7 @@ public class OnlineGameActivity extends BaseActivity {
                 int correctIdx = all.indexOf(right);
                 String correctKey = correctIdx == 0 ? "A" : (correctIdx == 1 ? "B" : "C");
 
-                long nonce = System.currentTimeMillis(); // identify "new question" across devices
+                long nonce = System.currentTimeMillis();
 
                 Map<String, Object> qMap = new HashMap<>();
                 qMap.put("nonce", nonce);
@@ -199,8 +208,7 @@ public class OnlineGameActivity extends BaseActivity {
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-            }
+            public void onCancelled(@NonNull DatabaseError error) { }
         });
     }
 
@@ -212,29 +220,26 @@ public class OnlineGameActivity extends BaseActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snap) {
 
-                if (snap.child("gameOver").getValue(Boolean.class) != null &&
-                        snap.child("gameOver").getValue(Boolean.class)) {
-
+                // snap פה הוא /game (לא כל החדר!)
+                Boolean over = snap.child("gameOver").getValue(Boolean.class);
+                if (over != null && over) {
                     String winner = snap.child("winner").getValue(String.class);
+                    if (winner == null) winner = "";
                     showGameOverDialog(winner);
                     return;
                 }
 
-
                 if (!snap.exists()) {
                     if (finishing) return;
-
                     Toast.makeText(OnlineGameActivity.this, "Game finished", Toast.LENGTH_SHORT).show();
                     goHome();
                     return;
                 }
 
-                // ניקוד
                 long p1 = getLong(snap.child("p1Score"), 0);
                 long p2 = getLong(snap.child("p2Score"), 0);
                 tvScore.setText("P1: " + p1 + " | P2: " + p2);
 
-                // מי בתור
                 String turn = snap.child("currentTurn").getValue(String.class);
                 if (turn == null) turn = "p1";
 
@@ -242,10 +247,8 @@ public class OnlineGameActivity extends BaseActivity {
                 lastTurnSeen = turn;
 
                 isMyTurn = (isPlayer1 && turn.equals("p1")) || (!isPlayer1 && turn.equals("p2"));
-
                 tvTurnInfo.setText(isMyTurn ? "Your turn" : "Opponent's turn");
 
-                // שאלה
                 if (snap.hasChild("question")) {
                     loadQuestionFromSnapshot(snap);
 
@@ -253,29 +256,25 @@ public class OnlineGameActivity extends BaseActivity {
                     boolean newQuestion = (nonce != null) && (lastQuestionNonceSeen == null || !nonce.equals(lastQuestionNonceSeen));
                     if (newQuestion) {
                         lastQuestionNonceSeen = nonce;
-                        answerLocked = false;     // IMPORTANT: unlock on new question
+                        answerLocked = false;
                         resetButtonColors();
                     }
                 } else {
                     tvQuestion.setText("Loading question...");
                 }
 
-                // אם התור התחלף לתור שלי – נפתח נעילה
                 if (newTurn && isMyTurn) {
                     answerLocked = false;
                     resetButtonColors();
                 }
-                // אם לא התור שלי – אין סיבה שאוכל ללחוץ
                 if (!isMyTurn) {
                     answerLocked = true;
                 }
 
-                // טיימר
                 Long endAt = snap.child("turnEndAt").getValue(Long.class);
                 if (endAt != null) {
                     long now = System.currentTimeMillis();
-                    long remain = endAt - now;
-                    if (remain < 0) remain = 0;
+                    long remain = Math.max(0, endAt - now);
                     startLocalTimer(remain);
                 } else {
                     tvTimer.setText("--:--");
@@ -285,8 +284,7 @@ public class OnlineGameActivity extends BaseActivity {
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-            }
+            public void onCancelled(@NonNull DatabaseError error) { }
         };
 
         gameRef.addValueEventListener(gameListener);
@@ -323,22 +321,20 @@ public class OnlineGameActivity extends BaseActivity {
                         if (correct == null) correct = "A";
 
                         boolean isCorrect = key.equals(correct);
-
                         showAnswerColors(key, correct, clickedBtn);
 
                         if (isCorrect) {
                             incrementScore(playerKey);
                         }
 
-                        // שאלה חדשה – רק מי שבתור מייצר, והיא תפתח את הנעילה דרך nonce בליסנר
+                        // רק מי שבתור מייצר שאלה חדשה
                         if (isMyTurn) {
                             setNewQuestionInGame();
                         }
                     }
 
                     @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-                    }
+                    public void onCancelled(@NonNull DatabaseError error) { }
                 });
     }
 
@@ -355,18 +351,15 @@ public class OnlineGameActivity extends BaseActivity {
                     }
 
                     @Override
-                    public void onComplete(DatabaseError error, boolean committed, DataSnapshot snapshot) {
-                    }
+                    public void onComplete(DatabaseError error, boolean committed, DataSnapshot snapshot) { }
                 });
     }
 
     // =========================
-    // 5) TIMER – END TURN
+    // 5) TIMER – END TURN (עם טרנזקציה כדי למנוע רייס)
     // =========================
     private void startLocalTimer(long ms) {
-        if (turnTimer != null) {
-            turnTimer.cancel();
-        }
+        if (turnTimer != null) turnTimer.cancel();
 
         turnTimer = new CountDownTimer(ms, 1000) {
             @Override
@@ -390,45 +383,44 @@ public class OnlineGameActivity extends BaseActivity {
     }
 
     private void endTurnInDatabase() {
-        gameRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        gameRef.runTransaction(new Transaction.Handler() {
+            @NonNull
             @Override
-            public void onDataChange(@NonNull DataSnapshot snap) {
+            public Transaction.Result doTransaction(@NonNull MutableData currentData) {
+                if (currentData.getValue() == null) return Transaction.abort();
 
-                String turn = snap.child("currentTurn").getValue(String.class);
+                Boolean over = currentData.child("gameOver").getValue(Boolean.class);
+                if (over != null && over) return Transaction.abort();
+
+                String turn = currentData.child("currentTurn").getValue(String.class);
                 if (turn == null) turn = "p1";
 
-                if (turn.equals("p1")) {
-                    long newEnd = System.currentTimeMillis() + defaultTurnMs;
+                long p1 = getLong(currentData.child("p1Score"), 0);
+                long p2 = getLong(currentData.child("p2Score"), 0);
 
-                    Map<String, Object> updates = new HashMap<>();
-                    updates.put("currentTurn", "p2");
-                    updates.put("turnEndAt", newEnd);
-
-                    gameRef.updateChildren(updates).addOnCompleteListener(t -> {
-                        // שאלה ראשונה לתור של P2
-                        setNewQuestionInGame();
-                    });
-
+                if ("p1".equals(turn)) {
+                    currentData.child("currentTurn").setValue("p2");
+                    currentData.child("turnEndAt").setValue(System.currentTimeMillis() + defaultTurnMs);
                 } else {
-                    long p1 = getLong(snap.child("p1Score"), 0);
-                    long p2 = getLong(snap.child("p2Score"), 0);
-
-                    String message;
-                    if (p1 > p2) {
-                        message = "🏆 Player 1 Wins!";
-                    } else if (p2 > p1) {
-                        message = "🏆 Player 2 Wins!";
-                    } else {
-                        message = "🤝 It's a Draw!";
-                    }
-
-                    showGameOverDialog(message);
+                    // סיום משחק בסוף תור p2
+                    currentData.child("gameOver").setValue(true);
+                    if (p1 > p2) currentData.child("winner").setValue("P1");
+                    else if (p2 > p1) currentData.child("winner").setValue("P2");
+                    else currentData.child("winner").setValue("DRAW");
                 }
 
+                return Transaction.success(currentData);
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError error) {
+            public void onComplete(DatabaseError error, boolean committed, DataSnapshot currentData) {
+                if (!committed || error != null || currentData == null) return;
+
+                String turn = currentData.child("currentTurn").getValue(String.class);
+                if ("p2".equals(turn)) {
+                    // מתחילים תור p2 עם שאלה חדשה (מי שכרגע בתור ייצור)
+                    setNewQuestionInGame();
+                }
             }
         });
     }
@@ -440,9 +432,7 @@ public class OnlineGameActivity extends BaseActivity {
         if (finishing) return;
         finishing = true;
 
-        if (turnTimer != null) {
-            turnTimer.cancel();
-        }
+        if (turnTimer != null) turnTimer.cancel();
 
         roomRef.removeValue().addOnCompleteListener(t -> goHome());
     }
@@ -458,9 +448,7 @@ public class OnlineGameActivity extends BaseActivity {
     protected void onDestroy() {
         super.onDestroy();
         if (turnTimer != null) turnTimer.cancel();
-        if (gameListener != null && gameRef != null) {
-            gameRef.removeEventListener(gameListener);
-        }
+        if (gameListener != null && gameRef != null) gameRef.removeEventListener(gameListener);
     }
 
     // =========================
@@ -474,6 +462,12 @@ public class OnlineGameActivity extends BaseActivity {
 
     private long getLong(DataSnapshot snap, long def) {
         Long v = snap.getValue(Long.class);
+        return v == null ? def : v;
+    }
+
+    // overload ל-MutableData
+    private long getLong(MutableData data, long def) {
+        Long v = data.getValue(Long.class);
         return v == null ? def : v;
     }
 
@@ -511,8 +505,10 @@ public class OnlineGameActivity extends BaseActivity {
             message = "🤝 It's a Draw!";
         } else if ("P1".equals(winner)) {
             message = isPlayer1 ? "🏆 You Win!" : "😢 You Lose";
-        } else {
+        } else if ("P2".equals(winner)) {
             message = isPlayer1 ? "😢 You Lose" : "🏆 You Win!";
+        } else {
+            message = "Game Over";
         }
 
         runOnUiThread(() -> {
@@ -521,11 +517,10 @@ public class OnlineGameActivity extends BaseActivity {
                     .setMessage(message)
                     .setCancelable(false)
                     .setPositiveButton("OK", (d, w) -> {
-                        roomRef.removeValue(); // כמו שרצית
+                        roomRef.removeValue();
                         goHome();
                     })
                     .show();
         });
     }
-
 }
