@@ -33,7 +33,7 @@ public class LeaderboardAdapter extends RecyclerView.Adapter<LeaderboardAdapter.
         LeaderboardEntry entry = leaderboardEntries.get(position);
         holder.rank.setText(String.valueOf(entry.getRank()));
         holder.username.setText(entry.getUsername());
-        holder.score.setText(String.valueOf(entry.getScore()));
+        holder.wins.setText(String.valueOf(entry.getScore()));
     }
 
     @Override
@@ -42,13 +42,13 @@ public class LeaderboardAdapter extends RecyclerView.Adapter<LeaderboardAdapter.
     }
 
     public static class LeaderboardViewHolder extends RecyclerView.ViewHolder {
-        TextView rank, username, score;
+        TextView rank, username, wins;
 
         public LeaderboardViewHolder(@NonNull View itemView) {
             super(itemView);
             rank = itemView.findViewById(R.id.tv_rank);
             username = itemView.findViewById(R.id.tv_username);
-            score = itemView.findViewById(R.id.tv_score);
+            wins = itemView.findViewById(R.id.tv_wins);
         }
     }
 }

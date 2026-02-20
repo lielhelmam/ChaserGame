@@ -15,7 +15,11 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 
 import com.example.chasergame.R;
+import com.example.chasergame.models.GameResult;
 import com.example.chasergame.models.Question;
+import com.example.chasergame.models.User;
+import com.example.chasergame.utils.GameResultsUtil;
+import com.example.chasergame.utils.SharedPreferencesUtil;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
@@ -384,6 +388,10 @@ public class PlayAgainstBotActivity extends BaseActivity {
     }
 
     private void endGame(String msg) {
+        boolean playerWon = msg.equals("Time over!");
+        User user = SharedPreferencesUtil.getUser(this);
+        GameResultsUtil.saveGameResult(this, new GameResult(user.getId(), user.getUsername(), "PlayAgainstBotActivity", playerWon));
+
         Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
         goHome();
     }

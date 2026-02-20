@@ -13,6 +13,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.example.chasergame.R;
+import com.example.chasergame.models.GameResult;
+import com.example.chasergame.models.User;
+import com.example.chasergame.utils.GameResultsUtil;
+import com.example.chasergame.utils.SharedPreferencesUtil;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -410,9 +414,13 @@ public class OnlineGameActivity extends BaseActivity {
         if (finishing) return;
         finishing = true;
 
+        boolean isWinner = ("P1".equals(w) && isPlayer1) || ("P2".equals(w) && !isPlayer1);
+        User user = SharedPreferencesUtil.getUser(this);
+        GameResultsUtil.saveGameResult(this, new GameResult(user.getId(), user.getUsername(), "OnlineGameActivity", isWinner));
+
         String msg =
                 "DRAW".equals(w) ? "🤝 Draw" :
-                        ("P1".equals(w) == isPlayer1) ? "🏆 You Win!" : "😢 You Lose";
+                        (isWinner) ? "🏆 You Win!" : "😢 You Lose";
 
         new androidx.appcompat.app.AlertDialog.Builder(this)
                 .setTitle("Game Over")

@@ -14,10 +14,16 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.chasergame.R;
 import com.example.chasergame.adapters.LeaderboardAdapter;
+import com.example.chasergame.models.GameResult;
 import com.example.chasergame.models.LeaderboardEntry;
+import com.example.chasergame.utils.GameResultsUtil;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class LeaderBoardActivity extends AppCompatActivity {
 
@@ -47,7 +53,7 @@ public class LeaderBoardActivity extends AppCompatActivity {
         btnBot = findViewById(R.id.btn_leaderboard_bot);
         btnOneDevice = findViewById(R.id.btn_leaderboard_one_device);
 
-        initializeDummyData();
+        loadLeaderboardData();
 
         adapter = new LeaderboardAdapter(onlineLeaderboard);
         recyclerView.setAdapter(adapter);
@@ -68,20 +74,47 @@ public class LeaderBoardActivity extends AppCompatActivity {
         });
     }
 
-    private void initializeDummyData() {
-        onlineLeaderboard = new ArrayList<>();
-        onlineLeaderboard.add(new LeaderboardEntry(1, "Alice", 1000));
-        onlineLeaderboard.add(new LeaderboardEntry(2, "Bob", 950));
-        onlineLeaderboard.add(new LeaderboardEntry(3, "Charlie", 900));
+    private void loadLeaderboardData() {
+        List<GameResult> gameResults = GameResultsUtil.getGameResults(this);
 
-        botLeaderboard = new ArrayList<>();
-        botLeaderboard.add(new LeaderboardEntry(1, "Player1", 500));
-        botLeaderboard.add(new LeaderboardEntry(2, "Player2", 450));
-        botLeaderboard.add(new LeaderboardEntry(3, "Player3", 400));
+        Map<String, Integer> onlineWins = new HashMap<>();
+        Map<String, Integer> botWins = new HashMap<>();
+        Map<String, Integer> oneDeviceWins = new HashMap<>();
 
-        oneDeviceLeaderboard = new ArrayList<>();
-        oneDeviceLeaderboard.add(new LeaderboardEntry(1, "John", 1200));
-        oneDeviceLeaderboard.add(new LeaderboardEntry(2, "Jane", 1100));
-        oneDeviceLeaderboard.add(new LeaderboardEntry(3, "Doe", 1050));
+        for (GameResult result : gameResults) {
+            if (result.isWin()) {
+                String username = result.getUsername();
+                switch (result.getGameMode()) {
+                    case "OnlineGameActivity":
+                        onlineWins.put(username, onlineWins.getOrDefault(username, 0) + 1);
+                        break;
+                    case "PlayAgainstBotActivity":
+                        botWins.put(username, botWins.getOrDefault(username, 0) + 1);
+                        break;
+                    case "PlayOnOneDeviceActivity":
+                        oneDeviceWins.put(username, oneDeviceWins.getOrDefault(username, 0) + 1);
+                        break;
+                }
+            }
+        }
+
+        onlineLeaderboard = createLeaderboardList(onlineWins);
+        botLeaderboard = createLeaderboardList(botWins);
+        oneDeviceLeaderboard = createLeaderboardList(oneDeviceWins);
+    }
+
+    private List<LeaderboardEntry> createLeaderboardList(Map<String, Integer> winsMap) {
+        List<LeaderboardEntry> leaderboard = new ArrayList<>();
+        for (Map.Entry<String, Integer> entry : winsMap.entrySet()) {
+            leaderboard.add(new LeaderboardEntry(0, entry.getKey(), entry.getValue()));
+        }
+
+        Collections.sort(leaderboard, (e1, e2) -> Integer.compare(e2.getScore(), e1.getScore()));
+
+        for (int i = 0; i < leaderboard.size(); i++) {
+            leaderboard.get(i).setRank(i + 1);
+        }
+
+        return leaderboard;
     }
 }

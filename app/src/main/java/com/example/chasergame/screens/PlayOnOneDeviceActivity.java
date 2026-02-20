@@ -16,7 +16,11 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 
 import com.example.chasergame.R;
+import com.example.chasergame.models.GameResult;
 import com.example.chasergame.models.Question;
+import com.example.chasergame.models.User;
+import com.example.chasergame.utils.GameResultsUtil;
+import com.example.chasergame.utils.SharedPreferencesUtil;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
@@ -487,6 +491,17 @@ public class PlayOnOneDeviceActivity extends BaseActivity {
         cancelTimer();
         isTurnRunning = false;
         setInputsEnabled(false);
+
+        User user = SharedPreferencesUtil.getUser(this);
+        String username1 = user != null ? user.getUsername() : "Player 1";
+        String userId1 = user != null ? user.getId() : "guest";
+
+        boolean p1Wins = scoreP1 > scoreP2;
+        boolean p2Wins = scoreP2 > scoreP1;
+
+        GameResultsUtil.saveGameResult(this, new GameResult(userId1, username1, "PlayOnOneDeviceActivity", p1Wins));
+        GameResultsUtil.saveGameResult(this, new GameResult("guest2", "Player 2", "PlayOnOneDeviceActivity", p2Wins));
+
 
         Toast.makeText(this, reason, Toast.LENGTH_LONG).show();
         goHome();

@@ -22,4 +22,8 @@ public class LeaderboardEntry {
     public int getScore() {
         return score;
     }
+
+    public void setRank(int rank) {
+        this.rank = rank;
+    }
 }
