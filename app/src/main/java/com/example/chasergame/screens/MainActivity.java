@@ -33,8 +33,8 @@ public class MainActivity extends BaseActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-        btnPlayOnline = findViewById(R.id.btn_main_leaderboards);
-        btnPlayOnline.setOnClickListener(view -> {
+        btnLeaderBoards = findViewById(R.id.btn_main_leaderboards);
+        btnLeaderBoards.setOnClickListener(view -> {
             Intent intent = new Intent(MainActivity.this, LeaderBoardActivity.class);
             startActivity(intent);
         });
