@@ -5,6 +5,7 @@ import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -13,10 +14,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.example.chasergame.R;
-import com.example.chasergame.models.GameResult;
 import com.example.chasergame.models.User;
 import com.example.chasergame.services.DatabaseService;
-import com.example.chasergame.utils.GameResultsUtil;
 import com.example.chasergame.utils.SharedPreferencesUtil;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -33,6 +32,7 @@ import java.util.Map;
 
 public class OnlineGameActivity extends BaseActivity {
 
+    private static final String TAG = "OnlineGameActivity";
     // ================= STATE =================
     private String roomId;
     private String playerId;
@@ -152,12 +152,16 @@ public class OnlineGameActivity extends BaseActivity {
         qRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snap) {
-                if (!snap.exists()) return;
+                if (!snap.exists() || snap.getChildrenCount() == 0) {
+                    Toast.makeText(OnlineGameActivity.this, "No questions in database.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
 
-                int index = (int) (Math.random() * snap.getChildrenCount());
-                int i = 0;
+                long count = snap.getChildrenCount();
+                long index = (long) (Math.random() * count);
+
                 DataSnapshot qSnap = null;
-
+                long i = 0;
                 for (DataSnapshot c : snap.getChildren()) {
                     if (i++ == index) {
                         qSnap = c;
@@ -165,7 +169,10 @@ public class OnlineGameActivity extends BaseActivity {
                     }
                 }
 
-                if (qSnap == null) return;
+                if (qSnap == null) {
+                    // Fallback or error
+                    return;
+                }
 
                 String q = qSnap.child("question").getValue(String.class);
                 String right = qSnap.child("rightAnswer").getValue(String.class);
@@ -292,7 +299,11 @@ public class OnlineGameActivity extends BaseActivity {
                     }
 
                     @Override
-                    public void onCancelled(@NonNull DatabaseError error) {}
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        // Re-enable buttons if DB read fails
+                        answerLocked = false;
+                        setButtonsEnabled(isMyTurn && !inCooldown);
+                    }
                 });
     }
 
@@ -418,7 +429,22 @@ public class OnlineGameActivity extends BaseActivity {
         boolean isWinner = ("P1".equals(w) && isPlayer1) || ("P2".equals(w) && !isPlayer1);
         if (isWinner) {
             User user = SharedPreferencesUtil.getUser(this);
-            databaseService.updateUserWins(user.getId(), "onlineWins", null);
+            if (user != null && user.getId() != null) {
+                databaseService.updateUserWins(user.getId(), "onlineWins", new DatabaseService.DatabaseCallback<Void>() {
+                    @Override
+                    public void onCompleted(Void object) {
+                        Log.d(TAG, "Online wins updated successfully.");
+                    }
+
+                    @Override
+                    public void onFailed(Exception e) {
+                        Log.e(TAG, "Failed to update online wins.", e);
+                        Toast.makeText(OnlineGameActivity.this, "Could not save your win.", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            } else {
+                Log.e(TAG, "User not found, cannot update wins.");
+            }
         }
 
         String msg =
