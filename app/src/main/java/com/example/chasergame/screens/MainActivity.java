@@ -18,7 +18,7 @@ import com.example.chasergame.utils.SharedPreferencesUtil;
 
 public class MainActivity extends BaseActivity {
     private static final String TAG = "MainActivity";
-    private Button Logout, PlayAgainstBot, PlayOnOneDevice, btnEditProfile;
+    private Button Logout, PlayAgainstBot, PlayOnOneDevice, btnEditProfile, btnPlayOnline, btnLeaderBoards;
     private TextView hitouser;
     private User user;
 
@@ -33,6 +33,11 @@ public class MainActivity extends BaseActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+        btnPlayOnline = findViewById(R.id.btn_main_leaderboards);
+        btnPlayOnline.setOnClickListener(view -> {
+            Intent intent = new Intent(MainActivity.this, LeaderBoardActivity.class);
+            startActivity(intent);
+        });
 
         PlayAgainstBot = findViewById(R.id.btn_main_playagainstabot);
         PlayAgainstBot.setOnClickListener(view -> {
@@ -40,8 +45,8 @@ public class MainActivity extends BaseActivity {
             startActivity(intent);
         });
 
-        Button playOnline = findViewById(R.id.btn_main_playonline);
-        playOnline.setOnClickListener(v -> {
+        btnPlayOnline = findViewById(R.id.btn_main_playonline);
+        btnPlayOnline.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, OnlineMenuActivity.class);
             startActivity(intent);
         });
