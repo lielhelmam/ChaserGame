@@ -19,6 +19,7 @@ import com.example.chasergame.R;
 import com.example.chasergame.models.GameResult;
 import com.example.chasergame.models.Question;
 import com.example.chasergame.models.User;
+import com.example.chasergame.services.DatabaseService;
 import com.example.chasergame.utils.GameResultsUtil;
 import com.example.chasergame.utils.SharedPreferencesUtil;
 import com.google.firebase.database.DataSnapshot;
@@ -493,15 +494,12 @@ public class PlayOnOneDeviceActivity extends BaseActivity {
         setInputsEnabled(false);
 
         User user = SharedPreferencesUtil.getUser(this);
-        String username1 = user != null ? user.getUsername() : "Player 1";
-        String userId1 = user != null ? user.getId() : "guest";
-
-        boolean p1Wins = scoreP1 > scoreP2;
-        boolean p2Wins = scoreP2 > scoreP1;
-
-        GameResultsUtil.saveGameResult(this, new GameResult(userId1, username1, "PlayOnOneDeviceActivity", p1Wins));
-        GameResultsUtil.saveGameResult(this, new GameResult("guest2", "Player 2", "PlayOnOneDeviceActivity", p2Wins));
-
+        if (user != null) {
+            boolean p1Wins = scoreP1 > scoreP2;
+            if (p1Wins) {
+                databaseService.updateUserWins(user.getId(), "oneDeviceWins", null);
+            }
+        }
 
         Toast.makeText(this, reason, Toast.LENGTH_LONG).show();
         goHome();

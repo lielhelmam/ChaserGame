@@ -6,16 +6,23 @@ public class User {
     public String password;
     public String email;
     public boolean isAdmin;
+    public int onlineWins;
+    public int botWins;
+    public int oneDeviceWins;
+
 
     public User() {
     }
 
-    public User(String id, String username, String password, String email, boolean isAdmin) {
+    public User(String id, String username, String password, String email, boolean isAdmin, int onlineWins, int botWins, int oneDeviceWins) {
         this.id = id;
         this.username = username;
         this.password = password;
         this.email = email;
         this.isAdmin = isAdmin;
+        this.onlineWins = onlineWins;
+        this.botWins = botWins;
+        this.oneDeviceWins = oneDeviceWins;
     }
 
     public String getId() {
@@ -58,6 +65,30 @@ public class User {
         isAdmin = admin;
     }
 
+    public int getOnlineWins() {
+        return onlineWins;
+    }
+
+    public void setOnlineWins(int onlineWins) {
+        this.onlineWins = onlineWins;
+    }
+
+    public int getBotWins() {
+        return botWins;
+    }
+
+    public void setBotWins(int botWins) {
+        this.botWins = botWins;
+    }
+
+    public int getOneDeviceWins() {
+        return oneDeviceWins;
+    }
+
+    public void setOneDeviceWins(int oneDeviceWins) {
+        this.oneDeviceWins = oneDeviceWins;
+    }
+
     @Override
     public String toString() {
         return "User{" +
@@ -66,6 +97,9 @@ public class User {
                 ", password='" + password + '\'' +
                 ", email='" + email + '\'' +
                 ", isAdmin=" + isAdmin +
+                ", onlineWins=" + onlineWins +
+                ", botWins=" + botWins +
+                ", oneDeviceWins=" + oneDeviceWins +
                 '}';
     }
 }

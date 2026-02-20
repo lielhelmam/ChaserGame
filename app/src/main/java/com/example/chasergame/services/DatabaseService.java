@@ -38,7 +38,6 @@ public class DatabaseService {
     ///
     /// @see DatabaseService#readData(String)
     private static final String USERS_PATH = "users",
-            FOODS_PATH = "foods",
             QUESTIONS_PATH = "questions";
     /// the instance of this class
     ///
@@ -170,43 +169,6 @@ public class DatabaseService {
         return databaseReference.child(path).push().getKey();
     }
 
-    /// run a transaction on the data at a specific path </br>
-    /// good for incrementing a value or modifying an object in the database
-    ///
-    /// @param path     the path to run the transaction on
-    /// @param clazz    the class of the object to return
-    /// @param function the function to apply to the current value of the data
-    /// @param callback the callback to call when the operation is completed
-    /// @see DatabaseReference#runTransaction(Transaction.Handler)
-    private <T> void runTransaction(@NotNull final String path, @NotNull final Class<T> clazz, @NotNull UnaryOperator<T> function, @NotNull final DatabaseCallback<T> callback) {
-        readData(path).runTransaction(new Transaction.Handler() {
-            @NonNull
-            @Override
-            public Transaction.Result doTransaction(@NonNull MutableData currentData) {
-                T currentValue = currentData.getValue(clazz);
-                if (currentValue == null) {
-                    currentValue = function.apply(null);
-                } else {
-                    currentValue = function.apply(currentValue);
-                }
-                currentData.setValue(currentValue);
-                return Transaction.success(currentData);
-            }
-
-            @Override
-            public void onComplete(@Nullable DatabaseError error, boolean committed, @Nullable DataSnapshot currentData) {
-                if (error != null) {
-                    Log.e(TAG, "Transaction failed", error.toException());
-                    callback.onFailed(error.toException());
-                    return;
-                }
-                T result = currentData != null ? currentData.getValue(clazz) : null;
-                callback.onCompleted(result);
-            }
-        });
-
-    }
-
     /// generate a new id for a new user in the database
     ///
     /// @return a new id for the user
@@ -262,7 +224,7 @@ public class DatabaseService {
     ///
     /// @param uid      the user id to delete
     /// @param callback the callback to call when the operation is completed
-    public void deleteUser(@NotNull final String uid, @Nullable final DatabaseCallback<Void> callback) {
+    public void deleteUserById(@NotNull final String uid, @Nullable final DatabaseCallback<Void> callback) {
         deleteData(USERS_PATH + "/" + uid, callback);
     }
 
@@ -320,22 +282,39 @@ public class DatabaseService {
     }
 
     public void updateUser(@NotNull final User user, @Nullable final DatabaseCallback<Void> callback) {
-        runTransaction(USERS_PATH + "/" + user.getId(), User.class, currentUser -> user, new DatabaseCallback<User>() {
+        writeData(USERS_PATH + "/" + user.getId(), user, callback);
+    }
+
+    public void updateUserWins(@NotNull final String userId, @NotNull final String winType, @Nullable final DatabaseCallback<Void> callback) {
+        DatabaseReference userWinRef = readData(USERS_PATH + "/" + userId + "/" + winType);
+        userWinRef.runTransaction(new Transaction.Handler() {
+            @NonNull
             @Override
-            public void onCompleted(User object) {
-                if (callback != null) {
-                    callback.onCompleted(null);
+            public Transaction.Result doTransaction(@NonNull MutableData currentData) {
+                Long currentValue = currentData.getValue(Long.class);
+                if (currentValue == null) {
+                    currentData.setValue(1L); // Use Long
+                } else {
+                    currentData.setValue(currentValue + 1);
                 }
+                return Transaction.success(currentData);
             }
 
             @Override
-            public void onFailed(Exception e) {
-                if (callback != null) {
-                    callback.onFailed(e);
+            public void onComplete(@Nullable DatabaseError error, boolean committed, @Nullable DataSnapshot currentData) {
+                if (callback == null) return;
+                if (error != null) {
+                    callback.onFailed(error.toException());
+                } else {
+                    callback.onCompleted(null);
                 }
             }
         });
     }
+
+    //endregion
+
+    //region Question Section
 
     /// get all the questions from the database
     ///
@@ -357,39 +336,12 @@ public class DatabaseService {
         writeData(QUESTIONS_PATH + "/" + key, question, callback);
     }
 
-    public void addQuestion(@NotNull Question question,
-                            @Nullable DatabaseCallback<Void> callback) {
-
-        readData(QUESTIONS_PATH)
-                .runTransaction(new Transaction.Handler() {
-
-                    @NonNull
-                    @Override
-                    public Transaction.Result doTransaction(@NonNull MutableData currentData) {
-                        Long index = currentData.getChildrenCount();
-                        currentData.child(String.valueOf(index)).setValue(question);
-                        return Transaction.success(currentData);
-                    }
-
-                    @Override
-                    public void onComplete(@Nullable DatabaseError error,
-                                           boolean committed,
-                                           @Nullable DataSnapshot currentData) {
-                        if (error != null) {
-                            if (callback != null) {
-                                callback.onFailed(error.toException());
-                            }
-                        } else {
-                            if (callback != null) {
-                                callback.onCompleted(null);
-                            }
-                        }
-                    }
-                });
+    public void addQuestion(@NotNull Question question, @Nullable DatabaseCallback<Void> callback) {
+        String key = generateNewId(QUESTIONS_PATH);
+        writeData(QUESTIONS_PATH + "/" + key, question, callback);
     }
 
-    public void deleteQuestionAndReindex(@NonNull String deleteKey,
-                                         @Nullable DatabaseCallback<Void> callback) {
+    public void deleteQuestionAndReindex(@NonNull String deleteKey, @Nullable DatabaseCallback<Void> callback) {
 
         readData(QUESTIONS_PATH).runTransaction(new Transaction.Handler() {
             @NonNull
@@ -428,6 +380,8 @@ public class DatabaseService {
         });
     }
 
+    //endregion
+
 
     /// callback interface for database operations
     ///
@@ -436,11 +390,9 @@ public class DatabaseService {
     /// @see DatabaseCallback#onFailed(Exception)
     public interface DatabaseCallback<T> {
         /// called when the operation is completed successfully
-        public void onCompleted(T object);
+        void onCompleted(T object);
 
         /// called when the operation fails with an exception
-        public void onFailed(Exception e);
+        void onFailed(Exception e);
     }
-
-
 }

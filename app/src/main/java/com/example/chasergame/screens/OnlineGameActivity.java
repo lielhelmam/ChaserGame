@@ -15,6 +15,7 @@ import androidx.annotation.Nullable;
 import com.example.chasergame.R;
 import com.example.chasergame.models.GameResult;
 import com.example.chasergame.models.User;
+import com.example.chasergame.services.DatabaseService;
 import com.example.chasergame.utils.GameResultsUtil;
 import com.example.chasergame.utils.SharedPreferencesUtil;
 import com.google.firebase.database.DataSnapshot;
@@ -415,8 +416,10 @@ public class OnlineGameActivity extends BaseActivity {
         finishing = true;
 
         boolean isWinner = ("P1".equals(w) && isPlayer1) || ("P2".equals(w) && !isPlayer1);
-        User user = SharedPreferencesUtil.getUser(this);
-        GameResultsUtil.saveGameResult(this, new GameResult(user.getId(), user.getUsername(), "OnlineGameActivity", isWinner));
+        if (isWinner) {
+            User user = SharedPreferencesUtil.getUser(this);
+            databaseService.updateUserWins(user.getId(), "onlineWins", null);
+        }
 
         String msg =
                 "DRAW".equals(w) ? "🤝 Draw" :

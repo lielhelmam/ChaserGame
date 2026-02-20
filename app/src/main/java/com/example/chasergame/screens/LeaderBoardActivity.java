@@ -5,7 +5,6 @@ import android.view.View;
 import android.widget.Button;
 
 import androidx.activity.EdgeToEdge;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -14,18 +13,15 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.chasergame.R;
 import com.example.chasergame.adapters.LeaderboardAdapter;
-import com.example.chasergame.models.GameResult;
 import com.example.chasergame.models.LeaderboardEntry;
-import com.example.chasergame.utils.GameResultsUtil;
+import com.example.chasergame.models.User;
+import com.example.chasergame.services.DatabaseService;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-public class LeaderBoardActivity extends AppCompatActivity {
+public class LeaderBoardActivity extends BaseActivity {
 
     private RecyclerView recyclerView;
     private LeaderboardAdapter adapter;
@@ -55,66 +51,65 @@ public class LeaderBoardActivity extends AppCompatActivity {
 
         loadLeaderboardData();
 
-        adapter = new LeaderboardAdapter(onlineLeaderboard);
-        recyclerView.setAdapter(adapter);
-
         btnOnline.setOnClickListener(v -> {
-            adapter = new LeaderboardAdapter(onlineLeaderboard);
-            recyclerView.setAdapter(adapter);
+            if (onlineLeaderboard != null) {
+                adapter = new LeaderboardAdapter(onlineLeaderboard);
+                recyclerView.setAdapter(adapter);
+            }
         });
 
         btnBot.setOnClickListener(v -> {
-            adapter = new LeaderboardAdapter(botLeaderboard);
-            recyclerView.setAdapter(adapter);
+            if (botLeaderboard != null) {
+                adapter = new LeaderboardAdapter(botLeaderboard);
+                recyclerView.setAdapter(adapter);
+            }
         });
 
         btnOneDevice.setOnClickListener(v -> {
-            adapter = new LeaderboardAdapter(oneDeviceLeaderboard);
-            recyclerView.setAdapter(adapter);
+            if (oneDeviceLeaderboard != null) {
+                adapter = new LeaderboardAdapter(oneDeviceLeaderboard);
+                recyclerView.setAdapter(adapter);
+            }
         });
     }
 
     private void loadLeaderboardData() {
-        List<GameResult> gameResults = GameResultsUtil.getGameResults(this);
+        databaseService.getUserList(new DatabaseService.DatabaseCallback<List<User>>() {
+            @Override
+            public void onCompleted(List<User> users) {
+                if (users == null) return;
 
-        Map<String, Integer> onlineWins = new HashMap<>();
-        Map<String, Integer> botWins = new HashMap<>();
-        Map<String, Integer> oneDeviceWins = new HashMap<>();
+                onlineLeaderboard = new ArrayList<>();
+                botLeaderboard = new ArrayList<>();
+                oneDeviceLeaderboard = new ArrayList<>();
 
-        for (GameResult result : gameResults) {
-            if (result.isWin()) {
-                String username = result.getUsername();
-                switch (result.getGameMode()) {
-                    case "OnlineGameActivity":
-                        onlineWins.put(username, onlineWins.getOrDefault(username, 0) + 1);
-                        break;
-                    case "PlayAgainstBotActivity":
-                        botWins.put(username, botWins.getOrDefault(username, 0) + 1);
-                        break;
-                    case "PlayOnOneDeviceActivity":
-                        oneDeviceWins.put(username, oneDeviceWins.getOrDefault(username, 0) + 1);
-                        break;
+                for (User user : users) {
+                    onlineLeaderboard.add(new LeaderboardEntry(0, user.getUsername(), user.getOnlineWins()));
+                    botLeaderboard.add(new LeaderboardEntry(0, user.getUsername(), user.getBotWins()));
+                    oneDeviceLeaderboard.add(new LeaderboardEntry(0, user.getUsername(), user.getOneDeviceWins()));
                 }
-            }
-        }
 
-        onlineLeaderboard = createLeaderboardList(onlineWins);
-        botLeaderboard = createLeaderboardList(botWins);
-        oneDeviceLeaderboard = createLeaderboardList(oneDeviceWins);
+                sortAndRank(onlineLeaderboard);
+                sortAndRank(botLeaderboard);
+                sortAndRank(oneDeviceLeaderboard);
+
+                // Set the default adapter
+                adapter = new LeaderboardAdapter(onlineLeaderboard);
+                recyclerView.setAdapter(adapter);
+            }
+
+            @Override
+            public void onFailed(Exception e) {
+                // Handle error
+            }
+        });
     }
 
-    private List<LeaderboardEntry> createLeaderboardList(Map<String, Integer> winsMap) {
-        List<LeaderboardEntry> leaderboard = new ArrayList<>();
-        for (Map.Entry<String, Integer> entry : winsMap.entrySet()) {
-            leaderboard.add(new LeaderboardEntry(0, entry.getKey(), entry.getValue()));
-        }
-
+    private void sortAndRank(List<LeaderboardEntry> leaderboard) {
         Collections.sort(leaderboard, (e1, e2) -> Integer.compare(e2.getScore(), e1.getScore()));
 
         for (int i = 0; i < leaderboard.size(); i++) {
             leaderboard.get(i).setRank(i + 1);
         }
-
-        return leaderboard;
     }
 }
