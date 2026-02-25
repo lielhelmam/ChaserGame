@@ -15,15 +15,15 @@ public class LeaderboardEntry {
         return rank;
     }
 
+    public void setRank(int rank) {
+        this.rank = rank;
+    }
+
     public String getUsername() {
         return username;
     }
 
     public int getScore() {
         return score;
-    }
-
-    public void setRank(int rank) {
-        this.rank = rank;
     }
 }

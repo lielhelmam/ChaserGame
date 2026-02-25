@@ -38,7 +38,8 @@ public class GameResultsUtil {
             return new ArrayList<>();
         }
         Gson gson = new Gson();
-        Type type = new TypeToken<ArrayList<GameResult>>() {}.getType();
+        Type type = new TypeToken<ArrayList<GameResult>>() {
+        }.getType();
         return gson.fromJson(json, type);
     }
 }

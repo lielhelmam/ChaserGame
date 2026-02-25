@@ -124,16 +124,19 @@
                         android:text="—"
                         android:textColor="#FFFFFF"
                         android:textSize="16sp" />
+
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Online Wins"
                         android:textColor="#FFBBBB"
                         android:textStyle="bold" />
+
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal">
+
                         <TextView
                             android:id="@+id/tv_online_wins"
                             android:layout_width="0dp"
@@ -150,16 +153,19 @@
                             android:backgroundTint="#FFBBBB"
                             android:text="Edit" />
                     </LinearLayout>
+
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Bot Wins"
                         android:textColor="#FFBBBB"
                         android:textStyle="bold" />
+
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal">
+
                         <TextView
                             android:id="@+id/tv_bot_wins"
                             android:layout_width="0dp"
@@ -176,16 +182,19 @@
                             android:backgroundTint="#FFBBBB"
                             android:text="Edit" />
                     </LinearLayout>
+
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="One Device Wins"
                         android:textColor="#FFBBBB"
                         android:textStyle="bold" />
+
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal">
+
                         <TextView
                             android:id="@+id/tv_one_device_wins"
                             android:layout_width="0dp"
