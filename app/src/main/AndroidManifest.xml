@@ -11,6 +11,15 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ChaserGame">
         <activity
+            android:name=".screens.ManageSongsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".screens.SongSelectionActivity"
+            android:exported="false" />
+        <activity
+            android:name=".screens.SecretGameRuelsActivity"
+            android:exported="false" />
+        <activity
             android:name=".screens.SecretGameActivity"
             android:exported="false" />
         <activity
@@ -80,7 +89,7 @@
             android:name=".screens.MainActivity"
             android:exported="false" />
         <activity
-            android:name=".screens.SigninActivity"
+            android:name=".screens.SignupActivity"
             android:exported="false" />
         <activity
             android:name=".screens.LoginActivity"

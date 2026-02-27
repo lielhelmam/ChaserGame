@@ -77,8 +77,20 @@
                 android:id="@+id/btn_admin_questions_list"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
+                android:layout_marginBottom="12dp"
                 android:backgroundTint="#C62828"
                 android:text="📋 Questions List"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <!-- New Button for Rhythm Songs -->
+            <Button
+                android:id="@+id/btn_admin_manage_songs"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:backgroundTint="#333333"
+                android:text="🎵 Manage Rhythm Songs"
                 android:textColor="#FFFFFF"
                 android:textSize="16sp"
                 android:textStyle="bold" />

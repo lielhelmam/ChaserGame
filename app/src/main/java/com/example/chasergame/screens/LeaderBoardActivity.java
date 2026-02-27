@@ -17,7 +17,6 @@ import com.example.chasergame.models.User;
 import com.example.chasergame.services.DatabaseService;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class LeaderBoardActivity extends BaseActivity {

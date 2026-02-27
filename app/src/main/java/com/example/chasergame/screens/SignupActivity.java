@@ -19,8 +19,8 @@ import com.example.chasergame.services.DatabaseService;
 import com.example.chasergame.utils.SharedPreferencesUtil;
 import com.example.chasergame.utils.Validator;
 
-public class SigninActivity extends BaseActivity {
-    private static final String TAG = "SigninActivity";
+public class SignupActivity extends BaseActivity {
+    private static final String TAG = "SignupActivity";
     private Button btnSubmit;
     private EditText etUserName, etPassword, etEmail, etPhoneNumber;
 
@@ -62,7 +62,7 @@ public class SigninActivity extends BaseActivity {
 
         Button goback = findViewById(R.id.btn_signup_goback);
         goback.setOnClickListener(view -> {
-            Intent intentreg = new Intent(SigninActivity.this, LandingActivity.class);
+            Intent intentreg = new Intent(SignupActivity.this, LandingActivity.class);
             startActivity(intentreg);
         });
 
@@ -122,7 +122,7 @@ public class SigninActivity extends BaseActivity {
             @Override
             public void onCompleted(Boolean exists) {
                 if (exists) {
-                    Toast.makeText(SigninActivity.this, "Email already exists", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(SignupActivity.this, "Email already exists", Toast.LENGTH_SHORT).show();
                 } else {
                     createUserInDatabase(user);
                 }
@@ -131,7 +131,7 @@ public class SigninActivity extends BaseActivity {
             @Override
             public void onFailed(Exception e) {
                 Log.e(TAG, "Error checking email", e);
-                Toast.makeText(SigninActivity.this, "Registration failed", Toast.LENGTH_SHORT).show();
+                Toast.makeText(SignupActivity.this, "Registration failed", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -143,9 +143,9 @@ public class SigninActivity extends BaseActivity {
             public void onCompleted(Void object) {
                 Log.d(TAG, "User created successfully");
 
-                SharedPreferencesUtil.saveUser(SigninActivity.this, user);
+                SharedPreferencesUtil.saveUser(SignupActivity.this, user);
 
-                Intent mainIntent = new Intent(SigninActivity.this, MainActivity.class);
+                Intent mainIntent = new Intent(SignupActivity.this, MainActivity.class);
                 mainIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(mainIntent);
             }
@@ -153,12 +153,12 @@ public class SigninActivity extends BaseActivity {
             @Override
             public void onFailed(Exception e) {
                 Log.e(TAG, "Error creating user", e);
-                Toast.makeText(SigninActivity.this, "Registration failed", Toast.LENGTH_SHORT).show();
-                SharedPreferencesUtil.signOutUser(SigninActivity.this);
+                Toast.makeText(SignupActivity.this, "Registration failed", Toast.LENGTH_SHORT).show();
+                SharedPreferencesUtil.signOutUser(SignupActivity.this);
             }
         });
         btnSubmit.setOnClickListener(view -> {
-            Intent intenthome = new Intent(SigninActivity.this, MainActivity.class);
+            Intent intenthome = new Intent(SignupActivity.this, MainActivity.class);
             startActivity(intenthome);
         });
 

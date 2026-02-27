@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:background="#C62828"
     android:padding="16dp"
-    tools:context=".screens.SigninActivity">
+    tools:context=".screens.SignupActivity">
 
     <!-- Card-like container -->
     <androidx.cardview.widget.CardView

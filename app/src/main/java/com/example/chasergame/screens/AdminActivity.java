@@ -5,7 +5,6 @@ import static android.content.ContentValues.TAG;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 
 import androidx.activity.EdgeToEdge;
@@ -33,32 +32,33 @@ public class AdminActivity extends BaseActivity {
 
 
         Button btnAddQuestion = findViewById(R.id.btnAddQuestion);
-
         btnAddQuestion.setOnClickListener(v -> {
             Intent intent = new Intent(AdminActivity.this, AddQuestionActivity.class);
             startActivity(intent);
         });
 
         Button btnQuestionsList = findViewById(R.id.btn_admin_questions_list);
-
         btnQuestionsList.setOnClickListener(v -> {
             Intent intent = new Intent(AdminActivity.this, QuestionsListActivity.class);
             startActivity(intent);
         });
 
         btn = findViewById(R.id.btn_admin_gotouserlist);
-        Log.d(TAG, "Navigating to UsersListActivity");
-
         btn.setOnClickListener(v -> {
             Intent intent = new Intent(AdminActivity.this, UsersListActivity.class);
+            startActivity(intent);
+        });
+
+        // New Button for Managing Songs
+        Button btnManageSongs = findViewById(R.id.btn_admin_manage_songs);
+        btnManageSongs.setOnClickListener(v -> {
+            Intent intent = new Intent(AdminActivity.this, ManageSongsActivity.class);
             startActivity(intent);
         });
 
 
         Logout = findViewById(R.id.btn_admin_logout);
         Logout.setOnClickListener(v -> signOut());
-
-
     }
 
     private void signOut() {
@@ -70,5 +70,4 @@ public class AdminActivity extends BaseActivity {
         landingIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(landingIntent);
     }
-
 }

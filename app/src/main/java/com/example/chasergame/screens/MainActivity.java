@@ -24,7 +24,7 @@ public class MainActivity extends BaseActivity {
     private static final String TAG = "MainActivity";
     
     // Secret navigation logic
-    private static final long SECRET_HOLD_DURATION = 1600L; // Reduced to ~1/3 of 5 seconds
+    private static final long SECRET_HOLD_DURATION = 1600L; 
     private final Handler secretHandler = new Handler(Looper.getMainLooper());
     private boolean isSecretTriggered = false;
     
@@ -32,8 +32,9 @@ public class MainActivity extends BaseActivity {
         @Override
         public void run() {
             isSecretTriggered = true;
-            Log.d(TAG, "Secret triggered! Navigating to SecretGameActivity");
-            Intent intent = new Intent(MainActivity.this, SecretGameActivity.class);
+            Log.d(TAG, "Secret triggered! Navigating to SecretGameRuelsActivity");
+            // Fixed: Corrected the class name to match SecretGameRuelsActivity
+            Intent intent = new Intent(MainActivity.this, SecretGameRuelsActivity.class);
             startActivity(intent);
         }
     };

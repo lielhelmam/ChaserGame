@@ -77,7 +77,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
             loginUser(username, password);
 
         } else if (v.getId() == tvRegister.getId()) {
-            startActivity(new Intent(LoginActivity.this, SigninActivity.class));
+            startActivity(new Intent(LoginActivity.this, SignupActivity.class));
         }
     }
 
