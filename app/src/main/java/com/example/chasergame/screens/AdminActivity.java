@@ -56,12 +56,7 @@ public class AdminActivity extends BaseActivity {
 
 
         Logout = findViewById(R.id.btn_admin_logout);
-        Logout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                signOut();
-            }
-        });
+        Logout.setOnClickListener(v -> signOut());
 
 
     }

@@ -1,7 +1,6 @@
 package com.example.chasergame.screens;
 
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
 
 import androidx.activity.EdgeToEdge;
@@ -29,8 +28,6 @@ public class LeaderBoardActivity extends BaseActivity {
     private List<LeaderboardEntry> botLeaderboard;
     private List<LeaderboardEntry> oneDeviceLeaderboard;
 
-    private Button btnOnline, btnBot, btnOneDevice;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,9 +42,9 @@ public class LeaderBoardActivity extends BaseActivity {
         recyclerView = findViewById(R.id.rv_leaderboard);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        btnOnline = findViewById(R.id.btn_leaderboard_online);
-        btnBot = findViewById(R.id.btn_leaderboard_bot);
-        btnOneDevice = findViewById(R.id.btn_leaderboard_one_device);
+        Button btnOnline = findViewById(R.id.btn_leaderboard_online);
+        Button btnBot = findViewById(R.id.btn_leaderboard_bot);
+        Button btnOneDevice = findViewById(R.id.btn_leaderboard_one_device);
 
         loadLeaderboardData();
 
@@ -74,7 +71,7 @@ public class LeaderBoardActivity extends BaseActivity {
     }
 
     private void loadLeaderboardData() {
-        databaseService.getUserList(new DatabaseService.DatabaseCallback<List<User>>() {
+        databaseService.getUserList(new DatabaseService.DatabaseCallback<>() {
             @Override
             public void onCompleted(List<User> users) {
                 if (users == null) return;
@@ -106,7 +103,7 @@ public class LeaderBoardActivity extends BaseActivity {
     }
 
     private void sortAndRank(List<LeaderboardEntry> leaderboard) {
-        Collections.sort(leaderboard, (e1, e2) -> Integer.compare(e2.getScore(), e1.getScore()));
+        leaderboard.sort((e1, e2) -> Integer.compare(e2.getScore(), e1.getScore()));
 
         for (int i = 0; i < leaderboard.size(); i++) {
             leaderboard.get(i).setRank(i + 1);

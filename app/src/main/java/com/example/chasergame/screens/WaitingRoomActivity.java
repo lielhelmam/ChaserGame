@@ -21,8 +21,7 @@ public class WaitingRoomActivity extends BaseActivity {
     private String roomId;
     private String playerId;
 
-    private TextView tvRoomCode, tvStatus, tvPlayers;
-    private Button btnCancel;
+    private TextView tvPlayers;
 
     private DatabaseReference roomRef;
     private ValueEventListener roomListener;
@@ -44,10 +43,10 @@ public class WaitingRoomActivity extends BaseActivity {
             return;
         }
 
-        tvRoomCode = findViewById(R.id.tvRoomCode);
-        tvStatus = findViewById(R.id.tvStatus);
+        TextView tvRoomCode = findViewById(R.id.tvRoomCode);
+        TextView tvStatus = findViewById(R.id.tvStatus);
         tvPlayers = findViewById(R.id.tvPlayers);
-        btnCancel = findViewById(R.id.btnCancelRoom);
+        Button btnCancel = findViewById(R.id.btnCancelRoom);
 
         tvRoomCode.setText("Room: " + roomId);
         tvStatus.setText("Waiting for another player...");

@@ -35,14 +35,13 @@ public class SharedPreferencesUtil {
 
     /// Get a string from shared preferences
     ///
-    /// @param context      The context to use
-    /// @param key          The key to get the string with
-    /// @param defaultValue The default value to return if the key is not found
+    /// @param context The context to use
+    /// @param key     The key to get the string with
     /// @return The string value stored in shared preferences
     /// @see SharedPreferences#getString(String, String)
-    private static String getString(Context context, String key, String defaultValue) {
+    private static String getString(Context context, String key) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
-        return sharedPreferences.getString(key, defaultValue);
+        return sharedPreferences.getString(key, null);
     }
 
     /// Save an integer to shared preferences
@@ -86,39 +85,37 @@ public class SharedPreferencesUtil {
     /// Remove a specific key from shared preferences
     ///
     /// @param context The context to use
-    /// @param key     The key to remove
     /// @see SharedPreferences.Editor#remove(String)
-    private static void remove(Context context, String key) {
+    private static void remove(Context context) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.remove(key);
+        editor.remove("user");
         editor.apply();
     }
 
     /// Check if a key exists in shared preferences
     ///
     /// @param context The context to use
-    /// @param key     The key to check
     /// @return true if the key exists, false otherwise
     /// @see SharedPreferences#contains(String)
-    private static boolean contains(Context context, String key) {
+    private static boolean contains(Context context) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
-        return sharedPreferences.contains(key);
+        return sharedPreferences.contains("user");
     }
 
-    private static <T> void saveObject(Context context, String key, T object) {
+    private static <T> void saveObject(Context context, T object) {
         Gson gson = new Gson();
         String json = gson.toJson(object);
-        saveString(context, key, json);
+        saveString(context, "user", json);
     }
 
-    private static <T> T getObject(Context context, String key, Class<T> type) {
-        String json = getString(context, key, null);
+    private static <T> T getObject(Context context) {
+        String json = getString(context, "user");
         if (json == null) {
             return null;
         }
         Gson gson = new Gson();
-        return gson.fromJson(json, type);
+        return gson.fromJson(json, (Class<T>) User.class);
     }
 
     // Add more utility methods as needed
@@ -129,7 +126,7 @@ public class SharedPreferencesUtil {
     /// @param user    The user object to save
     /// @see User
     public static void saveUser(Context context, User user) {
-        saveObject(context, "user", user);
+        saveObject(context, user);
     }
 
     /// Get the user object from shared preferences
@@ -142,23 +139,23 @@ public class SharedPreferencesUtil {
         if (!isUserLoggedIn(context)) {
             return null;
         }
-        return getObject(context, "user", User.class);
+        return getObject(context);
     }
 
     /// Sign out the user by removing user data from shared preferences
     ///
     /// @param context The context to use
     public static void signOutUser(Context context) {
-        remove(context, "user");
+        remove(context);
     }
 
     /// Check if a user is logged in by checking if the user id is present in shared preferences
     ///
     /// @param context The context to use
     /// @return true if the user is logged in, false otherwise
-    /// @see #contains(Context, String)
+    /// @see #contains(Context)
     public static boolean isUserLoggedIn(Context context) {
-        return contains(context, "user");
+        return contains(context);
     }
 
     /// Get the user id of the logged in user

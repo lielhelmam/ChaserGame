@@ -15,7 +15,7 @@ import java.util.List;
 
 public class LeaderboardAdapter extends RecyclerView.Adapter<LeaderboardAdapter.LeaderboardViewHolder> {
 
-    private List<LeaderboardEntry> leaderboardEntries;
+    private final List<LeaderboardEntry> leaderboardEntries;
 
     public LeaderboardAdapter(List<LeaderboardEntry> leaderboardEntries) {
         this.leaderboardEntries = leaderboardEntries;
@@ -42,7 +42,9 @@ public class LeaderboardAdapter extends RecyclerView.Adapter<LeaderboardAdapter.
     }
 
     public static class LeaderboardViewHolder extends RecyclerView.ViewHolder {
-        TextView rank, username, wins;
+        final TextView rank;
+        final TextView username;
+        final TextView wins;
 
         public LeaderboardViewHolder(@NonNull View itemView) {
             super(itemView);

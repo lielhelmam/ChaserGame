@@ -10,8 +10,8 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AlertDialog;
 import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -25,7 +25,6 @@ public class UserProfileActivity extends BaseActivity {
 
     private TextView tvName, tvEmail, tvPassword, tvAdmin, tvOnlineWins, tvBotWins, tvOneDeviceWins;
     private ProgressBar progressBar;
-    private Button btnEditOnlineWins, btnEditBotWins, btnEditOneDeviceWins;
 
     private String userId;
     private User currentUser;
@@ -50,9 +49,9 @@ public class UserProfileActivity extends BaseActivity {
         tvOnlineWins = findViewById(R.id.tv_online_wins);
         tvBotWins = findViewById(R.id.tv_bot_wins);
         tvOneDeviceWins = findViewById(R.id.tv_one_device_wins);
-        btnEditOnlineWins = findViewById(R.id.btn_edit_online_wins);
-        btnEditBotWins = findViewById(R.id.btn_edit_bot_wins);
-        btnEditOneDeviceWins = findViewById(R.id.btn_edit_one_device_wins);
+        Button btnEditOnlineWins = findViewById(R.id.btn_edit_online_wins);
+        Button btnEditBotWins = findViewById(R.id.btn_edit_bot_wins);
+        Button btnEditOneDeviceWins = findViewById(R.id.btn_edit_one_device_wins);
 
 
         userId = getIntent().getStringExtra("USER_UID");
@@ -73,7 +72,7 @@ public class UserProfileActivity extends BaseActivity {
     private void loadUser() {
         progressBar.setVisibility(View.VISIBLE);
 
-        databaseService.getUser(userId, new DatabaseService.DatabaseCallback<User>() {
+        databaseService.getUser(userId, new DatabaseService.DatabaseCallback<>() {
             @Override
             public void onCompleted(User user) {
                 progressBar.setVisibility(View.GONE);
@@ -144,7 +143,7 @@ public class UserProfileActivity extends BaseActivity {
                 break;
         }
 
-        databaseService.updateUser(currentUser, new DatabaseService.DatabaseCallback<Void>() {
+        databaseService.updateUser(currentUser, new DatabaseService.DatabaseCallback<>() {
             @Override
             public void onCompleted(Void unused) {
                 Toast.makeText(UserProfileActivity.this, "Wins updated", Toast.LENGTH_SHORT).show();

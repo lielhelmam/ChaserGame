@@ -21,6 +21,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
     private final List<User> fullList = new ArrayList<>();
     private final List<User> userList;
     private final OnUserClickListener onUserClickListener;
+
     public UserAdapter(@Nullable final OnUserClickListener onUserClickListener) {
         userList = new ArrayList<>();
         this.onUserClickListener = onUserClickListener;
@@ -54,12 +55,9 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
             return true;
         });
 
-        holder.btnDelete.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (onUserClickListener != null) {
-                    onUserClickListener.onDeleteClick(user);
-                }
+        holder.btnDelete.setOnClickListener(v -> {
+            if (onUserClickListener != null) {
+                onUserClickListener.onDeleteClick(user);
             }
         });
 
@@ -126,8 +124,9 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView tvName, tvEmail;
-        Button btnDelete;
+        final TextView tvName;
+        final TextView tvEmail;
+        final Button btnDelete;
 
 
         public ViewHolder(@NonNull View itemView) {

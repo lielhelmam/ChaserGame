@@ -1,5 +1,7 @@
 package com.example.chasergame.models;
 
+import androidx.annotation.NonNull;
+
 public class User {
     public String id;
     public String username;
@@ -89,6 +91,7 @@ public class User {
         this.oneDeviceWins = oneDeviceWins;
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "User{" +

@@ -20,7 +20,6 @@ import java.util.Arrays;
 public class AddQuestionActivity extends BaseActivity {
 
     private EditText etQuestion, etRightAnswer, etWrong1, etWrong2;
-    private Button btnSaveQuestion;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,7 +40,7 @@ public class AddQuestionActivity extends BaseActivity {
         etRightAnswer = findViewById(R.id.etRightAnswer);
         etWrong1 = findViewById(R.id.etWrong1);
         etWrong2 = findViewById(R.id.etWrong2);
-        btnSaveQuestion = findViewById(R.id.btnSaveQuestion);
+        Button btnSaveQuestion = findViewById(R.id.btnSaveQuestion);
 
         DatabaseService db = DatabaseService.getInstance();
 
@@ -65,7 +64,7 @@ public class AddQuestionActivity extends BaseActivity {
                     new ArrayList<>(Arrays.asList(w1, w2))
             );
 
-            db.addQuestion(question, new DatabaseService.DatabaseCallback<Void>() {
+            db.addQuestion(question, new DatabaseService.DatabaseCallback<>() {
                 @Override
                 public void onCompleted(Void object) {
                     Toast.makeText(AddQuestionActivity.this, "Question saved", Toast.LENGTH_SHORT).show();

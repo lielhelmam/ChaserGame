@@ -12,14 +12,12 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.example.chasergame.R;
-import com.example.chasergame.models.GameResult;
 import com.example.chasergame.models.Question;
 import com.example.chasergame.models.User;
-import com.example.chasergame.services.DatabaseService;
-import com.example.chasergame.utils.GameResultsUtil;
 import com.example.chasergame.utils.SharedPreferencesUtil;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -48,9 +46,7 @@ public class PlayAgainstBotActivity extends BaseActivity {
     private int scoreBot = 0;
     private View progressTrack;
     private int p1Pos = 0;
-    private int p2Pos = 0;
     private int botPos = 0;
-    private int trackOffset = 0;
 
     // ===== Timer =====
     private CountDownTimer turnTimer;
@@ -59,8 +55,6 @@ public class PlayAgainstBotActivity extends BaseActivity {
 
     // ===== Bot =====
     private int botAccuracy = 70;
-    private int botMinDelay = 800;
-    private int botMaxDelay = 1800;
 
     // ===== Firebase =====
     private int questionsCount = -1;
@@ -119,7 +113,7 @@ public class PlayAgainstBotActivity extends BaseActivity {
                 .getReference("questions")
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
-                    public void onDataChange(DataSnapshot snapshot) {
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
                         questionsCount = (int) snapshot.getChildrenCount();
                         if (questionsCount <= 0) {
                             Toast.makeText(PlayAgainstBotActivity.this, "No questions", Toast.LENGTH_LONG).show();
@@ -130,7 +124,7 @@ public class PlayAgainstBotActivity extends BaseActivity {
                     }
 
                     @Override
-                    public void onCancelled(DatabaseError error) {
+                    public void onCancelled(@NonNull DatabaseError error) {
                         goHome();
                     }
                 });
@@ -195,14 +189,14 @@ public class PlayAgainstBotActivity extends BaseActivity {
                 .child(String.valueOf(index))
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
-                    public void onDataChange(DataSnapshot snap) {
+                    public void onDataChange(@NonNull DataSnapshot snap) {
                         Question q = snap.getValue(Question.class);
                         if (q != null) showQuestion(q);
                         else loadRandomQuestion();
                     }
 
                     @Override
-                    public void onCancelled(DatabaseError error) {
+                    public void onCancelled(@NonNull DatabaseError error) {
                     }
                 });
     }
@@ -227,6 +221,8 @@ public class PlayAgainstBotActivity extends BaseActivity {
 
     // ===== Bot =====
     private void simulateBotAnswer() {
+        int botMaxDelay = 1800;
+        int botMinDelay = 800;
         int delay = botMinDelay + rnd.nextInt(botMaxDelay - botMinDelay);
         tvQuestion.postDelayed(() -> {
             if (!isTurnRunning) return;
@@ -370,7 +366,9 @@ public class PlayAgainstBotActivity extends BaseActivity {
 
         float stepPx = trackW / (float) VISIBLE_STEPS;
 
+        int trackOffset = 0;
         float p1Screen = (p1Pos - trackOffset);
+        int p2Pos = 0;
         float p2Screen = (p2Pos - trackOffset);
 
         // clamp so markers stay visible

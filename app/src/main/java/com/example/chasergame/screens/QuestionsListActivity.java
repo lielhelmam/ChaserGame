@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.widget.SearchView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -20,14 +21,10 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 public class QuestionsListActivity extends BaseActivity {
 
-    private RecyclerView rv;
-    private SearchView searchView;
     private QuestionsAdapter adapter;
 
     @Override
@@ -39,8 +36,8 @@ public class QuestionsListActivity extends BaseActivity {
         setSupportActionBar(toolbar);
         toolbar.setNavigationOnClickListener(v -> finish());
 
-        rv = findViewById(R.id.rv_questions_list);
-        searchView = findViewById(R.id.searchView);
+        RecyclerView rv = findViewById(R.id.rv_questions_list);
+        SearchView searchView = findViewById(R.id.searchView);
 
         adapter = new QuestionsAdapter(new QuestionsAdapter.Listener() {
             @Override
@@ -79,7 +76,7 @@ public class QuestionsListActivity extends BaseActivity {
                 .getReference("questions")
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
-                    public void onDataChange(DataSnapshot snapshot) {
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
                         List<QuestionsAdapter.Item> items = new ArrayList<>();
 
                         for (DataSnapshot child : snapshot.getChildren()) {
@@ -89,30 +86,27 @@ public class QuestionsListActivity extends BaseActivity {
                         }
 
                         // ✅ sort by numeric key so list order is correct
-                        Collections.sort(items, new Comparator<QuestionsAdapter.Item>() {
-                            @Override
-                            public int compare(QuestionsAdapter.Item a, QuestionsAdapter.Item b) {
-                                int ka = safeParseInt(a.key, Integer.MAX_VALUE);
-                                int kb = safeParseInt(b.key, Integer.MAX_VALUE);
-                                return Integer.compare(ka, kb);
-                            }
+                        items.sort((a, b) -> {
+                            int ka = safeParseInt(a.key);
+                            int kb = safeParseInt(b.key);
+                            return Integer.compare(ka, kb);
                         });
 
                         adapter.setItems(items);
                     }
 
                     @Override
-                    public void onCancelled(DatabaseError error) {
+                    public void onCancelled(@NonNull DatabaseError error) {
                         Toast.makeText(QuestionsListActivity.this, "Load failed: " + error.getMessage(), Toast.LENGTH_LONG).show();
                     }
                 });
     }
 
-    private int safeParseInt(String s, int fallback) {
+    private int safeParseInt(String s) {
         try {
             return Integer.parseInt(s);
         } catch (Exception e) {
-            return fallback;
+            return Integer.MAX_VALUE;
         }
     }
 
@@ -123,7 +117,7 @@ public class QuestionsListActivity extends BaseActivity {
                 .setPositiveButton("Delete", (d, w) -> {
 
                     // ✅ Delete + reindex so DB becomes 0..n-1 again
-                    databaseService.deleteQuestionAndReindex(key, new DatabaseService.DatabaseCallback<Void>() {
+                    databaseService.deleteQuestionAndReindex(key, new DatabaseService.DatabaseCallback<>() {
                         @Override
                         public void onCompleted(Void object) {
                             Toast.makeText(QuestionsListActivity.this, "Deleted", Toast.LENGTH_SHORT).show();
@@ -170,7 +164,7 @@ public class QuestionsListActivity extends BaseActivity {
                             ))
                     );
 
-                    databaseService.updateQuestion(key, updated, new DatabaseService.DatabaseCallback<Void>() {
+                    databaseService.updateQuestion(key, updated, new DatabaseService.DatabaseCallback<>() {
                         @Override
                         public void onCompleted(Void object) {
                             Toast.makeText(QuestionsListActivity.this, "Updated", Toast.LENGTH_SHORT).show();

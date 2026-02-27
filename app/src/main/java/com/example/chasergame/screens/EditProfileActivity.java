@@ -20,7 +20,6 @@ import com.example.chasergame.utils.Validator;
 
 public class EditProfileActivity extends BaseActivity {
     private EditText etUsername, etEmail, etPassword;
-    private Button btnSave, btnCancel;
     private User user;
 
     @Override
@@ -37,8 +36,8 @@ public class EditProfileActivity extends BaseActivity {
         etUsername = findViewById(R.id.et_edit_username);
         etEmail = findViewById(R.id.et_edit_email);
         etPassword = findViewById(R.id.et_edit_password);
-        btnSave = findViewById(R.id.btn_save_profile);
-        btnCancel = findViewById(R.id.btn_cancel_profile);
+        Button btnSave = findViewById(R.id.btn_save_profile);
+        Button btnCancel = findViewById(R.id.btn_cancel_profile);
 
         user = SharedPreferencesUtil.getUser(this);
         if (!SharedPreferencesUtil.isUserLoggedIn(this)) {
@@ -83,7 +82,7 @@ public class EditProfileActivity extends BaseActivity {
             boolean emailChanged = user.getEmail() == null || !user.getEmail().equalsIgnoreCase(newEmail);
 
             if (emailChanged) {
-                databaseService.checkIfEmailExists(newEmail, new DatabaseService.DatabaseCallback<Boolean>() {
+                databaseService.checkIfEmailExists(newEmail, new DatabaseService.DatabaseCallback<>() {
                     @Override
                     public void onCompleted(Boolean exists) {
                         if (exists) {
@@ -110,7 +109,7 @@ public class EditProfileActivity extends BaseActivity {
         user.setEmail(newEmail);
         user.setPassword(newPass);
 
-        databaseService.updateUser(user, new DatabaseService.DatabaseCallback<Void>() {
+        databaseService.updateUser(user, new DatabaseService.DatabaseCallback<>() {
             @Override
             public void onCompleted(Void object) {
                 SharedPreferencesUtil.saveUser(EditProfileActivity.this, user);

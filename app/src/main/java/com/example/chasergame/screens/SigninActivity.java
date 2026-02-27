@@ -21,7 +21,7 @@ import com.example.chasergame.utils.Validator;
 
 public class SigninActivity extends BaseActivity {
     private static final String TAG = "SigninActivity";
-    private Button goback, btnSubmit;
+    private Button btnSubmit;
     private EditText etUserName, etPassword, etEmail, etPhoneNumber;
 
     @Override
@@ -60,7 +60,7 @@ public class SigninActivity extends BaseActivity {
         btnSubmit = findViewById(R.id.btn_signup_submit);
         btnSubmit.setOnClickListener(this::onSubmit);
 
-        goback = findViewById(R.id.btn_signup_goback);
+        Button goback = findViewById(R.id.btn_signup_goback);
         goback.setOnClickListener(view -> {
             Intent intentreg = new Intent(SigninActivity.this, LandingActivity.class);
             startActivity(intentreg);
@@ -116,9 +116,9 @@ public class SigninActivity extends BaseActivity {
         Log.d(TAG, "Registering user...");
 
         String uid = databaseService.generateUserId();
-        User user = new User(uid, fName, password, email, false,0,0,0);
+        User user = new User(uid, fName, password, email, false, 0, 0, 0);
 
-        databaseService.checkIfEmailExists(email, new DatabaseService.DatabaseCallback<Boolean>() {
+        databaseService.checkIfEmailExists(email, new DatabaseService.DatabaseCallback<>() {
             @Override
             public void onCompleted(Boolean exists) {
                 if (exists) {
@@ -137,7 +137,7 @@ public class SigninActivity extends BaseActivity {
     }
 
     private void createUserInDatabase(User user) {
-        databaseService.createNewUser(user, new DatabaseService.DatabaseCallback<Void>() {
+        databaseService.createNewUser(user, new DatabaseService.DatabaseCallback<>() {
 
             @Override
             public void onCompleted(Void object) {

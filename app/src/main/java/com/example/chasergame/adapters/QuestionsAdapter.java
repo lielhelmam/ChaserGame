@@ -22,6 +22,7 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.VH> 
     private final List<Item> visible = new ArrayList<>();
     // master list for filtering
     private final List<Item> all = new ArrayList<>();
+
     public QuestionsAdapter(Listener listener) {
         this.listener = listener;
     }
@@ -148,8 +149,12 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.VH> 
     }
 
     static class VH extends RecyclerView.ViewHolder {
-        TextView tvNumber, tvQuestion, tvRight, tvWrong;
-        Button btnEdit, btnDelete;
+        final TextView tvNumber;
+        final TextView tvQuestion;
+        final TextView tvRight;
+        final TextView tvWrong;
+        final Button btnEdit;
+        final Button btnDelete;
 
         VH(@NonNull View itemView) {
             super(itemView);

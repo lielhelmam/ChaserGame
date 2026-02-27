@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.example.chasergame.R;
@@ -39,7 +40,7 @@ public class JoinGameActivity extends BaseActivity {
                     .child(roomId)
                     .addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
-                        public void onDataChange(DataSnapshot snapshot) {
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
 
                             if (!snapshot.exists()) {
                                 Toast.makeText(JoinGameActivity.this, "Room not found", Toast.LENGTH_SHORT).show();
@@ -70,7 +71,7 @@ public class JoinGameActivity extends BaseActivity {
                         }
 
                         @Override
-                        public void onCancelled(DatabaseError error) {
+                        public void onCancelled(@NonNull DatabaseError error) {
                             Toast.makeText(JoinGameActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
                         }
                     });

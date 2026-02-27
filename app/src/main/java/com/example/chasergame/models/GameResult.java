@@ -1,10 +1,10 @@
 package com.example.chasergame.models;
 
 public class GameResult {
-    private String userId;
-    private String username;
-    private String gameMode;
-    private boolean win;
+    private final String userId;
+    private final String username;
+    private final String gameMode;
+    private final boolean win;
 
     public GameResult(String userId, String username, String gameMode, boolean win) {
         this.userId = userId;

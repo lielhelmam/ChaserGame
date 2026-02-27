@@ -2,8 +2,8 @@ package com.example.chasergame.models;
 
 public class LeaderboardEntry {
     private int rank;
-    private String username;
-    private int score;
+    private final String username;
+    private final int score;
 
     public LeaderboardEntry(int rank, String username, int score) {
         this.rank = rank;

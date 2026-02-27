@@ -12,15 +12,13 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 
 import com.example.chasergame.R;
-import com.example.chasergame.models.GameResult;
 import com.example.chasergame.models.Question;
 import com.example.chasergame.models.User;
-import com.example.chasergame.services.DatabaseService;
-import com.example.chasergame.utils.GameResultsUtil;
 import com.example.chasergame.utils.SharedPreferencesUtil;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -194,7 +192,7 @@ public class PlayOnOneDeviceActivity extends BaseActivity {
                 .getReference("questions")
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
-                    public void onDataChange(DataSnapshot snapshot) {
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
                         questionsCount = (int) snapshot.getChildrenCount();
                         if (questionsCount <= 0) {
                             Toast.makeText(PlayOnOneDeviceActivity.this, "No questions in database", Toast.LENGTH_LONG).show();
@@ -205,7 +203,7 @@ public class PlayOnOneDeviceActivity extends BaseActivity {
                     }
 
                     @Override
-                    public void onCancelled(DatabaseError error) {
+                    public void onCancelled(@NonNull DatabaseError error) {
                         Toast.makeText(PlayOnOneDeviceActivity.this, "DB error: " + error.getMessage(), Toast.LENGTH_LONG).show();
                         goHome();
                     }
@@ -304,7 +302,7 @@ public class PlayOnOneDeviceActivity extends BaseActivity {
                 .child(String.valueOf(index))
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
-                    public void onDataChange(DataSnapshot snapshot) {
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
                         if (!isTurnRunning) return;
 
                         Question q = snapshot.getValue(Question.class);
@@ -316,7 +314,7 @@ public class PlayOnOneDeviceActivity extends BaseActivity {
                     }
 
                     @Override
-                    public void onCancelled(DatabaseError error) {
+                    public void onCancelled(@NonNull DatabaseError error) {
                         if (isTurnRunning) loadRandomQuestion();
                     }
                 });

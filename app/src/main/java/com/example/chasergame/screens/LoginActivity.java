@@ -20,7 +20,6 @@ import com.example.chasergame.utils.Validator;
 
 public class LoginActivity extends BaseActivity implements View.OnClickListener {
     private static final String TAG = "LoginActivity";
-    private Button goback;
     private EditText etUsername, etPassword;
     private Button btnLogin;
     private TextView tvRegister;
@@ -60,7 +59,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         btnLogin.setOnClickListener(this);
         tvRegister.setOnClickListener(this);
 
-        goback = findViewById(R.id.btn_login_goback);
+        Button goback = findViewById(R.id.btn_login_goback);
         goback.setOnClickListener(view -> {
             Intent intentreg = new Intent(LoginActivity.this, LandingActivity.class);
             startActivity(intentreg);
@@ -99,7 +98,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     }
 
     private void loginUser(String username, String password) {
-        databaseService.getUserByUsernameAndPassword(username, password, new DatabaseService.DatabaseCallback<User>() {
+        databaseService.getUserByUsernameAndPassword(username, password, new DatabaseService.DatabaseCallback<>() {
             @Override
             public void onCompleted(User user) {
 

@@ -34,17 +34,13 @@ import java.util.Map;
 public class OnlineGameActivity extends BaseActivity {
 
     private static final String TAG = "OnlineGameActivity";
-    // ================= STATE =================
-    private String roomId;
+    private static final long DEFAULT_TURN_MS = 60_000L;
+    private static final long WRONG_COOLDOWN_MS = 2_000L;
     private String playerId;
     private boolean isPlayer1 = false;
     private boolean isMyTurn = false;
     private boolean answerLocked = false;
     private boolean finishing = false;
-
-    private static final long DEFAULT_TURN_MS = 60_000L;
-    private static final long WRONG_COOLDOWN_MS = 2_000L;
-
     private long defaultTurnMs = DEFAULT_TURN_MS;
 
     private String lastTurnSeen = null;
@@ -54,7 +50,9 @@ public class OnlineGameActivity extends BaseActivity {
 
     // ================= UI =================
     private TextView tvTurnInfo, tvTimer, tvScore, tvQuestion;
-    private Button btnA, btnB, btnC, btnEndGame;
+    private Button btnA;
+    private Button btnB;
+    private Button btnC;
 
     // ================= FIREBASE =================
     private DatabaseReference roomRef;
@@ -77,7 +75,8 @@ public class OnlineGameActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_online_game);
 
-        roomId = getIntent().getStringExtra("ROOM_ID");
+        // ================= STATE =================
+        String roomId = getIntent().getStringExtra("ROOM_ID");
         playerId = getIntent().getStringExtra("PLAYER_ID");
 
         if (roomId == null || playerId == null) {
@@ -94,7 +93,7 @@ public class OnlineGameActivity extends BaseActivity {
         btnA = findViewById(R.id.btnAnswerA);
         btnB = findViewById(R.id.btnAnswerB);
         btnC = findViewById(R.id.btnAnswerC);
-        btnEndGame = findViewById(R.id.btnEndGame);
+        Button btnEndGame = findViewById(R.id.btnEndGame);
 
         roomRef = FirebaseDatabase.getInstance().getReference("rooms").child(roomId);
         gameRef = roomRef.child("game");
@@ -156,7 +155,8 @@ public class OnlineGameActivity extends BaseActivity {
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError error) { }
+            public void onCancelled(@NonNull DatabaseError error) {
+            }
         });
     }
 
@@ -237,7 +237,8 @@ public class OnlineGameActivity extends BaseActivity {
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError error) { }
+            public void onCancelled(@NonNull DatabaseError error) {
+            }
         });
     }
 
@@ -323,7 +324,8 @@ public class OnlineGameActivity extends BaseActivity {
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError error) { }
+            public void onCancelled(@NonNull DatabaseError error) {
+            }
         };
 
         gameRef.addValueEventListener(gameListener);
@@ -478,8 +480,8 @@ public class OnlineGameActivity extends BaseActivity {
                     d.child("turnDurationMs").setValue(defaultTurnMs);
                 } else {
                     d.child("gameOver").setValue(true);
-                    long p1 = getLong(d.child("p1Score"), 0);
-                    long p2 = getLong(d.child("p2Score"), 0);
+                    long p1 = getLong(d.child("p1Score"));
+                    long p2 = getLong(d.child("p2Score"));
                     d.child("winner").setValue(p1 > p2 ? "P1" : p2 > p1 ? "P2" : "DRAW");
                 }
                 return Transaction.success(d);
@@ -509,11 +511,11 @@ public class OnlineGameActivity extends BaseActivity {
         return d;
     }
 
-    private long getLong(MutableData d, long def) {
+    private long getLong(MutableData d) {
         Object raw = d.getValue();
         if (raw instanceof Number) return ((Number) raw).longValue();
         Long v = d.getValue(Long.class);
-        return v == null ? def : v;
+        return v == null ? (long) 0 : v;
     }
 
     private void resetButtonColors() {
@@ -543,7 +545,7 @@ public class OnlineGameActivity extends BaseActivity {
             User user = SharedPreferencesUtil.getUser(this);
             if (user != null && user.getId() != null) {
                 if (databaseService != null) {
-                    databaseService.updateUserWins(user.getId(), "onlineWins", new DatabaseService.DatabaseCallback<Void>() {
+                    databaseService.updateUserWins(user.getId(), "onlineWins", new DatabaseService.DatabaseCallback<>() {
                         @Override
                         public void onCompleted(Void object) {
                             Log.d(TAG, "Online wins updated successfully.");

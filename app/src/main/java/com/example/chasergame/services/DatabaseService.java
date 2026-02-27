@@ -19,7 +19,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.UnaryOperator;
 
 
 /// a service to interact with the Firebase Realtime Database.
@@ -120,18 +119,17 @@ public class DatabaseService {
     /// get data from the database at a specific path
     ///
     /// @param path     the path to get the data from
-    /// @param clazz    the class of the object to return
     /// @param callback the callback to call when the operation is completed
     /// @see DatabaseCallback
     /// @see Class
-    private <T> void getData(@NotNull final String path, @NotNull final Class<T> clazz, @NotNull final DatabaseCallback<T> callback) {
+    private <T> void getData(@NotNull final String path, @NotNull final DatabaseCallback<T> callback) {
         readData(path).get().addOnCompleteListener(task -> {
             if (!task.isSuccessful()) {
                 Log.e(TAG, "Error getting data", task.getException());
                 callback.onFailed(task.getException());
                 return;
             }
-            T data = task.getResult().getValue(clazz);
+            T data = task.getResult().getValue((Class<T>) User.class);
             callback.onCompleted(data);
         });
     }
@@ -188,8 +186,8 @@ public class DatabaseService {
     ///
     /// @param user     the user object to create
     /// @param callback the callback to call when the operation is completed
-    ///                              the callback will receive void
-    ///                            if the operation fails, the callback will receive an exception
+    ///                                              the callback will receive void
+    ///                                            if the operation fails, the callback will receive an exception
     /// @see DatabaseCallback
     /// @see User
     public void createNewUser(@NotNull final User user, @Nullable final DatabaseCallback<Void> callback) {
@@ -200,19 +198,19 @@ public class DatabaseService {
     ///
     /// @param uid      the id of the user to get
     /// @param callback the callback to call when the operation is completed
-    ///                               the callback will receive the user object
-    ///                             if the operation fails, the callback will receive an exception
+    ///                                               the callback will receive the user object
+    ///                                             if the operation fails, the callback will receive an exception
     /// @see DatabaseCallback
     /// @see User
     public void getUser(@NotNull final String uid, @NotNull final DatabaseCallback<User> callback) {
-        getData(USERS_PATH + "/" + uid, User.class, callback);
+        getData(USERS_PATH + "/" + uid, callback);
     }
 
     /// get all the users from the database
     ///
     /// @param callback the callback to call when the operation is completed
-    ///                              the callback will receive a list of user objects
-    ///                            if the operation fails, the callback will receive an exception
+    ///                                              the callback will receive a list of user objects
+    ///                                            if the operation fails, the callback will receive an exception
     /// @see DatabaseCallback
     /// @see List
     /// @see User
@@ -233,12 +231,12 @@ public class DatabaseService {
     /// @param username the email of the user
     /// @param password the password of the user
     /// @param callback the callback to call when the operation is completed
-    ///                            the callback will receive the user object
-    ///                          if the operation fails, the callback will receive an exception
+    ///                                            the callback will receive the user object
+    ///                                          if the operation fails, the callback will receive an exception
     /// @see DatabaseCallback
     /// @see User
     public void getUserByUsernameAndPassword(@NotNull final String username, @NotNull final String password, @NotNull final DatabaseCallback<User> callback) {
-        getUserList(new DatabaseCallback<List<User>>() {
+        getUserList(new DatabaseCallback<>() {
             @Override
             public void onCompleted(List<User> users) {
                 for (User user : users) {
@@ -262,7 +260,7 @@ public class DatabaseService {
     /// @param email    the email to check
     /// @param callback the callback to call when the operation is completed
     public void checkIfEmailExists(@NotNull final String email, @NotNull final DatabaseCallback<Boolean> callback) {
-        getUserList(new DatabaseCallback<List<User>>() {
+        getUserList(new DatabaseCallback<>() {
             @Override
             public void onCompleted(List<User> users) {
                 for (User user : users) {
@@ -319,8 +317,8 @@ public class DatabaseService {
     /// get all the questions from the database
     ///
     /// @param callback the callback to call when the operation is completed
-    ///                              the callback will receive a list of user objects
-    ///                            if the operation fails, the callback will receive an exception
+    ///                                              the callback will receive a list of user objects
+    ///                                            if the operation fails, the callback will receive an exception
     /// @see DatabaseCallback
     /// @see List
     /// @see Question

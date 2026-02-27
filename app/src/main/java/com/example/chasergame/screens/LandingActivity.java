@@ -60,23 +60,15 @@ public class LandingActivity extends BaseActivity {
         });
 
         exitBtn = findViewById(R.id.btn_main_exit);
-        exitBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                new AlertDialog.Builder(LandingActivity.this)
-                        .setTitle("Exit App")
-                        .setMessage("Are you sure?")
-                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                finishAffinity();
-                                System.exit(0);
-                            }
-                        })
-                        .setNegativeButton("No", null)
-                        .show();
-            }
-        });
+        exitBtn.setOnClickListener(v -> new AlertDialog.Builder(LandingActivity.this)
+                .setTitle("Exit App")
+                .setMessage("Are you sure?")
+                .setPositiveButton("Yes", (dialog, which) -> {
+                    finishAffinity();
+                    System.exit(0);
+                })
+                .setNegativeButton("No", null)
+                .show());
 
         /*
         DatabaseService.getInstance().getQuestionList(new DatabaseService.DatabaseCallback<List<Question>>() {

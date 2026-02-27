@@ -91,9 +91,7 @@ public class UsersListActivity extends BaseActivity {
                             Log.d(TAG, "User deleted.");
                             userAdapter.removeUser(user);   // <-- UPDATE UI
                         })
-                        .addOnFailureListener(e -> {
-                            Log.e(TAG, "Delete failed: " + e.getMessage());
-                        });
+                        .addOnFailureListener(e -> Log.e(TAG, "Delete failed: " + e.getMessage()));
             }
         });
         usersList.setAdapter(userAdapter);
