@@ -22,7 +22,7 @@ import com.google.gson.Gson;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SecretGameActivity extends AppCompatActivity {
+public class SecretGameActivity extends BaseActivity {
     private static final String TAG = "SecretGameActivity";
 
     private SongData songData;
@@ -55,7 +55,7 @@ public class SecretGameActivity extends AppCompatActivity {
         targetRight = findViewById(R.id.target_right);
 
         String json = getIntent().getStringExtra("SONG_DATA_JSON");
-        Log.d(TAG, "Received JSON: " + json);
+        Log.d(TAG, "onCreate: Received JSON: " + (json != null ? json : "NULL"));
 
         if (json != null) {
             try {
@@ -66,12 +66,23 @@ public class SecretGameActivity extends AppCompatActivity {
                     Log.d(TAG, "Song loaded: " + songData.getName() + ", Notes count: " + remainingNotes.size());
                     
                     setupInputListeners();
-                    // Wait for layout to be ready before starting
-                    findViewById(R.id.game_layout).post(this::startGame);
+                    
+                    // Use a small delay to ensure layout is ready
+                    gameHandler.postDelayed(this::startGame, 500);
+                } else {
+                    Log.e(TAG, "SongData is null after parsing JSON");
+                    Toast.makeText(this, "Error: Could not parse song data", Toast.LENGTH_SHORT).show();
+                    finish();
                 }
             } catch (Exception e) {
                 Log.e(TAG, "Error parsing JSON", e);
+                Toast.makeText(this, "Error loading song: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                finish();
             }
+        } else {
+            Log.e(TAG, "No SONG_DATA_JSON extra in Intent");
+            Toast.makeText(this, "No song data received!", Toast.LENGTH_SHORT).show();
+            finish();
         }
     }
 
@@ -81,16 +92,27 @@ public class SecretGameActivity extends AppCompatActivity {
     }
 
     private void startGame() {
-        if (songData == null || songData.getResName() == null) {
-            Log.e(TAG, "Song data or resource name is missing!");
+        if (songData == null) {
+            Log.e(TAG, "startGame: songData is null");
+            return;
+        }
+        
+        String resName = songData.getResName();
+        Log.d(TAG, "startGame: Resource Name = " + (resName != null ? resName : "NULL"));
+
+        if (resName == null || resName.isEmpty()) {
+            Toast.makeText(this, "Song resource name is missing!", Toast.LENGTH_LONG).show();
+            Log.e(TAG, "Resource name is null or empty");
+            finish();
             return;
         }
 
-        int resId = getResources().getIdentifier(songData.getResName(), "raw", getPackageName());
-        Log.d(TAG, "Resource name: " + songData.getResName() + ", resId: " + resId);
+        int resId = getResources().getIdentifier(resName, "raw", getPackageName());
+        Log.d(TAG, "startGame: resId = " + resId);
 
         if (resId == 0) {
-            Toast.makeText(this, "Audio file not found: " + songData.getResName(), Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Audio file not found: " + resName, Toast.LENGTH_LONG).show();
+            Log.e(TAG, "Could not find resource with name: " + resName);
             finish();
             return;
         }
@@ -98,7 +120,8 @@ public class SecretGameActivity extends AppCompatActivity {
         try {
             mediaPlayer = MediaPlayer.create(this, resId);
             if (mediaPlayer == null) {
-                Log.e(TAG, "MediaPlayer is null after creation");
+                Log.e(TAG, "MediaPlayer.create returned null for resId: " + resId);
+                Toast.makeText(this, "Failed to initialize player", Toast.LENGTH_SHORT).show();
                 finish();
                 return;
             }
@@ -109,9 +132,10 @@ public class SecretGameActivity extends AppCompatActivity {
             isGameRunning = true;
             
             gameHandler.post(gameLoop);
-            Log.d(TAG, "Game loop started");
+            Log.d(TAG, "Game loop started successfully");
         } catch (Exception e) {
-            Log.e(TAG, "Error starting game", e);
+            Log.e(TAG, "Error during media player start", e);
+            Toast.makeText(this, "Error starting audio: " + e.getMessage(), Toast.LENGTH_SHORT).show();
             finish();
         }
     }
@@ -156,7 +180,6 @@ public class SecretGameActivity extends AppCompatActivity {
         noteView.setTranslationY(-size);
 
         float targetY = targetLeft.getY();
-        // Fallback if getY is not ready
         if (targetY == 0) targetY = laneLeft.getHeight() - (120 * getResources().getDisplayMetrics().density);
 
         noteView.animate()

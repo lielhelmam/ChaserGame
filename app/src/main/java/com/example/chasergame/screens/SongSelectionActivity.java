@@ -2,6 +2,7 @@ package com.example.chasergame.screens;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -25,12 +26,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SongSelectionActivity extends BaseActivity {
+    private static final String TAG = "SongSelectionActivity";
 
     private RecyclerView rvSongs;
     private SongsAdapter adapter;
     private List<SongData> songList;
     private DatabaseReference mDatabase;
-    private ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,10 +79,16 @@ public class SongSelectionActivity extends BaseActivity {
     }
 
     private void onSongSelected(SongData song) {
-        Intent intent = new Intent(this, SecretGameActivity.class);
-        // Using GSON to pass the complex SongData object
-        String songJson = new Gson().toJson(song);
-        intent.putExtra("SONG_DATA_JSON", songJson);
-        startActivity(intent);
+        Log.d(TAG, "Song selected: " + song.getName());
+        try {
+            Intent intent = new Intent(this, SecretGameActivity.class);
+            String songJson = new Gson().toJson(song);
+            Log.d(TAG, "Passing JSON: " + songJson);
+            intent.putExtra("SONG_DATA_JSON", songJson);
+            startActivity(intent);
+        } catch (Exception e) {
+            Log.e(TAG, "Error starting SecretGameActivity", e);
+            Toast.makeText(this, "Error starting game: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
     }
 }
