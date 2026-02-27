@@ -22,6 +22,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.MutableData;
+import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
 
@@ -41,8 +42,8 @@ public class OnlineGameActivity extends BaseActivity {
     private boolean answerLocked = false;
     private boolean finishing = false;
 
-    private static final long DEFAULT_TURN_MS = 60_000;
-    private static final long WRONG_COOLDOWN_MS = 2000;
+    private static final long DEFAULT_TURN_MS = 60_000L;
+    private static final long WRONG_COOLDOWN_MS = 2_000L;
 
     private long defaultTurnMs = DEFAULT_TURN_MS;
 
@@ -60,8 +61,16 @@ public class OnlineGameActivity extends BaseActivity {
     private DatabaseReference gameRef;
     private ValueEventListener gameListener;
 
+    // server time offset listener
+    private DatabaseReference offsetRef;
+    private ValueEventListener offsetListener;
+    private long serverTimeOffsetMs = 0L; // serverNow = System.currentTimeMillis() + serverTimeOffsetMs
+
     private CountDownTimer turnTimer;
     private CountDownTimer cooldownTimer;
+
+    // NOTE: DatabaseService is provided by BaseActivity as protected field:
+    // protected DatabaseService databaseService;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -95,6 +104,26 @@ public class OnlineGameActivity extends BaseActivity {
         btnC.setOnClickListener(v -> onAnswerClicked("C", btnC));
         btnEndGame.setOnClickListener(v -> deleteRoomAndExit());
 
+        // listen to Firebase serverTime offset
+        offsetRef = FirebaseDatabase.getInstance().getReference(".info/serverTimeOffset");
+        offsetListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                Object v = snapshot.getValue();
+                if (v instanceof Number) {
+                    serverTimeOffsetMs = ((Number) v).longValue();
+                } else {
+                    serverTimeOffsetMs = 0L;
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                serverTimeOffsetMs = 0L;
+            }
+        };
+        offsetRef.addValueEventListener(offsetListener);
+
         initRoom();
     }
 
@@ -109,12 +138,13 @@ public class OnlineGameActivity extends BaseActivity {
                 }
 
                 String hostId = snap.child("hostId").getValue(String.class);
-                isPlayer1 = playerId.equals(hostId);
+                isPlayer1 = hostId != null && playerId.equals(hostId);
 
                 Long t = snap.child("timeMs").getValue(Long.class);
                 if (t != null && t > 0) defaultTurnMs = t;
 
                 if (isPlayer1) {
+                    // remove room on disconnect (host)
                     roomRef.onDisconnect().removeValue();
                 }
 
@@ -126,18 +156,20 @@ public class OnlineGameActivity extends BaseActivity {
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError error) {}
+            public void onCancelled(@NonNull DatabaseError error) { }
         });
     }
 
     private void createInitialGame() {
-        long now = System.currentTimeMillis();
-
+        // Use server timestamp and duration
         Map<String, Object> base = new HashMap<>();
         base.put("p1Score", 0);
         base.put("p2Score", 0);
         base.put("currentTurn", "p1");
-        base.put("turnEndAt", now + defaultTurnMs);
+
+        base.put("turnStartedAt", ServerValue.TIMESTAMP);
+        base.put("turnDurationMs", defaultTurnMs);
+
         base.put("gameOver", false);
         base.put("winner", "");
 
@@ -169,17 +201,18 @@ public class OnlineGameActivity extends BaseActivity {
                     }
                 }
 
-                if (qSnap == null) {
-                    // Fallback or error
-                    return;
-                }
+                if (qSnap == null) return;
 
                 String q = qSnap.child("question").getValue(String.class);
                 String right = qSnap.child("rightAnswer").getValue(String.class);
 
                 ArrayList<String> wrong = new ArrayList<>();
-                for (DataSnapshot w : qSnap.child("wrongAnswers").getChildren()) {
-                    wrong.add(w.getValue(String.class));
+                DataSnapshot wrongsNode = qSnap.child("wrongAnswers");
+                if (wrongsNode.exists()) {
+                    for (DataSnapshot w : wrongsNode.getChildren()) {
+                        String val = w.getValue(String.class);
+                        if (val != null) wrong.add(val);
+                    }
                 }
 
                 if (q == null || right == null || wrong.size() < 2) return;
@@ -204,7 +237,7 @@ public class OnlineGameActivity extends BaseActivity {
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError error) {}
+            public void onCancelled(@NonNull DatabaseError error) { }
         });
     }
 
@@ -227,7 +260,7 @@ public class OnlineGameActivity extends BaseActivity {
                 String turn = snap.child("currentTurn").getValue(String.class);
                 if (turn == null) turn = "p1";
 
-                boolean newTurn = !turn.equals(lastTurnSeen);
+                boolean newTurn = lastTurnSeen == null || !turn.equals(lastTurnSeen);
                 lastTurnSeen = turn;
 
                 isMyTurn = (isPlayer1 && turn.equals("p1")) ||
@@ -246,32 +279,68 @@ public class OnlineGameActivity extends BaseActivity {
                     }
                 }
 
-                if (newTurn && isMyTurn) {
+                if (newTurn) {
+                    // reset state for new turn
                     answerLocked = false;
                     inCooldown = false;
                     resetButtonColors();
+
+                    if (!snap.hasChild("question")) {
+                        setNewQuestionInGame();
+                    }
                 }
 
-                Long endAt = snap.child("turnEndAt").getValue(Long.class);
-                if (endAt != null) {
-                    startLocalTimer(Math.max(0, endAt - System.currentTimeMillis()));
+                // --- compute remaining time using server time ---
+                long serverNow = System.currentTimeMillis() + serverTimeOffsetMs;
+
+                Long startAt = snap.child("turnStartedAt").getValue(Long.class);
+                long duration = getLong(snap.child("turnDurationMs"), defaultTurnMs);
+
+                long remaining;
+                if (startAt != null) {
+                    remaining = (startAt + duration) - serverNow;
+                } else {
+                    // fallback for older rooms that may still use turnEndAt
+                    Long endAt = snap.child("turnEndAt").getValue(Long.class);
+                    if (endAt != null) {
+                        remaining = endAt - serverNow;
+                    } else {
+                        remaining = duration;
+                    }
                 }
+                if (remaining < 0) remaining = 0;
+
+                // If remaining is zero and it's our turn, endTurn (server authoritative)
+                if (remaining == 0 && isMyTurn && !finishing) {
+                    endTurn();
+                    startLocalTimer(0);
+                } else {
+                    startLocalTimer(remaining);
+                }
+                // -----------------------------------------------------
 
                 setButtonsEnabled(isMyTurn && !answerLocked && !inCooldown);
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError error) {}
+            public void onCancelled(@NonNull DatabaseError error) { }
         };
 
         gameRef.addValueEventListener(gameListener);
     }
 
     private void loadQuestionFromSnapshot(DataSnapshot snap) {
-        tvQuestion.setText(snap.child("question/text").getValue(String.class));
-        btnA.setText(snap.child("question/a").getValue(String.class));
-        btnB.setText(snap.child("question/b").getValue(String.class));
-        btnC.setText(snap.child("question/c").getValue(String.class));
+        DataSnapshot q = snap.child("question");
+        if (q != null && q.exists()) {
+            String text = q.child("text").getValue(String.class);
+            tvQuestion.setText(text != null ? text : "");
+            String a = q.child("a").getValue(String.class);
+            String b = q.child("b").getValue(String.class);
+            String c = q.child("c").getValue(String.class);
+            btnA.setText(a != null ? a : "A");
+            btnB.setText(b != null ? b : "B");
+            btnC.setText(c != null ? c : "C");
+        }
     }
 
     // ================= ANSWERS =================
@@ -281,12 +350,12 @@ public class OnlineGameActivity extends BaseActivity {
         answerLocked = true;
         setButtonsEnabled(false);
 
-        gameRef.child("question/correct")
+        gameRef.child("question").child("correct")
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot s) {
                         String correct = s.getValue(String.class);
-                        boolean ok = key.equals(correct);
+                        boolean ok = key != null && key.equals(correct);
 
                         showAnswerColors(key, correct, clickedBtn);
 
@@ -300,7 +369,6 @@ public class OnlineGameActivity extends BaseActivity {
 
                     @Override
                     public void onCancelled(@NonNull DatabaseError error) {
-                        // Re-enable buttons if DB read fails
                         answerLocked = false;
                         setButtonsEnabled(isMyTurn && !inCooldown);
                     }
@@ -308,24 +376,36 @@ public class OnlineGameActivity extends BaseActivity {
     }
 
     private void startWrongCooldown() {
+        if (cooldownTimer != null) {
+            cooldownTimer.cancel();
+            cooldownTimer = null;
+        }
+
         inCooldown = true;
         tvTurnInfo.setText("⏳ Cooldown...");
 
-        cooldownTimer = new CountDownTimer(WRONG_COOLDOWN_MS, 1000) {
+        cooldownTimer = new CountDownTimer(WRONG_COOLDOWN_MS, 250) {
             @Override
             public void onTick(long ms) {
-                tvTimer.setText("⏳ " + ((ms / 1000) + 1));
+                long secs = (ms + 999) / 1000;
+                tvTimer.setText("⏳ " + secs);
             }
 
             @Override
             public void onFinish() {
                 inCooldown = false;
+                answerLocked = false;
+                tvTurnInfo.setText(isMyTurn ? "Your turn" : "Opponent's turn");
+
                 if (isMyTurn && !finishing) {
                     setNewQuestionInGame();
                 }
+                setButtonsEnabled(isMyTurn && !answerLocked && !inCooldown);
             }
         };
         cooldownTimer.start();
+
+        setButtonsEnabled(false);
     }
 
     private void incrementScore(String key) {
@@ -333,32 +413,53 @@ public class OnlineGameActivity extends BaseActivity {
             @NonNull
             @Override
             public Transaction.Result doTransaction(@NonNull MutableData d) {
-                Long v = d.getValue(Long.class);
-                d.setValue((v == null ? 0 : v) + 1);
+                Object raw = d.getValue();
+                long current = 0;
+                if (raw instanceof Number) {
+                    current = ((Number) raw).longValue();
+                } else {
+                    Long v = d.getValue(Long.class);
+                    current = v == null ? 0 : v;
+                }
+                d.setValue(current + 1);
                 return Transaction.success(d);
             }
 
             @Override
-            public void onComplete(DatabaseError e, boolean c, DataSnapshot s) {}
+            public void onComplete(DatabaseError e, boolean c, DataSnapshot s) {
+                if (e != null) {
+                    Log.w(TAG, "incrementScore transaction failed", e.toException());
+                }
+            }
         });
     }
 
     // ================= TIMER =================
     private void startLocalTimer(long ms) {
-        if (turnTimer != null) turnTimer.cancel();
+        if (turnTimer != null) {
+            turnTimer.cancel();
+            turnTimer = null;
+        }
+
+        if (ms <= 0) {
+            tvTimer.setText("00:00");
+            return;
+        }
 
         turnTimer = new CountDownTimer(ms, 1000) {
             @Override
-            public void onTick(long ms) {
+            public void onTick(long msRemaining) {
                 if (!inCooldown) {
-                    long sec = ms / 1000;
+                    long sec = msRemaining / 1000;
                     tvTimer.setText(String.format("%02d:%02d", sec / 60, sec % 60));
                 }
             }
 
             @Override
             public void onFinish() {
-                if (isMyTurn) endTurn();
+                if (isMyTurn && !finishing) {
+                    endTurn();
+                }
             }
         };
         turnTimer.start();
@@ -372,7 +473,9 @@ public class OnlineGameActivity extends BaseActivity {
                 String turn = d.child("currentTurn").getValue(String.class);
                 if ("p1".equals(turn)) {
                     d.child("currentTurn").setValue("p2");
-                    d.child("turnEndAt").setValue(System.currentTimeMillis() + defaultTurnMs);
+                    // set server timestamp for start of new turn and duration
+                    d.child("turnStartedAt").setValue(ServerValue.TIMESTAMP);
+                    d.child("turnDurationMs").setValue(defaultTurnMs);
                 } else {
                     d.child("gameOver").setValue(true);
                     long p1 = getLong(d.child("p1Score"), 0);
@@ -383,7 +486,11 @@ public class OnlineGameActivity extends BaseActivity {
             }
 
             @Override
-            public void onComplete(DatabaseError e, boolean c, DataSnapshot s) {}
+            public void onComplete(DatabaseError e, boolean c, DataSnapshot s) {
+                if (e != null) {
+                    Log.w(TAG, "endTurn transaction failed", e.toException());
+                }
+            }
         });
     }
 
@@ -396,10 +503,15 @@ public class OnlineGameActivity extends BaseActivity {
 
     private long getLong(DataSnapshot s, long d) {
         Long v = s.getValue(Long.class);
-        return v == null ? d : v;
+        if (v != null) return v;
+        Object raw = s.getValue();
+        if (raw instanceof Number) return ((Number) raw).longValue();
+        return d;
     }
 
     private long getLong(MutableData d, long def) {
+        Object raw = d.getValue();
+        if (raw instanceof Number) return ((Number) raw).longValue();
         Long v = d.getValue(Long.class);
         return v == null ? def : v;
     }
@@ -414,11 +526,11 @@ public class OnlineGameActivity extends BaseActivity {
     private void showAnswerColors(String chosen, String correct, Button clicked) {
         resetButtonColors();
         Button c = "A".equals(correct) ? btnA : "B".equals(correct) ? btnB : btnC;
-        if (chosen.equals(correct)) {
+        if (chosen != null && chosen.equals(correct)) {
             clicked.setBackgroundTintList(ColorStateList.valueOf(Color.GREEN));
         } else {
             clicked.setBackgroundTintList(ColorStateList.valueOf(Color.RED));
-            c.setBackgroundTintList(ColorStateList.valueOf(Color.GREEN));
+            if (c != null) c.setBackgroundTintList(ColorStateList.valueOf(Color.GREEN));
         }
     }
 
@@ -430,26 +542,29 @@ public class OnlineGameActivity extends BaseActivity {
         if (isWinner) {
             User user = SharedPreferencesUtil.getUser(this);
             if (user != null && user.getId() != null) {
-                databaseService.updateUserWins(user.getId(), "onlineWins", new DatabaseService.DatabaseCallback<Void>() {
-                    @Override
-                    public void onCompleted(Void object) {
-                        Log.d(TAG, "Online wins updated successfully.");
-                    }
+                if (databaseService != null) {
+                    databaseService.updateUserWins(user.getId(), "onlineWins", new DatabaseService.DatabaseCallback<Void>() {
+                        @Override
+                        public void onCompleted(Void object) {
+                            Log.d(TAG, "Online wins updated successfully.");
+                        }
 
-                    @Override
-                    public void onFailed(Exception e) {
-                        Log.e(TAG, "Failed to update online wins.", e);
-                        Toast.makeText(OnlineGameActivity.this, "Could not save your win.", Toast.LENGTH_SHORT).show();
-                    }
-                });
+                        @Override
+                        public void onFailed(Exception e) {
+                            Log.e(TAG, "Failed to update online wins.", e);
+                            Toast.makeText(OnlineGameActivity.this, "Could not save your win.", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                } else {
+                    Log.w(TAG, "DatabaseService is null — cannot update online wins. Make sure BaseActivity initialized it.");
+                }
             } else {
                 Log.e(TAG, "User not found, cannot update wins.");
             }
         }
 
-        String msg =
-                "DRAW".equals(w) ? "🤝 Draw" :
-                        (isWinner) ? "🏆 You Win!" : "😢 You Lose";
+        String msg = "DRAW".equals(w) ? "🤝 Draw" :
+                (isWinner) ? "🏆 You Win!" : "😢 You Lose";
 
         new androidx.appcompat.app.AlertDialog.Builder(this)
                 .setTitle("Game Over")
@@ -476,8 +591,21 @@ public class OnlineGameActivity extends BaseActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (turnTimer != null) turnTimer.cancel();
-        if (cooldownTimer != null) cooldownTimer.cancel();
-        if (gameListener != null) gameRef.removeEventListener(gameListener);
+        if (turnTimer != null) {
+            turnTimer.cancel();
+            turnTimer = null;
+        }
+        if (cooldownTimer != null) {
+            cooldownTimer.cancel();
+            cooldownTimer = null;
+        }
+        if (gameListener != null) {
+            gameRef.removeEventListener(gameListener);
+            gameListener = null;
+        }
+        if (offsetListener != null && offsetRef != null) {
+            offsetRef.removeEventListener(offsetListener);
+            offsetListener = null;
+        }
     }
 }
