@@ -89,8 +89,19 @@
                 android:id="@+id/btn_admin_manage_songs"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
+                android:layout_marginBottom="12dp"
                 android:backgroundTint="#333333"
-                android:text="🎵 Manage Rhythm Songs"
+                android:text="➕ Add Rhythm Song"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/btn_admin_songs_list"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:backgroundTint="#C62828"
+                android:text="🎵 Songs List (Edit/Delete)"
                 android:textColor="#FFFFFF"
                 android:textSize="16sp"
                 android:textStyle="bold" />

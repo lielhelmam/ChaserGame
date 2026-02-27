@@ -49,10 +49,17 @@ public class AdminActivity extends BaseActivity {
             startActivity(intent);
         });
 
-        // New Button for Managing Songs
+        // Add Rhythm Song
         Button btnManageSongs = findViewById(R.id.btn_admin_manage_songs);
         btnManageSongs.setOnClickListener(v -> {
             Intent intent = new Intent(AdminActivity.this, ManageSongsActivity.class);
+            startActivity(intent);
+        });
+
+        // Songs List (Edit/Delete)
+        Button btnSongsList = findViewById(R.id.btn_admin_songs_list);
+        btnSongsList.setOnClickListener(v -> {
+            Intent intent = new Intent(AdminActivity.this, SongsListActivity.class);
             startActivity(intent);
         });
 
