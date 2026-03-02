@@ -28,23 +28,26 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class SecretGameActivity extends BaseActivity {
     private static final String TAG = "SecretGameActivity";
 
     private SongData songData;
     private MediaPlayer mediaPlayer;
-    private TextView tvScore, tvSongName;
+    private TextView tvScore, tvSongName, tvAccuracy;
     private FrameLayout laneLeft, laneRight;
     private View targetLeft, targetRight;
 
     private int currentScore = 0;
+    private int totalNotesPassed = 0;
+    private double notesHitWeight = 0; 
     private long startTime;
     private Handler gameHandler = new Handler(Looper.getMainLooper());
     private List<Note> remainingNotes;
     private boolean isGameRunning = false;
 
-    private static final long NOTE_FALL_DURATION = 2000L; // Time to reach the target
+    private static final long NOTE_FALL_DURATION = 2000L; 
     private static final int PERFECT_THRESHOLD = 150;
     private static final int GOOD_THRESHOLD = 300;
 
@@ -60,6 +63,7 @@ public class SecretGameActivity extends BaseActivity {
 
             tvScore = findViewById(R.id.tv_game_score);
             tvSongName = findViewById(R.id.tv_game_song_name);
+            tvAccuracy = findViewById(R.id.tv_game_accuracy);
             laneLeft = findViewById(R.id.lane_left);
             laneRight = findViewById(R.id.lane_right);
             targetLeft = findViewById(R.id.target_left);
@@ -87,7 +91,20 @@ public class SecretGameActivity extends BaseActivity {
                     songData = snapshot.getValue(SongData.class);
                     if (songData != null) {
                         tvSongName.setText(songData.getName());
-                        remainingNotes = (songData.getNotes() != null) ? new ArrayList<>(songData.getNotes()) : new ArrayList<>();
+                        
+                        // Filter notes: Remove nulls and notes that are too early to be hit correctly
+                        List<Note> allNotes = songData.getNotes();
+                        remainingNotes = new ArrayList<>();
+                        if (allNotes != null) {
+                            for (Note n : allNotes) {
+                                if (n != null && n.getTimestamp() >= NOTE_FALL_DURATION) {
+                                    remainingNotes.add(n);
+                                } else if (n != null) {
+                                    Log.d(TAG, "Skipping early note at: " + n.getTimestamp());
+                                }
+                            }
+                        }
+                        
                         setupInputListeners();
                         gameHandler.postDelayed(SecretGameActivity.this::startGame, 500);
                     } else {
@@ -193,7 +210,6 @@ public class SecretGameActivity extends BaseActivity {
             targetY = parentLane.getHeight() - (100 * density);
         }
 
-        // Fix: Animate PAST the target to the bottom of the lane
         float endY = parentLane.getHeight() + size;
         float distanceToTarget = targetY + size;
         float totalDistance = endY + size;
@@ -205,6 +221,8 @@ public class SecretGameActivity extends BaseActivity {
                 .setInterpolator(new LinearInterpolator())
                 .withEndAction(() -> {
                     if (parentLane != null && parentLane.indexOfChild(noteView) != -1) {
+                        totalNotesPassed++;
+                        updateAccuracyDisplay();
                         showFeedback("MISS", Color.RED, note.getLane());
                         parentLane.removeView(noteView);
                     }
@@ -237,17 +255,26 @@ public class SecretGameActivity extends BaseActivity {
         }
 
         if (bestNote != null && minDiff < GOOD_THRESHOLD) {
+            totalNotesPassed++;
             if (minDiff < PERFECT_THRESHOLD) {
                 currentScore += 300;
+                notesHitWeight += 1.0; 
                 showFeedback("300", Color.YELLOW, lane);
             } else {
                 currentScore += 100;
+                notesHitWeight += 0.5;
                 showFeedback("100", Color.WHITE, lane);
             }
             tvScore.setText("Score: " + currentScore);
+            updateAccuracyDisplay();
             laneView.removeView(bestNote);
         }
-        // Removed the 'else' MISS here to avoid miss on every empty tap
+    }
+
+    private void updateAccuracyDisplay() {
+        if (totalNotesPassed == 0) return;
+        double accuracy = (notesHitWeight / totalNotesPassed) * 100.0;
+        tvAccuracy.setText(String.format(Locale.US, "Acc: %.1f%%", accuracy));
     }
 
     private void showFeedback(String text, int color, int lane) {
@@ -280,8 +307,9 @@ public class SecretGameActivity extends BaseActivity {
         isGameRunning = false;
         gameHandler.removeCallbacks(gameLoop);
         if (songData != null) {
+            double finalAcc = totalNotesPassed > 0 ? (notesHitWeight / totalNotesPassed) * 100.0 : 0;
             String msg = (currentScore >= songData.getTargetScore()) ? "Level Passed!" : "Level Failed!";
-            Toast.makeText(this, msg + " Final Score: " + currentScore, Toast.LENGTH_LONG).show();
+            Toast.makeText(this, msg + "\nScore: " + currentScore + "\nAcc: " + String.format(Locale.US, "%.1f%%", finalAcc), Toast.LENGTH_LONG).show();
         }
         finish();
     }
