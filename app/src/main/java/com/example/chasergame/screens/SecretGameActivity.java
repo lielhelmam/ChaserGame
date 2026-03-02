@@ -1,10 +1,13 @@
 package com.example.chasergame.screens;
 
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.view.animation.LinearInterpolator;
 import android.widget.FrameLayout;
@@ -12,12 +15,16 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.annotation.NonNull;
 
 import com.example.chasergame.R;
 import com.example.chasergame.models.Note;
 import com.example.chasergame.models.SongData;
-import com.google.gson.Gson;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,83 +43,82 @@ public class SecretGameActivity extends BaseActivity {
     private Handler gameHandler = new Handler(Looper.getMainLooper());
     private List<Note> remainingNotes;
     private boolean isGameRunning = false;
-    
-    private static final long NOTE_FALL_DURATION = 2000L; 
-    private static final int PERFECT_THRESHOLD = 150;    
-    private static final int GOOD_THRESHOLD = 300;       
+
+    private static final long NOTE_FALL_DURATION = 2000L; // Time to reach the target
+    private static final int PERFECT_THRESHOLD = 150;
+    private static final int GOOD_THRESHOLD = 300;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_secret_game);
 
-        tvScore = findViewById(R.id.tv_game_score);
-        tvSongName = findViewById(R.id.tv_game_song_name);
-        laneLeft = findViewById(R.id.lane_left);
-        laneRight = findViewById(R.id.lane_right);
-        targetLeft = findViewById(R.id.target_left);
-        targetRight = findViewById(R.id.target_right);
+        Log.d(TAG, "onCreate: Activity started");
 
-        String json = getIntent().getStringExtra("SONG_DATA_JSON");
-        Log.d(TAG, "onCreate: Received JSON: " + (json != null ? json : "NULL"));
+        try {
+            EdgeToEdge.enable(this);
+            setContentView(R.layout.activity_secret_game);
 
-        if (json != null) {
-            try {
-                songData = new Gson().fromJson(json, SongData.class);
-                if (songData != null) {
-                    tvSongName.setText(songData.getName());
-                    remainingNotes = (songData.getNotes() != null) ? new ArrayList<>(songData.getNotes()) : new ArrayList<>();
-                    Log.d(TAG, "Song loaded: " + songData.getName() + ", Notes count: " + remainingNotes.size());
-                    
-                    setupInputListeners();
-                    
-                    // Use a small delay to ensure layout is ready
-                    gameHandler.postDelayed(this::startGame, 500);
-                } else {
-                    Log.e(TAG, "SongData is null after parsing JSON");
-                    Toast.makeText(this, "Error: Could not parse song data", Toast.LENGTH_SHORT).show();
-                    finish();
-                }
-            } catch (Exception e) {
-                Log.e(TAG, "Error parsing JSON", e);
-                Toast.makeText(this, "Error loading song: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            tvScore = findViewById(R.id.tv_game_score);
+            tvSongName = findViewById(R.id.tv_game_song_name);
+            laneLeft = findViewById(R.id.lane_left);
+            laneRight = findViewById(R.id.lane_right);
+            targetLeft = findViewById(R.id.target_left);
+            targetRight = findViewById(R.id.target_right);
+
+            String songId = getIntent().getStringExtra("SONG_ID");
+            if (songId != null) {
+                loadSongData(songId);
+            } else {
+                Toast.makeText(this, "No song selected!", Toast.LENGTH_SHORT).show();
                 finish();
             }
-        } else {
-            Log.e(TAG, "No SONG_DATA_JSON extra in Intent");
-            Toast.makeText(this, "No song data received!", Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            Log.e(TAG, "Crash in onCreate", e);
             finish();
         }
+    }
+
+    private void loadSongData(String songId) {
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("rhythm_songs").child(songId);
+        ref.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                try {
+                    songData = snapshot.getValue(SongData.class);
+                    if (songData != null) {
+                        tvSongName.setText(songData.getName());
+                        remainingNotes = (songData.getNotes() != null) ? new ArrayList<>(songData.getNotes()) : new ArrayList<>();
+                        setupInputListeners();
+                        gameHandler.postDelayed(SecretGameActivity.this::startGame, 500);
+                    } else {
+                        finish();
+                    }
+                } catch (Exception e) {
+                    finish();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                finish();
+            }
+        });
     }
 
     private void setupInputListeners() {
-        targetLeft.setOnClickListener(v -> checkHit(0));
-        targetRight.setOnClickListener(v -> checkHit(1));
+        if (targetLeft != null) targetLeft.setOnClickListener(v -> checkHit(0));
+        if (targetRight != null) targetRight.setOnClickListener(v -> checkHit(1));
     }
 
     private void startGame() {
-        if (songData == null) {
-            Log.e(TAG, "startGame: songData is null");
-            return;
-        }
-        
+        if (isFinishing() || isDestroyed()) return;
+        if (songData == null) return;
+
         String resName = songData.getResName();
-        Log.d(TAG, "startGame: Resource Name = " + (resName != null ? resName : "NULL"));
-
-        if (resName == null || resName.isEmpty()) {
-            Toast.makeText(this, "Song resource name is missing!", Toast.LENGTH_LONG).show();
-            Log.e(TAG, "Resource name is null or empty");
-            finish();
-            return;
-        }
-
         int resId = getResources().getIdentifier(resName, "raw", getPackageName());
-        Log.d(TAG, "startGame: resId = " + resId);
 
         if (resId == 0) {
             Toast.makeText(this, "Audio file not found: " + resName, Toast.LENGTH_LONG).show();
-            Log.e(TAG, "Could not find resource with name: " + resName);
             finish();
             return;
         }
@@ -120,22 +126,16 @@ public class SecretGameActivity extends BaseActivity {
         try {
             mediaPlayer = MediaPlayer.create(this, resId);
             if (mediaPlayer == null) {
-                Log.e(TAG, "MediaPlayer.create returned null for resId: " + resId);
-                Toast.makeText(this, "Failed to initialize player", Toast.LENGTH_SHORT).show();
                 finish();
                 return;
             }
             mediaPlayer.setOnCompletionListener(mp -> endGame());
             mediaPlayer.start();
-            
+
             startTime = System.currentTimeMillis();
             isGameRunning = true;
-            
             gameHandler.post(gameLoop);
-            Log.d(TAG, "Game loop started successfully");
         } catch (Exception e) {
-            Log.e(TAG, "Error during media player start", e);
-            Toast.makeText(this, "Error starting audio: " + e.getMessage(), Toast.LENGTH_SHORT).show();
             finish();
         }
     }
@@ -155,7 +155,7 @@ public class SecretGameActivity extends BaseActivity {
 
         long elapsed = System.currentTimeMillis() - startTime;
         List<Note> toSpawn = new ArrayList<>();
-        
+
         for (Note note : remainingNotes) {
             if (elapsed >= (note.getTimestamp() - NOTE_FALL_DURATION)) {
                 toSpawn.add(note);
@@ -171,24 +171,46 @@ public class SecretGameActivity extends BaseActivity {
     private void spawnNoteView(Note note) {
         View noteView = new View(this);
         noteView.setBackgroundResource(R.drawable.note_circle);
-        int size = (int) (60 * getResources().getDisplayMetrics().density);
+        float density = getResources().getDisplayMetrics().density;
+        int size = (int) (60 * density);
+
         FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(size, size);
+        params.gravity = Gravity.CENTER_HORIZONTAL;
         noteView.setLayoutParams(params);
 
         FrameLayout parentLane = (note.getLane() == 0) ? laneLeft : laneRight;
+        if (parentLane == null) return;
+
         parentLane.addView(noteView);
         noteView.setTranslationY(-size);
 
-        float targetY = targetLeft.getY();
-        if (targetY == 0) targetY = laneLeft.getHeight() - (120 * getResources().getDisplayMetrics().density);
+        float targetY;
+        if (targetLeft != null && laneLeft != null && targetLeft.getHeight() > 0) {
+            float relativeTargetTop = targetLeft.getTop() - laneLeft.getTop();
+            float targetHeight = targetLeft.getHeight();
+            targetY = relativeTargetTop + (targetHeight - size) / 2.0f;
+        } else {
+            targetY = parentLane.getHeight() - (100 * density);
+        }
+
+        // Fix: Animate PAST the target to the bottom of the lane
+        float endY = parentLane.getHeight() + size;
+        float distanceToTarget = targetY + size;
+        float totalDistance = endY + size;
+        long totalDuration = (long) (totalDistance * NOTE_FALL_DURATION / distanceToTarget);
 
         noteView.animate()
-                .translationY(targetY)
-                .setDuration(NOTE_FALL_DURATION)
+                .translationY(endY)
+                .setDuration(totalDuration)
                 .setInterpolator(new LinearInterpolator())
-                .withEndAction(() -> parentLane.removeView(noteView))
+                .withEndAction(() -> {
+                    if (parentLane != null && parentLane.indexOfChild(noteView) != -1) {
+                        showFeedback("MISS", Color.RED, note.getLane());
+                        parentLane.removeView(noteView);
+                    }
+                })
                 .start();
-                
+
         noteView.setTag(note.getTimestamp());
     }
 
@@ -196,7 +218,8 @@ public class SecretGameActivity extends BaseActivity {
         if (!isGameRunning) return;
         long currentTime = System.currentTimeMillis() - startTime;
         FrameLayout laneView = (lane == 0) ? laneLeft : laneRight;
-        
+        if (laneView == null) return;
+
         View bestNote = null;
         long minDiff = Long.MAX_VALUE;
 
@@ -205,7 +228,7 @@ public class SecretGameActivity extends BaseActivity {
             if (v.getTag() instanceof Long) {
                 long noteTimestamp = (long) v.getTag();
                 long diff = Math.abs(currentTime - noteTimestamp);
-                
+
                 if (diff < minDiff) {
                     minDiff = diff;
                     bestNote = v;
@@ -216,19 +239,50 @@ public class SecretGameActivity extends BaseActivity {
         if (bestNote != null && minDiff < GOOD_THRESHOLD) {
             if (minDiff < PERFECT_THRESHOLD) {
                 currentScore += 300;
+                showFeedback("300", Color.YELLOW, lane);
             } else {
                 currentScore += 100;
+                showFeedback("100", Color.WHITE, lane);
             }
             tvScore.setText("Score: " + currentScore);
             laneView.removeView(bestNote);
         }
+        // Removed the 'else' MISS here to avoid miss on every empty tap
+    }
+
+    private void showFeedback(String text, int color, int lane) {
+        TextView tv = new TextView(this);
+        tv.setText(text);
+        tv.setTextColor(color);
+        tv.setTextSize(32);
+        tv.setTypeface(null, Typeface.BOLD);
+
+        FrameLayout parent = (lane == 0) ? laneLeft : laneRight;
+        if (parent == null) return;
+
+        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.WRAP_CONTENT,
+                FrameLayout.LayoutParams.WRAP_CONTENT);
+        params.gravity = Gravity.CENTER;
+        tv.setLayoutParams(params);
+
+        parent.addView(tv);
+
+        tv.animate()
+                .translationYBy(-300)
+                .alpha(0)
+                .setDuration(600)
+                .withEndAction(() -> parent.removeView(tv))
+                .start();
     }
 
     private void endGame() {
         isGameRunning = false;
         gameHandler.removeCallbacks(gameLoop);
-        String msg = (currentScore >= songData.getTargetScore()) ? "Level Passed!" : "Level Failed!";
-        Toast.makeText(this, msg + " Final Score: " + currentScore, Toast.LENGTH_LONG).show();
+        if (songData != null) {
+            String msg = (currentScore >= songData.getTargetScore()) ? "Level Passed!" : "Level Failed!";
+            Toast.makeText(this, msg + " Final Score: " + currentScore, Toast.LENGTH_LONG).show();
+        }
         finish();
     }
 
@@ -237,6 +291,7 @@ public class SecretGameActivity extends BaseActivity {
         super.onDestroy();
         if (mediaPlayer != null) {
             mediaPlayer.release();
+            mediaPlayer = null;
         }
         isGameRunning = false;
         gameHandler.removeCallbacks(gameLoop);

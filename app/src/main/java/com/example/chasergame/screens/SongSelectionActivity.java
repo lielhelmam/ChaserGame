@@ -3,8 +3,6 @@ package com.example.chasergame.screens;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -20,10 +18,11 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.gson.Gson;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class SongSelectionActivity extends BaseActivity {
     private static final String TAG = "SongSelectionActivity";
@@ -31,6 +30,7 @@ public class SongSelectionActivity extends BaseActivity {
     private RecyclerView rvSongs;
     private SongsAdapter adapter;
     private List<SongData> songList;
+    private Map<SongData, String> songKeys = new HashMap<>(); 
     private DatabaseReference mDatabase;
 
     @Override
@@ -58,17 +58,16 @@ public class SongSelectionActivity extends BaseActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 songList.clear();
+                songKeys.clear();
                 for (DataSnapshot postSnapshot : snapshot.getChildren()) {
                     SongData song = postSnapshot.getValue(SongData.class);
                     if (song != null) {
+                        String key = postSnapshot.getKey();
                         songList.add(song);
+                        songKeys.put(song, key);
                     }
                 }
                 adapter.notifyDataSetChanged();
-                
-                if (songList.isEmpty()) {
-                    Toast.makeText(SongSelectionActivity.this, "No songs found. Add some from Admin panel!", Toast.LENGTH_LONG).show();
-                }
             }
 
             @Override
@@ -79,16 +78,22 @@ public class SongSelectionActivity extends BaseActivity {
     }
 
     private void onSongSelected(SongData song) {
-        Log.d(TAG, "Song selected: " + song.getName());
-        try {
-            Intent intent = new Intent(this, SecretGameActivity.class);
-            String songJson = new Gson().toJson(song);
-            Log.d(TAG, "Passing JSON: " + songJson);
-            intent.putExtra("SONG_DATA_JSON", songJson);
-            startActivity(intent);
-        } catch (Exception e) {
-            Log.e(TAG, "Error starting SecretGameActivity", e);
-            Toast.makeText(this, "Error starting game: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        String songId = songKeys.get(song);
+        Log.d(TAG, "onSongSelected: Song=" + song.getName() + ", ID=" + songId);
+        
+        if (songId != null) {
+            Toast.makeText(this, "Starting: " + song.getName(), Toast.LENGTH_SHORT).show();
+            try {
+                Intent intent = new Intent(SongSelectionActivity.this, SecretGameActivity.class);
+                intent.putExtra("SONG_ID", songId);
+                startActivity(intent);
+                Log.d(TAG, "startActivity called for ID: " + songId);
+            } catch (Exception e) {
+                Log.e(TAG, "Error starting Activity", e);
+                Toast.makeText(this, "Launch failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        } else {
+            Toast.makeText(this, "Error: Missing song ID", Toast.LENGTH_SHORT).show();
         }
     }
 }

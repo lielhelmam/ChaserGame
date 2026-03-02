@@ -40,7 +40,10 @@
             android:id="@+id/rv_songs"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:padding="12dp" />
+            android:padding="12dp"
+            android:scrollbars="vertical"
+            android:clickable="true"
+            android:focusable="true"/>
 
     </androidx.cardview.widget.CardView>
 
