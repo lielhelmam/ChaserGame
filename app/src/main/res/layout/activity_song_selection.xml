@@ -13,7 +13,7 @@
         android:id="@+id/tv_select_song_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="16dp"
         android:text="Select a Song"
         android:textColor="#FFFFFF"
         android:textSize="28sp"
@@ -22,19 +22,32 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <!-- ===== SEARCH BAR ===== -->
+    <SearchView
+        android:id="@+id/sv_songs"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/target_cube_bg"
+        android:queryHint="Search by name or difficulty..."
+        android:iconifiedByDefault="false"
+        app:layout_constraintTop_toBottomOf="@id/tv_select_song_title"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
     <!-- ===== SONGS CARD ===== -->
     <androidx.cardview.widget.CardView
         android:id="@+id/songsCard"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginTop="32dp"
-        android:layout_marginBottom="24dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
         app:cardCornerRadius="20dp"
         app:cardElevation="10dp"
         app:layout_constraintBottom_toTopOf="@+id/btn_back_to_rules"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tv_select_song_title">
+        app:layout_constraintTop_toBottomOf="@id/sv_songs">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rv_songs"

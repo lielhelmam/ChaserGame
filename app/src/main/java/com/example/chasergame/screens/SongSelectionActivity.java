@@ -3,6 +3,7 @@ package com.example.chasergame.screens;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.SearchView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -32,6 +33,7 @@ public class SongSelectionActivity extends BaseActivity {
     private List<SongData> songList;
     private Map<SongData, String> songKeys = new HashMap<>(); 
     private DatabaseReference mDatabase;
+    private SearchView searchView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +42,7 @@ public class SongSelectionActivity extends BaseActivity {
         setContentView(R.layout.activity_song_selection);
 
         rvSongs = findViewById(R.id.rv_songs);
+        searchView = findViewById(R.id.sv_songs);
         rvSongs.setLayoutManager(new LinearLayoutManager(this));
         
         songList = new ArrayList<>();
@@ -49,6 +52,20 @@ public class SongSelectionActivity extends BaseActivity {
         mDatabase = FirebaseDatabase.getInstance().getReference("rhythm_songs");
         
         loadSongs();
+
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                adapter.filter(query);
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                adapter.filter(newText);
+                return false;
+            }
+        });
 
         findViewById(R.id.btn_back_to_rules).setOnClickListener(v -> finish());
     }
@@ -67,7 +84,7 @@ public class SongSelectionActivity extends BaseActivity {
                         songKeys.put(song, key);
                     }
                 }
-                adapter.notifyDataSetChanged();
+                adapter.updateList(songList);
             }
 
             @Override
@@ -82,7 +99,6 @@ public class SongSelectionActivity extends BaseActivity {
         Log.d(TAG, "onSongSelected: Song=" + song.getName() + ", ID=" + songId);
         
         if (songId != null) {
-            Toast.makeText(this, "Starting: " + song.getName(), Toast.LENGTH_SHORT).show();
             try {
                 Intent intent = new Intent(SongSelectionActivity.this, SecretGameActivity.class);
                 intent.putExtra("SONG_ID", songId);

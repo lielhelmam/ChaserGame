@@ -13,11 +13,13 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.chasergame.R;
 import com.example.chasergame.models.SongData;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class SongsAdapter extends RecyclerView.Adapter<SongsAdapter.SongViewHolder> {
 
     private List<SongData> songList;
+    private List<SongData> songListFull; // Original full list for filtering
     private OnSongClickListener listener;
 
     public interface OnSongClickListener {
@@ -26,7 +28,31 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsAdapter.SongViewHold
 
     public SongsAdapter(List<SongData> songList, OnSongClickListener listener) {
         this.songList = songList;
+        this.songListFull = new ArrayList<>(songList);
         this.listener = listener;
+    }
+
+    public void updateList(List<SongData> newList) {
+        this.songList = newList;
+        this.songListFull = new ArrayList<>(newList);
+        notifyDataSetChanged();
+    }
+
+    public void filter(String query) {
+        List<SongData> filteredList = new ArrayList<>();
+        if (query == null || query.isEmpty()) {
+            filteredList.addAll(songListFull);
+        } else {
+            String filterPattern = query.toLowerCase().trim();
+            for (SongData song : songListFull) {
+                if (song.getName().toLowerCase().contains(filterPattern) ||
+                    song.getDifficulty().toLowerCase().contains(filterPattern)) {
+                    filteredList.add(song);
+                }
+            }
+        }
+        this.songList = filteredList;
+        notifyDataSetChanged();
     }
 
     @NonNull
@@ -43,7 +69,6 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsAdapter.SongViewHold
         holder.tvDifficulty.setText("Difficulty: " + song.getDifficulty());
         holder.tvTargetScore.setText("Target: " + song.getTargetScore());
 
-        // Connect the listener to the inner layout
         holder.itemLayout.setOnClickListener(v -> {
             Log.d("SongsAdapter", "Item clicked via layout: " + song.getName());
             if (listener != null) {
