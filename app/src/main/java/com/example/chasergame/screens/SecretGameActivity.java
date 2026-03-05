@@ -1,16 +1,21 @@
 package com.example.chasergame.screens;
 
+import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.media.MediaPlayer;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.animation.LinearInterpolator;
 import android.widget.FrameLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -36,8 +41,10 @@ public class SecretGameActivity extends BaseActivity {
     private SongData songData;
     private MediaPlayer mediaPlayer;
     private TextView tvScore, tvSongName, tvAccuracy;
+    private ProgressBar pbSongProgress;
     private FrameLayout laneLeft, laneRight;
     private View targetLeft, targetRight;
+    private Vibrator vibrator;
 
     private int currentScore = 0;
     private int totalNotesPassed = 0;
@@ -64,10 +71,13 @@ public class SecretGameActivity extends BaseActivity {
             tvScore = findViewById(R.id.tv_game_score);
             tvSongName = findViewById(R.id.tv_game_song_name);
             tvAccuracy = findViewById(R.id.tv_game_accuracy);
+            pbSongProgress = findViewById(R.id.pb_song_progress);
             laneLeft = findViewById(R.id.lane_left);
             laneRight = findViewById(R.id.lane_right);
             targetLeft = findViewById(R.id.target_left);
             targetRight = findViewById(R.id.target_right);
+
+            vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 
             String songId = getIntent().getStringExtra("SONG_ID");
             if (songId != null) {
@@ -92,15 +102,12 @@ public class SecretGameActivity extends BaseActivity {
                     if (songData != null) {
                         tvSongName.setText(songData.getName());
                         
-                        // Filter notes: Remove nulls and notes that are too early to be hit correctly
                         List<Note> allNotes = songData.getNotes();
                         remainingNotes = new ArrayList<>();
                         if (allNotes != null) {
                             for (Note n : allNotes) {
                                 if (n != null && n.getTimestamp() >= NOTE_FALL_DURATION) {
                                     remainingNotes.add(n);
-                                } else if (n != null) {
-                                    Log.d(TAG, "Skipping early note at: " + n.getTimestamp());
                                 }
                             }
                         }
@@ -146,6 +153,8 @@ public class SecretGameActivity extends BaseActivity {
                 finish();
                 return;
             }
+            
+            pbSongProgress.setMax(mediaPlayer.getDuration());
             mediaPlayer.setOnCompletionListener(mp -> endGame());
             mediaPlayer.start();
 
@@ -162,10 +171,17 @@ public class SecretGameActivity extends BaseActivity {
         public void run() {
             if (isGameRunning) {
                 updateGame();
+                updateProgressBar();
                 gameHandler.postDelayed(this, 16);
             }
         }
     };
+
+    private void updateProgressBar() {
+        if (mediaPlayer != null && isGameRunning) {
+            pbSongProgress.setProgress(mediaPlayer.getCurrentPosition());
+        }
+    }
 
     private void updateGame() {
         if (remainingNotes == null || remainingNotes.isEmpty()) return;
@@ -224,6 +240,7 @@ public class SecretGameActivity extends BaseActivity {
                         totalNotesPassed++;
                         updateAccuracyDisplay();
                         showFeedback("MISS", Color.RED, note.getLane());
+                        vibrate(100); // Larger vibration for MISS
                         parentLane.removeView(noteView);
                     }
                 })
@@ -267,7 +284,18 @@ public class SecretGameActivity extends BaseActivity {
             }
             tvScore.setText("Score: " + currentScore);
             updateAccuracyDisplay();
+            vibrate(30); // Short vibration for a hit
             laneView.removeView(bestNote);
+        }
+    }
+
+    private void vibrate(long duration) {
+        if (vibrator != null && vibrator.hasVibrator()) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                vibrator.vibrate(VibrationEffect.createOneShot(duration, VibrationEffect.DEFAULT_AMPLITUDE));
+            } else {
+                vibrator.vibrate(duration);
+            }
         }
     }
 
