@@ -8,7 +8,7 @@
     android:padding="24dp"
     tools:context=".screens.SongSelectionActivity">
 
-    <!-- ===== TITLE ===== -->
+    <!-- ===== TOP BAR: TITLE & SHOP ===== -->
     <TextView
         android:id="@+id/tv_select_song_title"
         android:layout_width="wrap_content"
@@ -18,9 +18,20 @@
         android:textColor="#FFFFFF"
         android:textSize="28sp"
         android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/btn_go_to_shop"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:backgroundTint="#FFEB3B"
+        android:text="🛒 Shop"
+        android:textColor="#333333"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/tv_select_song_title"
+        app:layout_constraintBottom_toBottomOf="@id/tv_select_song_title" />
 
     <!-- ===== SEARCH BAR ===== -->
     <SearchView

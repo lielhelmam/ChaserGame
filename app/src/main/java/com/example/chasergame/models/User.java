@@ -1,6 +1,8 @@
 package com.example.chasergame.models;
 
 import androidx.annotation.NonNull;
+import java.util.ArrayList;
+import java.util.List;
 
 public class User {
     public String id;
@@ -11,9 +13,14 @@ public class User {
     public int onlineWins;
     public int botWins;
     public int oneDeviceWins;
+    public int points; // Currency for the shop
+    public String equippedSkin = "default"; // ID of the current skin
+    public List<String> ownedSkins = new ArrayList<>(); // List of skin IDs owned by user
 
 
     public User() {
+        if (ownedSkins == null) ownedSkins = new ArrayList<>();
+        if (!ownedSkins.contains("default")) ownedSkins.add("default");
     }
 
     public User(String id, String username, String password, String email, boolean isAdmin, int onlineWins, int botWins, int oneDeviceWins) {
@@ -25,6 +32,10 @@ public class User {
         this.onlineWins = onlineWins;
         this.botWins = botWins;
         this.oneDeviceWins = oneDeviceWins;
+        this.points = 0;
+        this.equippedSkin = "default";
+        this.ownedSkins = new ArrayList<>();
+        this.ownedSkins.add("default");
     }
 
     public String getId() {
@@ -91,6 +102,31 @@ public class User {
         this.oneDeviceWins = oneDeviceWins;
     }
 
+    public int getPoints() {
+        return points;
+    }
+
+    public void setPoints(int points) {
+        this.points = points;
+    }
+
+    public String getEquippedSkin() {
+        return equippedSkin;
+    }
+
+    public void setEquippedSkin(String equippedSkin) {
+        this.equippedSkin = equippedSkin;
+    }
+
+    public List<String> getOwnedSkins() {
+        if (ownedSkins == null) ownedSkins = new ArrayList<>();
+        return ownedSkins;
+    }
+
+    public void setOwnedSkins(List<String> ownedSkins) {
+        this.ownedSkins = ownedSkins;
+    }
+
     @NonNull
     @Override
     public String toString() {
@@ -103,6 +139,9 @@ public class User {
                 ", onlineWins=" + onlineWins +
                 ", botWins=" + botWins +
                 ", oneDeviceWins=" + oneDeviceWins +
+                ", points=" + points +
+                ", equippedSkin='" + equippedSkin + '\'' +
+                ", ownedSkins=" + ownedSkins +
                 '}';
     }
 }

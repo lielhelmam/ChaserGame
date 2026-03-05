@@ -41,6 +41,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
 
         holder.tvName.setText(user.getUsername());
         holder.tvEmail.setText(user.getEmail());
+        holder.tvPoints.setText(user.getPoints() + " pts");
 
         holder.itemView.setOnClickListener(v -> {
             if (onUserClickListener != null) {
@@ -84,14 +85,26 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
     }
 
     public void updateUser(User user) {
-        int index = userList.indexOf(user);
+        int index = -1;
+        for (int i = 0; i < userList.size(); i++) {
+            if (userList.get(i).getId().equals(user.getId())) {
+                index = i;
+                break;
+            }
+        }
         if (index == -1) return;
         userList.set(index, user);
         notifyItemChanged(index);
     }
 
     public void removeUser(User user) {
-        int index = userList.indexOf(user);
+        int index = -1;
+        for (int i = 0; i < userList.size(); i++) {
+            if (userList.get(i).getId().equals(user.getId())) {
+                index = i;
+                break;
+            }
+        }
         if (index == -1) return;
         userList.remove(index);
         notifyItemRemoved(index);
@@ -126,6 +139,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
     public static class ViewHolder extends RecyclerView.ViewHolder {
         final TextView tvName;
         final TextView tvEmail;
+        final TextView tvPoints;
         final Button btnDelete;
 
 
@@ -133,6 +147,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
             super(itemView);
             tvName = itemView.findViewById(R.id.tv_item_user_name);
             tvEmail = itemView.findViewById(R.id.tv_item_user_email);
+            tvPoints = itemView.findViewById(R.id.tv_item_user_points);
             btnDelete = itemView.findViewById(R.id.btn_item_user_delete);
         }
     }

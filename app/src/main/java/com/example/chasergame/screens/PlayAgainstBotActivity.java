@@ -107,6 +107,18 @@ public class PlayAgainstBotActivity extends BaseActivity {
         loadQuestionsCountThenStart();
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        // Stop the game if user leaves the activity (home button, back, etc.)
+        isTurnRunning = false;
+        cancelTimer();
+        // Close activity so it doesn't continue in background
+        if (!isFinishing()) {
+            finish();
+        }
+    }
+
     // ===== Start flow =====
     private void loadQuestionsCountThenStart() {
         FirebaseDatabase.getInstance()
@@ -114,6 +126,7 @@ public class PlayAgainstBotActivity extends BaseActivity {
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if (isFinishing()) return;
                         questionsCount = (int) snapshot.getChildrenCount();
                         if (questionsCount <= 0) {
                             Toast.makeText(PlayAgainstBotActivity.this, "No questions", Toast.LENGTH_LONG).show();
@@ -125,6 +138,7 @@ public class PlayAgainstBotActivity extends BaseActivity {
 
                     @Override
                     public void onCancelled(@NonNull DatabaseError error) {
+                        if (isFinishing()) return;
                         goHome();
                     }
                 });
@@ -183,6 +197,7 @@ public class PlayAgainstBotActivity extends BaseActivity {
 
     // ===== Questions =====
     private void loadRandomQuestion() {
+        if (!isTurnRunning) return;
         int index = rnd.nextInt(questionsCount);
         FirebaseDatabase.getInstance()
                 .getReference("questions")
@@ -190,6 +205,7 @@ public class PlayAgainstBotActivity extends BaseActivity {
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snap) {
+                        if (!isTurnRunning) return;
                         Question q = snap.getValue(Question.class);
                         if (q != null) showQuestion(q);
                         else loadRandomQuestion();
@@ -255,6 +271,7 @@ public class PlayAgainstBotActivity extends BaseActivity {
         }
 
         btn.postDelayed(() -> {
+            if (!isTurnRunning) return;
             if (correct && currentPlayer == 2 && botPos >= p1Pos) {
                 endGame("Bot caught you!");
                 return;
@@ -387,6 +404,8 @@ public class PlayAgainstBotActivity extends BaseActivity {
     }
 
     private void endGame(String msg) {
+        if (!isTurnRunning) return; // Prevent endGame if activity is pausing/finishing
+
         boolean playerWon = msg.equals("Time over!");
         if (playerWon) {
             User user = SharedPreferencesUtil.getUser(this);

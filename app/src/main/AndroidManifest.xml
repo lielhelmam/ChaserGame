@@ -13,6 +13,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ChaserGame">
         <activity
+            android:name=".screens.ShopActivity"
+            android:exported="false" />
+        <activity
             android:name=".screens.SongsListActivity"
             android:exported="false" />
         <activity

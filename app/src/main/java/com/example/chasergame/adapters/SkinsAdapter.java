@@ -1,0 +1,92 @@
+package com.example.chasergame.adapters;
+
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.chasergame.R;
+import com.example.chasergame.models.Skin;
+import com.example.chasergame.models.User;
+
+import java.util.List;
+
+public class SkinsAdapter extends RecyclerView.Adapter<SkinsAdapter.ViewHolder> {
+
+    private final List<Skin> skins;
+    private final User currentUser;
+    private final OnSkinActionListener listener;
+
+    public interface OnSkinActionListener {
+        void onBuy(Skin skin);
+        void onEquip(Skin skin);
+    }
+
+    public SkinsAdapter(List<Skin> skins, User user, OnSkinActionListener listener) {
+        this.skins = skins;
+        this.currentUser = user;
+        this.listener = listener;
+    }
+
+    @NonNull
+    @Override
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_skin, parent, false);
+        return new ViewHolder(v);
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+        Skin skin = skins.get(position);
+        holder.tvName.setText(skin.name);
+        holder.tvEffect.setText("Effect: " + skin.effectType);
+        
+        holder.previewBg.setBackgroundColor(skin.backgroundColor);
+        holder.previewCircle.getBackground().setTint(skin.circleColor);
+        holder.previewTarget.getBackground().setTint(skin.targetColor);
+
+        boolean isOwned = currentUser.getOwnedSkins().contains(skin.id);
+        boolean isEquipped = skin.id.equals(currentUser.getEquippedSkin());
+
+        if (isEquipped) {
+            holder.btnAction.setText("Equipped");
+            holder.btnAction.setEnabled(false);
+            holder.btnAction.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFF4CAF50));
+        } else if (isOwned) {
+            holder.btnAction.setText("Equip");
+            holder.btnAction.setEnabled(true);
+            holder.btnAction.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFF2196F3));
+            holder.btnAction.setOnClickListener(v -> listener.onEquip(skin));
+        } else {
+            holder.btnAction.setText(skin.price + " pts");
+            holder.btnAction.setEnabled(currentUser.getPoints() >= skin.price);
+            holder.btnAction.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFFB71C1C));
+            holder.btnAction.setOnClickListener(v -> listener.onBuy(skin));
+        }
+    }
+
+    @Override
+    public int getItemCount() {
+        return skins.size();
+    }
+
+    static class ViewHolder extends RecyclerView.ViewHolder {
+        TextView tvName, tvEffect;
+        View previewBg, previewCircle, previewTarget;
+        Button btnAction;
+
+        ViewHolder(View v) {
+            super(v);
+            tvName = v.findViewById(R.id.tv_skin_name);
+            tvEffect = v.findViewById(R.id.tv_skin_effect);
+            previewBg = v.findViewById(R.id.view_preview_bg);
+            previewCircle = v.findViewById(R.id.view_preview_circle);
+            previewTarget = v.findViewById(R.id.view_preview_target);
+            btnAction = v.findViewById(R.id.btn_skin_action);
+        }
+    }
+}

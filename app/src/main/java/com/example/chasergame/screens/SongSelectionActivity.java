@@ -3,6 +3,7 @@ package com.example.chasergame.screens;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Button;
 import android.widget.SearchView;
 import android.widget.Toast;
 
@@ -67,6 +68,12 @@ public class SongSelectionActivity extends BaseActivity {
             }
         });
 
+        Button btnShop = findViewById(R.id.btn_go_to_shop);
+        btnShop.setOnClickListener(v -> {
+            Intent intent = new Intent(SongSelectionActivity.this, ShopActivity.class);
+            startActivity(intent);
+        });
+
         findViewById(R.id.btn_back_to_rules).setOnClickListener(v -> finish());
     }
 
@@ -96,20 +103,10 @@ public class SongSelectionActivity extends BaseActivity {
 
     private void onSongSelected(SongData song) {
         String songId = songKeys.get(song);
-        Log.d(TAG, "onSongSelected: Song=" + song.getName() + ", ID=" + songId);
-        
         if (songId != null) {
-            try {
-                Intent intent = new Intent(SongSelectionActivity.this, SecretGameActivity.class);
-                intent.putExtra("SONG_ID", songId);
-                startActivity(intent);
-                Log.d(TAG, "startActivity called for ID: " + songId);
-            } catch (Exception e) {
-                Log.e(TAG, "Error starting Activity", e);
-                Toast.makeText(this, "Launch failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
-            }
-        } else {
-            Toast.makeText(this, "Error: Missing song ID", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(SongSelectionActivity.this, SecretGameActivity.class);
+            intent.putExtra("SONG_ID", songId);
+            startActivity(intent);
         }
     }
 }

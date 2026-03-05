@@ -2,10 +2,14 @@ package com.example.chasergame.screens;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.InputType;
 import android.util.Log;
+import android.widget.EditText;
 import android.widget.SearchView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -75,26 +79,62 @@ public class UsersListActivity extends BaseActivity {
 
             @Override
             public void onLongUserClick(User user) {
-                // Handle long user click
-                Log.d(TAG, "User long clicked: " + user);
+                // Handle long user click to edit points
+                showEditPointsDialog(user);
             }
 
             @Override
             public void onDeleteClick(User user) {
-
-                FirebaseDatabase database = FirebaseDatabase.getInstance();
-
-                database.getReference("users")
-                        .child(user.getId())  // <-- FIXED
-                        .removeValue()
-                        .addOnSuccessListener(aVoid -> {
-                            Log.d(TAG, "User deleted.");
-                            userAdapter.removeUser(user);   // <-- UPDATE UI
+                new AlertDialog.Builder(UsersListActivity.this)
+                        .setTitle("Delete User")
+                        .setMessage("Are you sure you want to delete " + user.getUsername() + "?")
+                        .setPositiveButton("Yes", (dialog, which) -> {
+                            FirebaseDatabase database = FirebaseDatabase.getInstance();
+                            database.getReference("users")
+                                    .child(user.getId())
+                                    .removeValue()
+                                    .addOnSuccessListener(aVoid -> {
+                                        Log.d(TAG, "User deleted.");
+                                        userAdapter.removeUser(user);
+                                    })
+                                    .addOnFailureListener(e -> Log.e(TAG, "Delete failed: " + e.getMessage()));
                         })
-                        .addOnFailureListener(e -> Log.e(TAG, "Delete failed: " + e.getMessage()));
+                        .setNegativeButton("No", null)
+                        .show();
             }
         });
         usersList.setAdapter(userAdapter);
+    }
+
+    private void showEditPointsDialog(User user) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Edit Points for " + user.getUsername());
+
+        final EditText input = new EditText(this);
+        input.setInputType(InputType.TYPE_CLASS_NUMBER);
+        input.setText(String.valueOf(user.getPoints()));
+        builder.setView(input);
+
+        builder.setPositiveButton("Save", (dialog, which) -> {
+            String newPointsStr = input.getText().toString();
+            if (!newPointsStr.isEmpty()) {
+                int newPoints = Integer.parseInt(newPointsStr);
+                user.setPoints(newPoints);
+                
+                FirebaseDatabase.getInstance().getReference("users")
+                        .child(user.getId())
+                        .child("points")
+                        .setValue(newPoints)
+                        .addOnSuccessListener(aVoid -> {
+                            Toast.makeText(UsersListActivity.this, "Points updated", Toast.LENGTH_SHORT).show();
+                            userAdapter.updateUser(user);
+                        })
+                        .addOnFailureListener(e -> Toast.makeText(UsersListActivity.this, "Update failed", Toast.LENGTH_SHORT).show());
+            }
+        });
+        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
+
+        builder.show();
     }
 
 
