@@ -76,7 +76,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="10dp"
-                android:backgroundTint="#B71C1C"
+                android:backgroundTint="@color/background_red"
                 android:text="Delete"
                 android:textColor="@android:color/white" />
         </LinearLayout>

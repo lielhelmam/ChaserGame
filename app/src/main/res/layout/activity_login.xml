@@ -5,7 +5,7 @@
     android:id="@+id/LoginPage"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#C62828"
+    android:background="@color/background_red"
     android:padding="16dp"
     tools:context=".screens.LoginActivity">
 
@@ -73,7 +73,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:backgroundTint="#B71C1C"
+                android:backgroundTint="@color/background_red"
                 android:text="check"
                 android:textColor="#FFFFFF" />
 

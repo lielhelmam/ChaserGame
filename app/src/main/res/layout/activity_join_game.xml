@@ -56,7 +56,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
                 android:layout_marginBottom="24dp"
-                android:backgroundTint="#C62828"
+                android:backgroundTint="@color/background_red"
                 android:hint="ABC123"
                 android:inputType="text"
                 android:padding="12dp"

@@ -4,7 +4,7 @@
     android:id="@+id/LandingPage"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#B71C1C"
+    android:background="@color/background_red"
     android:padding="24dp">
 
     <!-- ===== EXIT ===== -->
@@ -82,7 +82,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
                 android:layout_marginBottom="24dp"
-                android:backgroundTint="#C62828"
+                android:backgroundTint="@color/background_red"
                 android:text="Sign Up"
                 android:textColor="#FFFFFF"
                 android:textSize="16sp" />

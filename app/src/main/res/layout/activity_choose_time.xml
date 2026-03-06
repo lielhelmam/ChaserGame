@@ -4,7 +4,7 @@
     android:id="@+id/ChooseTimePage"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#7F0000"
+    android:background="@color/background_red"
     android:padding="24dp">
 
     <!-- ===== TITLE ===== -->
@@ -87,7 +87,7 @@
         android:layout_width="0dp"
         android:layout_height="56dp"
         android:layout_marginTop="40dp"
-        android:backgroundTint="#B71C1C"
+        android:backgroundTint="@color/background_red"
         android:text="Start Game"
         android:textColor="#FFFFFF"
         android:textSize="16sp"

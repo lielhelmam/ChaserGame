@@ -47,7 +47,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:text="Target: 5000"
-            android:textColor="#C62828"
+            android:textColor="@color/background_red"
             android:textSize="14sp"
             android:textStyle="bold" />
 

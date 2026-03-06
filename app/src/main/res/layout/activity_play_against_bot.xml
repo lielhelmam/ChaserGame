@@ -13,7 +13,7 @@
         android:id="@+id/One_Device_progressContainer"
         android:layout_width="0dp"
         android:layout_height="50dp"
-        android:background="#C62828"
+        android:background="@color/background_red"
         android:padding="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

@@ -4,7 +4,7 @@
     android:id="@+id/AdminPage"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#B71C1C"
+    android:background="@color/background_red"
     android:padding="24dp">
 
     <!-- ===== TOP BAR ===== -->
@@ -57,7 +57,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
                 android:layout_marginBottom="12dp"
-                android:backgroundTint="#C62828"
+                android:backgroundTint="@color/background_red"
                 android:text="👥 User List"
                 android:textColor="#FFFFFF"
                 android:textSize="16sp" />
@@ -78,7 +78,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
                 android:layout_marginBottom="12dp"
-                android:backgroundTint="#C62828"
+                android:backgroundTint="@color/background_red"
                 android:text="📋 Questions List"
                 android:textColor="#FFFFFF"
                 android:textSize="16sp"
@@ -100,7 +100,7 @@
                 android:id="@+id/btn_admin_songs_list"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
-                android:backgroundTint="#C62828"
+                android:backgroundTint="@color/background_red"
                 android:text="🎵 Songs List (Edit/Delete)"
                 android:textColor="#FFFFFF"
                 android:textSize="16sp"

@@ -5,7 +5,7 @@
     android:id="@+id/MainPage"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#C62828"
+    android:background="@color/background_red"
     android:padding="16dp"
     tools:context=".screens.SignupActivity">
 
@@ -134,7 +134,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="12dp"
-                    android:backgroundTint="#B71C1C"
+                    android:backgroundTint="@color/background_red"
                     android:text="Submit"
                     android:textColor="#FFFFFF" />
             </LinearLayout>

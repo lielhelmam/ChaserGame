@@ -12,7 +12,7 @@ public class SkinManager {
         if (skins == null) {
             skins = new ArrayList<>();
             // Default Skin - Back to "none" for no effects
-            skins.add(new Skin("default", "Classic Red", 0, Color.parseColor("#FFFFFF"), Color.parseColor("#B71C1C"), Color.parseColor("#1A1A1A"), "none"));
+            skins.add(new Skin("default", "Classic Red", 0, Color.parseColor("#FFFFFF"), Color.parseColor("#bd5757"), Color.parseColor("#1A1A1A"), "none"));
             
             // Neon Skin
             skins.add(new Skin("neon", "Neon Night", 100000, Color.parseColor("#00FBFF"), Color.parseColor("#00FBFF"), Color.parseColor("#000000"), "glow"));
