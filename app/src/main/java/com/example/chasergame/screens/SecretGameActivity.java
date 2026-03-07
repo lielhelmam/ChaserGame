@@ -92,8 +92,17 @@ public class SecretGameActivity extends BaseActivity {
             vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 
             User user = SharedPreferencesUtil.getUser(this);
-            String skinId = (user != null) ? user.getEquippedSkin() : "default";
-            equippedSkin = SkinManager.getSkinById(skinId);
+            if (user != null) {
+                String skinId = user.getEquippedSkin();
+                if ("custom".equals(skinId)) {
+                    equippedSkin = SkinManager.getCustomSkinForUser(user);
+                } else {
+                    equippedSkin = SkinManager.getSkinById(skinId);
+                }
+            } else {
+                equippedSkin = SkinManager.getSkinById("default");
+            }
+            
             applySkin();
 
             String songId = getIntent().getStringExtra("SONG_ID");
@@ -319,42 +328,51 @@ public class SecretGameActivity extends BaseActivity {
                 .start();
     }
 
-    private void spawnParticle(float x, float y, int color, String type, FrameLayout parent, boolean isBurst) {
-        final View p = new View(this);
+    private void spawnBurstParticles(View target, int color) {
         float density = getResources().getDisplayMetrics().density;
-        
-        int pSize = (int) ((isBurst ? 40 : 20) * density);
-        p.setLayoutParams(new FrameLayout.LayoutParams(pSize, pSize));
-        
-        GradientDrawable shape = new GradientDrawable();
-        shape.setShape(GradientDrawable.OVAL);
-        shape.setColor(color);
-        p.setBackground(shape);
-        
-        p.setX(x - pSize/2f);
-        p.setY(y - pSize/2f);
-        
-        parent.addView(p);
+        float centerX = target.getX() + target.getWidth() / 2f;
+        float centerY = target.getY() + target.getHeight() / 2f;
 
-        float tx = (random.nextFloat() * 800 - 400) * density;
-        float ty = (random.nextFloat() * 800 - 400) * density;
-        
-        p.animate()
-                .translationXBy(tx)
-                .translationYBy(ty)
-                .alpha(0)
-                .scaleX(0.1f)
-                .scaleY(0.1f)
-                .setDuration(1000)
-                .withEndAction(() -> parent.removeView(p))
-                .start();
+        for (int i = 0; i < 20; i++) {
+            final View p = new View(this);
+            int pSize = (int) (25 * density);
+            ConstraintLayout.LayoutParams lp = new ConstraintLayout.LayoutParams(pSize, pSize);
+            p.setLayoutParams(lp);
+            
+            GradientDrawable shape = new GradientDrawable();
+            shape.setShape(GradientDrawable.OVAL);
+            shape.setColor(color);
+            p.setBackground(shape);
+            
+            p.setX(centerX - pSize/2f);
+            p.setY(centerY - pSize/2f);
+            
+            rootLayout.addView(p);
+
+            float angle = (float) (random.nextFloat() * 2 * Math.PI);
+            float distance = (60 + random.nextFloat() * 140) * density;
+            float tx = (float) (Math.cos(angle) * distance);
+            float ty = (float) (Math.sin(angle) * distance);
+
+            p.animate()
+                    .translationXBy(tx)
+                    .translationYBy(ty)
+                    .alpha(0)
+                    .scaleX(0.1f)
+                    .scaleY(0.1f)
+                    .setDuration(500 + random.nextInt(300))
+                    .withEndAction(() -> rootLayout.removeView(p))
+                    .start();
+        }
     }
 
     private void checkHit(int lane) {
         if (!isGameRunning) return;
         long currentTime = System.currentTimeMillis() - startTime;
         FrameLayout laneView = (lane == 0) ? laneLeft : laneRight;
-        if (laneView == null) return;
+        View targetView = (lane == 0) ? targetLeft : targetRight;
+        if (laneView == null || targetView == null) return;
+
         View bestNote = null;
         long minDiff = Long.MAX_VALUE;
         for (int i = 0; i < laneView.getChildCount(); i++) {
@@ -368,13 +386,12 @@ public class SecretGameActivity extends BaseActivity {
                 }
             }
         }
+
         if (bestNote != null && minDiff < GOOD_THRESHOLD) {
             totalNotesPassed++;
             
             if (equippedSkin != null) {
-                float hitX = laneView.getWidth() / 2f;
-                float hitY = bestNote.getY() + bestNote.getHeight()/2f;
-                for(int i=0; i<30; i++) spawnParticle(hitX, hitY, equippedSkin.circleColor, equippedSkin.effectType, laneView, true);
+                spawnBurstParticles(targetView, equippedSkin.circleColor);
             }
 
             if (minDiff < PERFECT_THRESHOLD) {
@@ -438,7 +455,6 @@ public class SecretGameActivity extends BaseActivity {
             earnedPoints = currentScore / 10;
             if (finalAcc >= 95.0) earnedPoints += 500;
         } else {
-            // אם לא עבר את השלב, מקבל רק שליש מהניקוד (ללא בונוס דיוק)
             earnedPoints = (currentScore / 10) / 3;
         }
         

@@ -24,6 +24,7 @@ public class SkinsAdapter extends RecyclerView.Adapter<SkinsAdapter.ViewHolder> 
     public interface OnSkinActionListener {
         void onBuy(Skin skin);
         void onEquip(Skin skin);
+        void onEditCustom();
     }
 
     public SkinsAdapter(List<Skin> skins, User user, OnSkinActionListener listener) {
@@ -43,11 +44,22 @@ public class SkinsAdapter extends RecyclerView.Adapter<SkinsAdapter.ViewHolder> 
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Skin skin = skins.get(position);
         holder.tvName.setText(skin.name);
-        holder.tvEffect.setText("Effect: " + skin.effectType);
         
-        holder.previewBg.setBackgroundColor(skin.backgroundColor);
-        holder.previewCircle.getBackground().setTint(skin.circleColor);
-        holder.previewTarget.getBackground().setTint(skin.targetColor);
+        // Handle preview and info for custom skin
+        if ("custom".equals(skin.id)) {
+            holder.tvEffect.setText("Effect: " + currentUser.getCustomEffectType());
+            holder.previewBg.setBackgroundColor(currentUser.getCustomBackgroundColor());
+            holder.previewCircle.getBackground().setTint(currentUser.getCustomCircleColor());
+            holder.previewTarget.getBackground().setTint(currentUser.getCustomTargetColor());
+            holder.btnEdit.setVisibility(currentUser.getOwnedSkins().contains("custom") ? View.VISIBLE : View.GONE);
+            holder.btnEdit.setOnClickListener(v -> listener.onEditCustom());
+        } else {
+            holder.tvEffect.setText("Effect: " + skin.effectType);
+            holder.previewBg.setBackgroundColor(skin.backgroundColor);
+            holder.previewCircle.getBackground().setTint(skin.circleColor);
+            holder.previewTarget.getBackground().setTint(skin.targetColor);
+            holder.btnEdit.setVisibility(View.GONE);
+        }
 
         boolean isOwned = currentUser.getOwnedSkins().contains(skin.id);
         boolean isEquipped = skin.id.equals(currentUser.getEquippedSkin());
@@ -55,16 +67,21 @@ public class SkinsAdapter extends RecyclerView.Adapter<SkinsAdapter.ViewHolder> 
         if (isEquipped) {
             holder.btnAction.setText("Equipped");
             holder.btnAction.setEnabled(false);
-            holder.btnAction.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFF4CAF50));
+            holder.btnAction.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFF4CAF50)); // Green
         } else if (isOwned) {
             holder.btnAction.setText("Equip");
             holder.btnAction.setEnabled(true);
-            holder.btnAction.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFF2196F3));
+            holder.btnAction.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFF2196F3)); // Blue
             holder.btnAction.setOnClickListener(v -> listener.onEquip(skin));
         } else {
             holder.btnAction.setText(skin.price + " pts");
-            holder.btnAction.setEnabled(currentUser.getPoints() >= skin.price);
-            holder.btnAction.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFFB71C1C));
+            boolean canAfford = currentUser.getPoints() >= skin.price;
+            holder.btnAction.setEnabled(canAfford);
+            
+            // Set color based on affordability: Blue if can buy, Red if cannot
+            int color = canAfford ? 0xFF2196F3 : 0xFFB71C1C;
+            holder.btnAction.setBackgroundTintList(android.content.res.ColorStateList.valueOf(color));
+
             holder.btnAction.setOnClickListener(v -> listener.onBuy(skin));
         }
     }
@@ -77,7 +94,7 @@ public class SkinsAdapter extends RecyclerView.Adapter<SkinsAdapter.ViewHolder> 
     static class ViewHolder extends RecyclerView.ViewHolder {
         TextView tvName, tvEffect;
         View previewBg, previewCircle, previewTarget;
-        Button btnAction;
+        Button btnAction, btnEdit;
 
         ViewHolder(View v) {
             super(v);
@@ -87,6 +104,7 @@ public class SkinsAdapter extends RecyclerView.Adapter<SkinsAdapter.ViewHolder> 
             previewCircle = v.findViewById(R.id.view_preview_circle);
             previewTarget = v.findViewById(R.id.view_preview_target);
             btnAction = v.findViewById(R.id.btn_skin_action);
+            btnEdit = v.findViewById(R.id.btn_edit_custom_skin);
         }
     }
 }
