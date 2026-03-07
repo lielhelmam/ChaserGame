@@ -251,7 +251,6 @@ public class SecretGameActivity extends BaseActivity {
             if (equippedSkin != null && !"none".equals(equippedSkin.effectType)) {
                 trailCounter[0]++;
                 if (trailCounter[0] % 2 == 0) {
-                    // חישוב מיקום אבסולוטי ביחס ל-rootLayout
                     float centerX = parentLane.getLeft() + (parentLane.getWidth() / 2f);
                     float currentY = parentLane.getTop() + val + (size / 2f);
                     spawnTrailParticle(centerX, currentY, equippedSkin.circleColor, equippedSkin.effectType);
@@ -294,7 +293,7 @@ public class SecretGameActivity extends BaseActivity {
         p.setX(x - pSize/2f);
         p.setY(y - pSize/2f);
         
-        rootLayout.addView(p, 1); // הוספה מעל הרקע אבל מתחת לשאר האלמנטים
+        rootLayout.addView(p, 1);
 
         float tx = (random.nextFloat() * 40 - 20) * density;
         float ty = (random.nextFloat() * 40 - 20) * density;
@@ -430,12 +429,22 @@ public class SecretGameActivity extends BaseActivity {
         gameHandler.removeCallbacks(gameLoop);
         
         final double finalAcc = totalNotesPassed > 0 ? (notesHitWeight / totalNotesPassed) * 100.0 : 0;
-        int earnedPoints = currentScore / 10;
-        if (finalAcc >= 95.0) earnedPoints += 500;
+        
+        int targetScore = (songData != null) ? songData.getTargetScore() : 0;
+        boolean levelPassed = currentScore >= targetScore;
+        
+        int earnedPoints;
+        if (levelPassed) {
+            earnedPoints = currentScore / 10;
+            if (finalAcc >= 95.0) earnedPoints += 500;
+        } else {
+            // אם לא עבר את השלב, מקבל רק שליש מהניקוד (ללא בונוס דיוק)
+            earnedPoints = (currentScore / 10) / 3;
+        }
         
         updateUserPoints(earnedPoints);
         
-        String msg = (currentScore >= (songData != null ? songData.getTargetScore() : 0)) ? "Level Passed!" : "Level Failed!";
+        String msg = levelPassed ? "Level Passed!" : "Level Failed!";
         new AlertDialog.Builder(this)
                 .setTitle(msg)
                 .setMessage(String.format(Locale.US, "Score: %d\nAccuracy: %.1f%%\nPoints Earned: %d", currentScore, finalAcc, earnedPoints))
