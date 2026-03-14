@@ -85,6 +85,10 @@ public class MainActivity extends BaseActivity {
             return false; // Return false to allow onClick to fire
         });
 
+
+        findViewById(R.id.btn_main_rythmgame).setOnClickListener(v ->
+                startActivity(new Intent(this, SecretGameRulesActivity.class)));
+
         findViewById(R.id.btn_main_playagainstabot).setOnClickListener(v -> 
             startActivity(new Intent(this, ChooseTimeBotActivity.class)));
 
