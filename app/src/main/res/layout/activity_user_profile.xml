@@ -125,6 +125,7 @@
                         android:textColor="#FFFFFF"
                         android:textSize="16sp" />
 
+                    <!-- Stats Section -->
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -157,7 +158,8 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Bot Wins"
+                        android:layout_marginTop="8dp"
+                        android:text="Bot Wins (Easy)"
                         android:textColor="#FFBBBB"
                         android:textStyle="bold" />
 
@@ -167,7 +169,7 @@
                         android:orientation="horizontal">
 
                         <TextView
-                            android:id="@+id/tv_bot_wins"
+                            android:id="@+id/tv_bot_wins_easy"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
@@ -176,7 +178,7 @@
                             android:textSize="16sp" />
 
                         <Button
-                            android:id="@+id/btn_edit_bot_wins"
+                            android:id="@+id/btn_edit_bot_wins_easy"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:backgroundTint="#FFBBBB"
@@ -186,6 +188,67 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="Bot Wins (Normal)"
+                        android:textColor="#FFBBBB"
+                        android:textStyle="bold" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/tv_bot_wins_normal"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="0"
+                            android:textColor="#FFFFFF"
+                            android:textSize="16sp" />
+
+                        <Button
+                            android:id="@+id/btn_edit_bot_wins_normal"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:backgroundTint="#FFBBBB"
+                            android:text="Edit" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="Bot Wins (Hard)"
+                        android:textColor="#FFBBBB"
+                        android:textStyle="bold" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/tv_bot_wins_hard"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="0"
+                            android:textColor="#FFFFFF"
+                            android:textSize="16sp" />
+
+                        <Button
+                            android:id="@+id/btn_edit_bot_wins_hard"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:backgroundTint="#FFBBBB"
+                            android:text="Edit" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
                         android:text="One Device Wins"
                         android:textColor="#FFBBBB"
                         android:textStyle="bold" />
@@ -211,13 +274,6 @@
                             android:backgroundTint="#FFBBBB"
                             android:text="Edit" />
                     </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:gravity="end"
-                        android:orientation="horizontal" />
 
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>

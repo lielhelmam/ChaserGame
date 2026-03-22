@@ -12,12 +12,16 @@ public class User {
     public String email;
     public boolean isAdmin;
     public int onlineWins;
-    public int botWins;
+    public int botWins; // Total bot wins (can keep for legacy or sum)
+    public int botWinsEasy;
+    public int botWinsNormal;
+    public int botWinsHard;
     public int oneDeviceWins;
     public int points; 
     public String equippedSkin = "default"; 
     public List<String> ownedSkins = new ArrayList<>(); 
-    public boolean giftClaimed = false; // Track if the one-time gift has been claimed
+    public boolean giftClaimed = false;
+    public int totalRhythmScore = 0; // Cumulative score for the leaderboard
 
     // Custom Skin Settings
     public int customCircleColor = Color.WHITE;
@@ -38,12 +42,16 @@ public class User {
         this.isAdmin = isAdmin;
         this.onlineWins = onlineWins;
         this.botWins = botWins;
+        this.botWinsEasy = 0;
+        this.botWinsNormal = 0;
+        this.botWinsHard = 0;
         this.oneDeviceWins = oneDeviceWins;
         this.points = 0;
         this.equippedSkin = "default";
         this.ownedSkins = new ArrayList<>();
         this.ownedSkins.add("default");
         this.giftClaimed = false;
+        this.totalRhythmScore = 0;
         
         // Default custom settings
         this.customCircleColor = Color.WHITE;
@@ -67,6 +75,14 @@ public class User {
     public void setOnlineWins(int onlineWins) { this.onlineWins = onlineWins; }
     public int getBotWins() { return botWins; }
     public void setBotWins(int botWins) { this.botWins = botWins; }
+
+    public int getBotWinsEasy() { return botWinsEasy; }
+    public void setBotWinsEasy(int botWinsEasy) { this.botWinsEasy = botWinsEasy; }
+    public int getBotWinsNormal() { return botWinsNormal; }
+    public void setBotWinsNormal(int botWinsNormal) { this.botWinsNormal = botWinsNormal; }
+    public int getBotWinsHard() { return botWinsHard; }
+    public void setBotWinsHard(int botWinsHard) { this.botWinsHard = botWinsHard; }
+
     public int getOneDeviceWins() { return oneDeviceWins; }
     public void setOneDeviceWins(int oneDeviceWins) { this.oneDeviceWins = oneDeviceWins; }
     public int getPoints() { return points; }
@@ -80,6 +96,8 @@ public class User {
     public void setOwnedSkins(List<String> ownedSkins) { this.ownedSkins = ownedSkins; }
     public boolean isGiftClaimed() { return giftClaimed; }
     public void setGiftClaimed(boolean giftClaimed) { this.giftClaimed = giftClaimed; }
+    public int getTotalRhythmScore() { return totalRhythmScore; }
+    public void setTotalRhythmScore(int totalRhythmScore) { this.totalRhythmScore = totalRhythmScore; }
 
     public int getCustomCircleColor() { return customCircleColor; }
     public void setCustomCircleColor(int customCircleColor) { this.customCircleColor = customCircleColor; }
@@ -98,7 +116,7 @@ public class User {
                 ", username='" + username + '\'' +
                 ", points=" + points +
                 ", equippedSkin='" + equippedSkin + '\'' +
-                ", giftClaimed=" + giftClaimed +
+                ", totalRhythmScore=" + totalRhythmScore +
                 '}';
     }
 }

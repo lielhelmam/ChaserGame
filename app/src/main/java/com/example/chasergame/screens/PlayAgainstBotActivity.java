@@ -14,6 +14,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 
 import com.example.chasergame.R;
 import com.example.chasergame.models.Question;
@@ -63,7 +64,7 @@ public class PlayAgainstBotActivity extends BaseActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_play_on_one_device);
+        setContentView(R.layout.activity_play_against_bot);
 
         // ----- bind UI -----
         progressContainer = findViewById(R.id.One_Device_progressContainer);
@@ -83,7 +84,9 @@ public class PlayAgainstBotActivity extends BaseActivity {
         btnB = findViewById(R.id.Bot_btnAnswerB);
         btnC = findViewById(R.id.Bot_btnAnswerC);
 
-        defaultBtnColor = btnA.getBackgroundTintList().getDefaultColor();
+        if (btnA.getBackgroundTintList() != null) {
+            defaultBtnColor = btnA.getBackgroundTintList().getDefaultColor();
+        }
 
         btnA.setOnClickListener(v -> onAnswerClicked(btnA));
         btnB.setOnClickListener(v -> onAnswerClicked(btnB));
@@ -110,10 +113,8 @@ public class PlayAgainstBotActivity extends BaseActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        // Stop the game if user leaves the activity (home button, back, etc.)
         isTurnRunning = false;
         cancelTimer();
-        // Close activity so it doesn't continue in background
         if (!isFinishing()) {
             finish();
         }
@@ -164,7 +165,7 @@ public class PlayAgainstBotActivity extends BaseActivity {
             currentPlayer = 2;
             startTurn();
         } else {
-            endGame("Time over!");
+            endGame("Time is up! You survived the bot!", true);
         }
     }
 
@@ -237,8 +238,8 @@ public class PlayAgainstBotActivity extends BaseActivity {
 
     // ===== Bot =====
     private void simulateBotAnswer() {
-        int botMaxDelay = 1800;
-        int botMinDelay = 800;
+        int botMaxDelay = 3500;
+        int botMinDelay = 1500;
         int delay = botMinDelay + rnd.nextInt(botMaxDelay - botMinDelay);
         tvQuestion.postDelayed(() -> {
             if (!isTurnRunning) return;
@@ -273,7 +274,7 @@ public class PlayAgainstBotActivity extends BaseActivity {
         btn.postDelayed(() -> {
             if (!isTurnRunning) return;
             if (correct && currentPlayer == 2 && botPos >= p1Pos) {
-                endGame("Bot caught you!");
+                endGame("Oh no! The bot caught you!", false);
                 return;
             }
 
@@ -323,12 +324,8 @@ public class PlayAgainstBotActivity extends BaseActivity {
     }
 
     private void buildChaseTrackUI() {
-        // hide old solid track view (optional)
         if (progressTrack != null) progressTrack.setVisibility(View.GONE);
 
-        // remove any previous dynamic track (if activity recreated)
-        // (keep markers)
-        // We'll add a LinearLayout as the track row.
         LinearLayout cellsRow = new LinearLayout(this);
         cellsRow.setOrientation(LinearLayout.HORIZONTAL);
         cellsRow.setGravity(Gravity.CENTER_VERTICAL);
@@ -341,34 +338,24 @@ public class PlayAgainstBotActivity extends BaseActivity {
         cellsRow.setLayoutParams(lp);
 
         int cellColor = 0xFF333333;
-        int borderColor = 0xFF111111;
         int startFinishColor = 0xFFFFFFFF;
 
         for (int i = 0; i < VISIBLE_STEPS; i++) {
             View cell = new View(this);
-
             LinearLayout.LayoutParams clp = new LinearLayout.LayoutParams(0, dp(12), 1f);
             int m = dp(2);
             clp.setMargins(m, 0, m, 0);
             cell.setLayoutParams(clp);
 
-            // start / finish style (white-ish), middle dark
-            if (i == 0 || i == VISIBLE_STEPS) {
-                cell.setBackgroundColor(startFinishColor);
-            } else if (i == VISIBLE_STEPS - 1) {
-                // finish cell highlight
+            if (i == 0 || i == VISIBLE_STEPS - 1) {
                 cell.setBackgroundColor(startFinishColor);
             } else {
                 cell.setBackgroundColor(cellColor);
             }
-
             cellsRow.addView(cell);
         }
 
-        // add it behind markers
         progressContainer.addView(cellsRow, 0);
-
-        // bring markers to front
         markerP1.bringToFront();
         markerP2.bringToFront();
     }
@@ -383,12 +370,9 @@ public class PlayAgainstBotActivity extends BaseActivity {
 
         float stepPx = trackW / (float) VISIBLE_STEPS;
 
-        int trackOffset = 0;
-        float p1Screen = (p1Pos - trackOffset);
-        int p2Pos = 0;
-        float p2Screen = (p2Pos - trackOffset);
+        float p1Screen = p1Pos;
+        float p2Screen = botPos;
 
-        // clamp so markers stay visible
         p1Screen = Math.max(0, Math.min(VISIBLE_STEPS, p1Screen));
         p2Screen = Math.max(0, Math.min(VISIBLE_STEPS, p2Screen));
 
@@ -398,22 +382,31 @@ public class PlayAgainstBotActivity extends BaseActivity {
         markerP1.setX(x1);
         markerP2.setX(x2);
 
-        // if overlapped, lift P2 a bit
         if (Math.abs(x1 - x2) < 10f) markerP2.setTranslationY(-18f);
         else markerP2.setTranslationY(0f);
     }
 
-    private void endGame(String msg) {
-        if (!isTurnRunning) return; // Prevent endGame if activity is pausing/finishing
+    private void endGame(String msg, boolean playerWon) {
+        cancelTimer();
+        isTurnRunning = false;
 
-        boolean playerWon = msg.equals("Time over!");
         if (playerWon) {
             User user = SharedPreferencesUtil.getUser(this);
-            databaseService.updateUserWins(user.getId(), "botWins", null);
+            if (user != null) {
+                String winField = "botWinsNormal"; // default
+                if (botAccuracy == 35) winField = "botWinsEasy";
+                else if (botAccuracy == 75) winField = "botWinsHard";
+                
+                databaseService.updateUserWins(user.getId(), winField, null);
+            }
         }
 
-        Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
-        goHome();
+        new AlertDialog.Builder(this)
+                .setTitle(playerWon ? "Victory!" : "Game Over")
+                .setMessage(msg + "\n\nYour score: " + scoreP1 + "\nBot score: " + scoreBot)
+                .setCancelable(false)
+                .setPositiveButton("Main Menu", (dialog, which) -> goHome())
+                .show();
     }
 
     private int dp(int v) {

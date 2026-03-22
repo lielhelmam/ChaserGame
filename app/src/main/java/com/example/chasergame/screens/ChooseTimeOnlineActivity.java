@@ -22,6 +22,8 @@ public class ChooseTimeOnlineActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_choose_time_online);
 
+        boolean isPublic = getIntent().getBooleanExtra("IS_PUBLIC", false);
+
         NumberPicker pickerMinutes = findViewById(R.id.pickerMinutes);
         NumberPicker pickerSeconds = findViewById(R.id.pickerSeconds);
 
@@ -49,6 +51,7 @@ public class ChooseTimeOnlineActivity extends BaseActivity {
             room.put("status", "waiting");
             room.put("timeMs", timeMs);
             room.put("hostId", playerId);
+            room.put("type", isPublic ? "public" : "private");
 
             Map<String, Object> players = new HashMap<>();
             players.put(playerId, true);

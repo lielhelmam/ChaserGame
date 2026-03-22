@@ -19,15 +19,15 @@ public class ChooseBotDifficultyActivity extends BaseActivity {
     }
 
     public void easy(View v) {
-        startGame(50);
+        startGame(35); // Nerfed from 50
     }
 
     public void normal(View v) {
-        startGame(70);
+        startGame(55); // Nerfed from 70
     }
 
     public void hard(View v) {
-        startGame(90);
+        startGame(75); // Nerfed from 90
     }
 
     private void startGame(int accuracy) {

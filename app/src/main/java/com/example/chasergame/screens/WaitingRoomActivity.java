@@ -2,6 +2,7 @@ package com.example.chasergame.screens;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -21,7 +22,7 @@ public class WaitingRoomActivity extends BaseActivity {
     private String roomId;
     private String playerId;
 
-    private TextView tvPlayers;
+    private TextView tvPlayers, tvRoomCode, tvStatus;
 
     private DatabaseReference roomRef;
     private ValueEventListener roomListener;
@@ -43,8 +44,8 @@ public class WaitingRoomActivity extends BaseActivity {
             return;
         }
 
-        TextView tvRoomCode = findViewById(R.id.tvRoomCode);
-        TextView tvStatus = findViewById(R.id.tvStatus);
+        tvRoomCode = findViewById(R.id.tvRoomCode);
+        tvStatus = findViewById(R.id.tvStatus);
         tvPlayers = findViewById(R.id.tvPlayers);
         Button btnCancel = findViewById(R.id.btnCancelRoom);
 
@@ -63,19 +64,33 @@ public class WaitingRoomActivity extends BaseActivity {
         roomListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-
                 if (!snapshot.exists()) {
-                    if (!destroyed) {
+                    if (!destroyed && !navigatedToGame) {
                         Toast.makeText(WaitingRoomActivity.this, "Room closed", Toast.LENGTH_SHORT).show();
                         finish();
                     }
                     return;
                 }
 
+                // Check room type to hide/show code
+                String type = snapshot.child("type").getValue(String.class);
+                if ("public".equals(type)) {
+                    tvRoomCode.setVisibility(View.GONE);
+                    tvStatus.setText("Searching for opponent...");
+                } else {
+                    tvRoomCode.setVisibility(View.VISIBLE);
+                }
+
                 long playersCount = snapshot.child("players").getChildrenCount();
                 tvPlayers.setText("Players: " + playersCount + "/2");
 
                 String status = snapshot.child("status").getValue(String.class);
+
+                // Auto-start logic: If 2 players are in, set status to ready
+                if ("waiting".equals(status) && playersCount == 2) {
+                    roomRef.child("status").setValue("ready");
+                    return; // Next onDataChange will trigger the game start
+                }
 
                 if ("ready".equals(status) && playersCount == 2 && !navigatedToGame) {
                     navigatedToGame = true;
@@ -101,8 +116,14 @@ public class WaitingRoomActivity extends BaseActivity {
     }
 
     private void leaveRoomAndGoBack() {
-        roomRef.removeValue()
-                .addOnCompleteListener(task -> finish());
+        if (roomRef != null) {
+            // Remove the listener first to prevent the "Room closed" toast
+            if (roomListener != null) roomRef.removeEventListener(roomListener);
+            
+            roomRef.removeValue().addOnCompleteListener(task -> finish());
+        } else {
+            finish();
+        }
     }
 
     @Override
@@ -114,8 +135,7 @@ public class WaitingRoomActivity extends BaseActivity {
             roomRef.removeEventListener(roomListener);
         }
 
-        // אם לא התקדמנו למשחק — מחיקה
-        if (!navigatedToGame) {
+        if (!navigatedToGame && roomRef != null) {
             roomRef.removeValue();
         }
     }

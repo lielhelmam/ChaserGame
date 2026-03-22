@@ -2,11 +2,6 @@ package com.example.chasergame.screens;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-import android.util.Log;
-import android.view.MotionEvent;
-import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -22,22 +17,6 @@ import com.example.chasergame.utils.SharedPreferencesUtil;
 
 public class MainActivity extends BaseActivity {
     private static final String TAG = "MainActivity";
-    
-    // Secret navigation logic
-    private static final long SECRET_HOLD_DURATION = 1600L; 
-    private final Handler secretHandler = new Handler(Looper.getMainLooper());
-    private boolean isSecretTriggered = false;
-    
-    private final Runnable secretRunnable = new Runnable() {
-        @Override
-        public void run() {
-            isSecretTriggered = true;
-            Log.d(TAG, "Secret triggered! Navigating to SecretGameRuelsActivity");
-            // Fixed: Corrected the class name to match SecretGameRuelsActivity
-            Intent intent = new Intent(MainActivity.this, SecretGameRuelsActivity.class);
-            startActivity(intent);
-        }
-    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,33 +40,13 @@ public class MainActivity extends BaseActivity {
     }
 
     private void setupButtons() {
-        Button btnLeaderBoards = findViewById(R.id.btn_main_leaderboards);
-        
-        // Handle normal click
-        btnLeaderBoards.setOnClickListener(v -> {
-            if (isSecretTriggered) {
-                // If the secret was just triggered, don't open the leaderboard
-                isSecretTriggered = false; 
-                return;
-            }
-            Intent intent = new Intent(MainActivity.this, LeaderBoardActivity.class);
-            startActivity(intent);
+        findViewById(R.id.btn_main_leaderboards).setOnClickListener(v -> {
+            startActivity(new Intent(MainActivity.this, LeaderBoardActivity.class));
         });
 
-        // Handle long press
-        btnLeaderBoards.setOnTouchListener((v, event) -> {
-            if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                isSecretTriggered = false;
-                secretHandler.postDelayed(secretRunnable, SECRET_HOLD_DURATION);
-            } else if (event.getAction() == MotionEvent.ACTION_UP || event.getAction() == MotionEvent.ACTION_CANCEL) {
-                secretHandler.removeCallbacks(secretRunnable);
-            }
-            return false; // Return false to allow onClick to fire
-        });
-
-
+        // FIXED: Navigate to the Rules activity first (using the correct spelling from Manifest)
         findViewById(R.id.btn_main_rythmgame).setOnClickListener(v ->
-                startActivity(new Intent(this, SecretGameRulesActivity.class)));
+                startActivity(new Intent(this, SecretGameRuelsActivity.class)));
 
         findViewById(R.id.btn_main_playagainstabot).setOnClickListener(v -> 
             startActivity(new Intent(this, ChooseTimeBotActivity.class)));
@@ -102,12 +61,6 @@ public class MainActivity extends BaseActivity {
             startActivity(new Intent(this, EditProfileActivity.class)));
 
         findViewById(R.id.btn_main_logout).setOnClickListener(v -> showLogoutDialog());
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        isSecretTriggered = false; // Reset when returning to this screen
     }
 
     private void showLogoutDialog() {
@@ -126,11 +79,5 @@ public class MainActivity extends BaseActivity {
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        secretHandler.removeCallbacks(secretRunnable);
     }
 }

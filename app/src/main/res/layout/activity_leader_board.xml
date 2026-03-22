@@ -40,47 +40,134 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <LinearLayout
-                android:id="@+id/leaderboard_buttons"
+            <HorizontalScrollView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:scrollbars="none">
+
+                <LinearLayout
+                    android:id="@+id/leaderboard_buttons"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/btn_leaderboard_rhythm"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:backgroundTint="@color/background_red"
+                        android:text="🎶 Rhythm"
+                        android:textColor="#FFFFFF" />
+
+                    <Button
+                        android:id="@+id/btn_leaderboard_online"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:backgroundTint="#333333"
+                        android:text="Online"
+                        android:textColor="#FFFFFF" />
+
+                    <Button
+                        android:id="@+id/btn_leaderboard_bot"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:backgroundTint="#333333"
+                        android:text="Bot"
+                        android:textColor="#FFFFFF" />
+
+                    <Button
+                        android:id="@+id/btn_leaderboard_one_device"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:backgroundTint="#333333"
+                        android:text="1v1"
+                        android:textColor="#FFFFFF" />
+                </LinearLayout>
+            </HorizontalScrollView>
+
+            <LinearLayout
+                android:id="@+id/bot_difficulty_filters"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:visibility="gone">
 
                 <Button
-                    android:id="@+id/btn_leaderboard_online"
-                    android:layout_width="0dp"
+                    android:id="@+id/btn_bot_easy"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="8dp"
-                    android:layout_weight="1"
-                    android:backgroundTint="@color/background_red"
-                    android:text="Online"
-                    android:textColor="#FFFFFF" />
+                    android:layout_marginEnd="4dp"
+                    android:text="Easy"
+                    android:textSize="12sp" />
 
                 <Button
-                    android:id="@+id/btn_leaderboard_bot"
-                    android:layout_width="0dp"
+                    android:id="@+id/btn_bot_normal"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="8dp"
-                    android:layout_weight="1"
-                    android:backgroundTint="#333333"
-                    android:text="Bot"
-                    android:textColor="#FFFFFF" />
+                    android:layout_marginEnd="4dp"
+                    android:text="Normal"
+                    android:textSize="12sp" />
 
                 <Button
-                    android:id="@+id/btn_leaderboard_one_device"
+                    android:id="@+id/btn_bot_hard"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Hard"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+            <!-- Leaderboard Header Row - Forced LTR -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:background="#F5F5F5"
+                android:orientation="horizontal"
+                android:layoutDirection="ltr"
+                android:padding="8dp">
+
+                <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:backgroundTint="@color/background_red"
-                    android:text="1v1"
-                    android:textColor="#FFFFFF" />
+                    android:text="Rank"
+                    android:textColor="#757575"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="3"
+                    android:text="Player"
+                    android:textColor="#757575"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tv_header_stat"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1.2"
+                    android:gravity="end"
+                    android:text="Wins"
+                    android:textColor="#757575"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
             </LinearLayout>
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rv_leaderboard"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_marginTop="16dp"
                 android:layout_weight="1" />
         </LinearLayout>
     </androidx.cardview.widget.CardView>

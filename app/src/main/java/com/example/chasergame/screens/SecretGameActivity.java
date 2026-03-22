@@ -454,6 +454,8 @@ public class SecretGameActivity extends BaseActivity {
         if (levelPassed) {
             earnedPoints = currentScore / 10;
             if (finalAcc >= 95.0) earnedPoints += 500;
+            // Update total cumulative score for leaderboard only on pass
+            updateUserRhythmScore(currentScore);
         } else {
             earnedPoints = (currentScore / 10) / 3;
         }
@@ -472,6 +474,15 @@ public class SecretGameActivity extends BaseActivity {
                     finish();
                 })
                 .show();
+    }
+
+    private void updateUserRhythmScore(int score) {
+        User user = SharedPreferencesUtil.getUser(this);
+        if (user != null) {
+            user.setTotalRhythmScore(user.getTotalRhythmScore() + score);
+            SharedPreferencesUtil.saveUser(this, user);
+            FirebaseDatabase.getInstance().getReference("users").child(user.getId()).child("totalRhythmScore").setValue(user.getTotalRhythmScore());
+        }
     }
 
     private void updateUserPoints(int earnedPoints) {

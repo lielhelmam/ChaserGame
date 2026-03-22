@@ -23,7 +23,7 @@ import com.example.chasergame.services.DatabaseService;
 public class UserProfileActivity extends BaseActivity {
     private static final String TAG = "UserProfileActivity";
 
-    private TextView tvName, tvEmail, tvPassword, tvAdmin, tvOnlineWins, tvBotWins, tvOneDeviceWins;
+    private TextView tvName, tvEmail, tvPassword, tvAdmin, tvOnlineWins, tvBotWinsEasy, tvBotWinsNormal, tvBotWinsHard, tvOneDeviceWins;
     private ProgressBar progressBar;
 
     private String userId;
@@ -34,25 +34,30 @@ public class UserProfileActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
 
-
         setContentView(R.layout.activity_user_profile);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
         tvName = findViewById(R.id.tv_profile_name);
         tvEmail = findViewById(R.id.tv_profile_email);
         tvPassword = findViewById(R.id.tv_profile_password);
         tvAdmin = findViewById(R.id.tv_profile_admin);
         progressBar = findViewById(R.id.profile_progress);
+        
         tvOnlineWins = findViewById(R.id.tv_online_wins);
-        tvBotWins = findViewById(R.id.tv_bot_wins);
+        tvBotWinsEasy = findViewById(R.id.tv_bot_wins_easy);
+        tvBotWinsNormal = findViewById(R.id.tv_bot_wins_normal);
+        tvBotWinsHard = findViewById(R.id.tv_bot_wins_hard);
         tvOneDeviceWins = findViewById(R.id.tv_one_device_wins);
-        Button btnEditOnlineWins = findViewById(R.id.btn_edit_online_wins);
-        Button btnEditBotWins = findViewById(R.id.btn_edit_bot_wins);
-        Button btnEditOneDeviceWins = findViewById(R.id.btn_edit_one_device_wins);
 
+        Button btnEditOnlineWins = findViewById(R.id.btn_edit_online_wins);
+        Button btnEditBotEasy = findViewById(R.id.btn_edit_bot_wins_easy);
+        Button btnEditBotNormal = findViewById(R.id.btn_edit_bot_wins_normal);
+        Button btnEditBotHard = findViewById(R.id.btn_edit_bot_wins_hard);
+        Button btnEditOneDeviceWins = findViewById(R.id.btn_edit_one_device_wins);
 
         userId = getIntent().getStringExtra("USER_UID");
         if (userId == null || userId.trim().isEmpty()) {
@@ -64,14 +69,15 @@ public class UserProfileActivity extends BaseActivity {
 
         loadUser();
 
-        btnEditOnlineWins.setOnClickListener(v -> showEditWinsDialog("onlineWins"));
-        btnEditBotWins.setOnClickListener(v -> showEditWinsDialog("botWins"));
-        btnEditOneDeviceWins.setOnClickListener(v -> showEditWinsDialog("oneDeviceWins"));
+        btnEditOnlineWins.setOnClickListener(v -> showEditWinsDialog("onlineWins", currentUser.getOnlineWins()));
+        btnEditBotEasy.setOnClickListener(v -> showEditWinsDialog("botWinsEasy", currentUser.getBotWinsEasy()));
+        btnEditBotNormal.setOnClickListener(v -> showEditWinsDialog("botWinsNormal", currentUser.getBotWinsNormal()));
+        btnEditBotHard.setOnClickListener(v -> showEditWinsDialog("botWinsHard", currentUser.getBotWinsHard()));
+        btnEditOneDeviceWins.setOnClickListener(v -> showEditWinsDialog("oneDeviceWins", currentUser.getOneDeviceWins()));
     }
 
     private void loadUser() {
         progressBar.setVisibility(View.VISIBLE);
-
         databaseService.getUser(userId, new DatabaseService.DatabaseCallback<>() {
             @Override
             public void onCompleted(User user) {
@@ -96,63 +102,56 @@ public class UserProfileActivity extends BaseActivity {
     private void showUserData(User user) {
         tvName.setText(user.getUsername() == null ? "-" : user.getUsername());
         tvEmail.setText(user.getEmail() == null ? "-" : user.getEmail());
-
         tvPassword.setText(user.getPassword() == null ? "-" : user.getPassword());
-
         tvAdmin.setText((user.isAdmin ? "Yes" : "No"));
 
         tvOnlineWins.setText(String.valueOf(user.getOnlineWins()));
-        tvBotWins.setText(String.valueOf(user.getBotWins()));
+        tvBotWinsEasy.setText(String.valueOf(user.getBotWinsEasy()));
+        tvBotWinsNormal.setText(String.valueOf(user.getBotWinsNormal()));
+        tvBotWinsHard.setText(String.valueOf(user.getBotWinsHard()));
         tvOneDeviceWins.setText(String.valueOf(user.getOneDeviceWins()));
     }
 
-    private void showEditWinsDialog(String field) {
+    private void showEditWinsDialog(String field, int currentVal) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Edit Wins");
+        builder.setTitle("Edit " + field);
 
         final EditText input = new EditText(this);
         input.setInputType(InputType.TYPE_CLASS_NUMBER);
+        input.setText(String.valueOf(currentVal));
         builder.setView(input);
 
-        builder.setPositiveButton("OK", (dialog, which) -> {
+        builder.setPositiveButton("Save", (dialog, which) -> {
             String value = input.getText().toString();
-            if (value.isEmpty()) {
-                return;
+            if (!value.isEmpty()) {
+                updateWins(field, Integer.parseInt(value));
             }
-            int newWins = Integer.parseInt(value);
-            updateWins(field, newWins);
         });
-        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
-
+        builder.setNegativeButton("Cancel", null);
         builder.show();
     }
 
     private void updateWins(String field, int newWins) {
-        if (currentUser == null) {
-            return;
-        }
+        if (currentUser == null) return;
+        
         switch (field) {
-            case "onlineWins":
-                currentUser.setOnlineWins(newWins);
-                break;
-            case "botWins":
-                currentUser.setBotWins(newWins);
-                break;
-            case "oneDeviceWins":
-                currentUser.setOneDeviceWins(newWins);
-                break;
+            case "onlineWins": currentUser.setOnlineWins(newWins); break;
+            case "botWinsEasy": currentUser.setBotWinsEasy(newWins); break;
+            case "botWinsNormal": currentUser.setBotWinsNormal(newWins); break;
+            case "botWinsHard": currentUser.setBotWinsHard(newWins); break;
+            case "oneDeviceWins": currentUser.setOneDeviceWins(newWins); break;
         }
 
         databaseService.updateUser(currentUser, new DatabaseService.DatabaseCallback<>() {
             @Override
             public void onCompleted(Void unused) {
-                Toast.makeText(UserProfileActivity.this, "Wins updated", Toast.LENGTH_SHORT).show();
+                Toast.makeText(UserProfileActivity.this, "Updated successfully", Toast.LENGTH_SHORT).show();
                 showUserData(currentUser);
             }
 
             @Override
             public void onFailed(Exception e) {
-                Toast.makeText(UserProfileActivity.this, "Failed to update wins", Toast.LENGTH_SHORT).show();
+                Toast.makeText(UserProfileActivity.this, "Update failed", Toast.LENGTH_SHORT).show();
             }
         });
     }
