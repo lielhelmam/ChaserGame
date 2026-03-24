@@ -18,7 +18,7 @@ public class SecretGameRulesActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_secret_game_ruels);
+        setContentView(R.layout.activity_secret_game_rules);
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -28,7 +28,7 @@ public class SecretGameRulesActivity extends AppCompatActivity {
 
         Button btnStartGame = findViewById(R.id.btn_start_secret_game);
         btnStartGame.setOnClickListener(v -> {
-            Intent intent = new Intent(SecretGameRulesActivity.this, SecretGameActivity.class);
+            Intent intent = new Intent(SecretGameRulesActivity.this, SongSelectionActivity.class);
             startActivity(intent);
             finish(); // Optional: finish rules activity so user doesn't go back to it from game
         });

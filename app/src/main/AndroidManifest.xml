@@ -25,7 +25,7 @@
             android:name=".screens.SongSelectionActivity"
             android:exported="false" />
         <activity
-            android:name=".screens.SecretGameRuelsActivity"
+            android:name=".screens.SecretGameRulesActivity"
             android:exported="false" />
         <activity
             android:name=".screens.SecretGameActivity"

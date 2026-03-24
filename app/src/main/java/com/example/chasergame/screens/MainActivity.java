@@ -46,7 +46,7 @@ public class MainActivity extends BaseActivity {
 
         // FIXED: Navigate to the Rules activity first (using the correct spelling from Manifest)
         findViewById(R.id.btn_main_rythmgame).setOnClickListener(v ->
-                startActivity(new Intent(this, SecretGameRuelsActivity.class)));
+                startActivity(new Intent(this, SecretGameRulesActivity.class)));
 
         findViewById(R.id.btn_main_playagainstabot).setOnClickListener(v -> 
             startActivity(new Intent(this, ChooseTimeBotActivity.class)));
