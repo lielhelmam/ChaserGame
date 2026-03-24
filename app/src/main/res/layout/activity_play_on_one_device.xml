@@ -4,180 +4,227 @@
     android:id="@+id/PlayOnOneDevice"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/background"
-    android:padding="16dp">
+    android:background="@color/background_red">
 
-    <!-- Progress bar container -->
-    <!-- Progress bar container -->
-    <FrameLayout
-        android:id="@+id/One_Device_progressContainer"
-        android:layout_width="0dp"
-        android:layout_height="50dp"
-        android:background="@color/background_red"
-        android:padding="8dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+    <!-- ===== TOP BAR ===== -->
+    <View
+        android:id="@+id/top_bar_bg"
+        android:layout_width="match_parent"
+        android:layout_height="72dp"
+        android:background="#22000000"
+        app:layout_constraintTop_toTopOf="parent" />
 
-        <!-- The track -->
-        <View
-            android:id="@+id/progressTrack"
-            android:layout_width="match_parent"
-            android:layout_height="10dp"
-            android:layout_gravity="center_vertical"
-            android:background="#333333" />
-
-        <!-- Player 1 marker -->
-        <TextView
-            android:id="@+id/markerP1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:text="P1"
-            android:textColor="#FFFFFF"
-            android:textStyle="bold"
-            android:translationX="0dp" />
-
-        <!-- Player 2 marker -->
-        <TextView
-            android:id="@+id/markerP2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:text="P2"
-            android:textColor="#FFFFFF"
-            android:textStyle="bold"
-            android:translationX="0dp" />
-
-    </FrameLayout>
-
-    <!-- ADDED: Turn indicator -->
+    <!-- Turn indicator centered in top bar -->
     <TextView
         android:id="@+id/One_Device_tvTurn"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
         android:gravity="center"
         android:text="Player 1 Turn"
         android:textColor="#FFFFFF"
-        android:textSize="18sp"
+        android:textSize="20sp"
         android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@id/top_bar_bg"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/One_Device_progressContainer" />
+        app:layout_constraintTop_toTopOf="@id/top_bar_bg" />
 
-    <!-- ADDED: Timer text -->
+    <!-- ===== PROGRESS RACE TRACK ===== -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/One_Device_progressContainer"
+        android:layout_width="0dp"
+        android:layout_height="56dp"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="12dp"
+        app:cardBackgroundColor="#33000000"
+        app:cardCornerRadius="28dp"
+        app:cardElevation="0dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/top_bar_bg">
+
+        <!-- Track line -->
+        <View
+            android:id="@+id/progressTrack"
+            android:layout_width="match_parent"
+            android:layout_height="4dp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginHorizontal="24dp"
+            android:background="#44FFFFFF" />
+
+        <!-- P1 marker -->
+        <TextView
+            android:id="@+id/markerP1"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_gravity="center_vertical"
+            android:background="@drawable/marker_bg"
+            android:gravity="center"
+            android:text="P1"
+            android:textColor="#FFFFFF"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:translationX="0dp" />
+
+        <!-- P2 marker -->
+        <TextView
+            android:id="@+id/markerP2"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_gravity="center_vertical"
+            android:background="@drawable/marker_bg"
+            android:gravity="center"
+            android:text="P2"
+            android:textColor="#FFFFFF"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:translationX="0dp" />
+    </androidx.cardview.widget.CardView>
+
+    <!-- ===== TIMER + SCORES ROW ===== -->
     <TextView
         android:id="@+id/One_Device_tvTimer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="14dp"
+        android:background="#33000000"
+        android:paddingHorizontal="14dp"
+        android:paddingVertical="6dp"
         android:text="02:00"
         android:textColor="#FFFFFF"
-        android:textSize="18sp"
+        android:textSize="16sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/One_Device_tvTurn" />
+        app:layout_constraintTop_toBottomOf="@id/One_Device_progressContainer" />
 
-    <!-- ADDED: Scores -->
-    <TextView
-        android:id="@+id/One_Device_tvScoreP1"
+    <LinearLayout
+        android:id="@+id/scoresLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="P1: 0"
-        android:textColor="#FFFFFF"
-        android:textSize="16sp"
-        android:textStyle="bold"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="10dp"
+        android:gravity="end"
+        android:orientation="vertical"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/One_Device_tvTurn" />
+        app:layout_constraintTop_toBottomOf="@id/One_Device_progressContainer">
 
-    <TextView
-        android:id="@+id/One_Device_tvScoreP2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
-        android:text="P2: 0"
-        android:textColor="#FFFFFF"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/One_Device_tvScoreP1" />
+        <TextView
+            android:id="@+id/One_Device_tvScoreP1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="P1: 0"
+            android:textColor="#FFFFFF"
+            android:textSize="15sp"
+            android:textStyle="bold" />
 
-    <!-- ADDED: Target for player 2 -->
+        <TextView
+            android:id="@+id/One_Device_tvScoreP2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="P2: 0"
+            android:textColor="#FFCCCC"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
     <TextView
         android:id="@+id/One_Device_tvTarget"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="4dp"
         android:text="Target: 0"
-        android:textColor="#FFFFFF"
-        android:textSize="16sp"
-        android:textStyle="bold"
+        android:textColor="#FFCCCC"
+        android:textSize="13sp"
         android:visibility="gone"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/One_Device_tvTimer" />
 
-    <!-- Answers: 3 buttons next to each other -->
+    <!-- ===== QUESTION CARD ===== -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/Bot_tvQuestion_card"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        app:cardBackgroundColor="#FFFFFF"
+        app:cardCornerRadius="24dp"
+        app:cardElevation="6dp"
+        app:layout_constraintBottom_toTopOf="@id/answersRow"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/scoresLayout">
+
+        <TextView
+            android:id="@+id/Bot_tvQuestion"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:padding="28dp"
+            android:text="Question text goes here"
+            android:textColor="#1A1A1A"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+    </androidx.cardview.widget.CardView>
+
+    <!-- ===== ANSWER BUTTONS ===== -->
     <LinearLayout
         android:id="@+id/answersRow"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="50dp"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="24dp"
         android:orientation="horizontal"
         android:weightSum="3"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/Bot_tvQuestion">
+        app:layout_constraintStart_toStartOf="parent">
 
         <Button
             android:id="@+id/Bot_btnAnswerA"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
+            android:layout_height="60dp"
+            android:layout_marginEnd="6dp"
             android:layout_weight="1"
-            android:backgroundTint="#333333"
+            android:backgroundTint="#33000000"
             android:text="A"
-            android:textColor="#FFFFFF" />
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:cornerRadius="16dp"
+            app:strokeColor="#44FFFFFF"
+            app:strokeWidth="1dp" />
 
         <Button
             android:id="@+id/Bot_btnAnswerB"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
+            android:layout_height="60dp"
+            android:layout_marginEnd="6dp"
             android:layout_weight="1"
-            android:backgroundTint="#333333"
+            android:backgroundTint="#33000000"
             android:text="B"
-            android:textColor="#FFFFFF" />
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:cornerRadius="16dp"
+            app:strokeColor="#44FFFFFF"
+            app:strokeWidth="1dp" />
 
         <Button
             android:id="@+id/Bot_btnAnswerC"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="60dp"
             android:layout_weight="1"
-            android:backgroundTint="#333333"
+            android:backgroundTint="#33000000"
             android:text="C"
-            android:textColor="#FFFFFF" />
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:cornerRadius="16dp"
+            app:strokeColor="#44FFFFFF"
+            app:strokeWidth="1dp" />
     </LinearLayout>
-
-    <TextView
-        android:id="@+id/Bot_tvQuestion"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="348dp"
-        android:background="#ffff"
-        android:padding="20dp"
-        android:text="Question text goes here"
-        android:textColor="#000000"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@+id/answersRow"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/One_Device_progressContainer" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
