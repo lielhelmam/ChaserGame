@@ -1,24 +1,12 @@
 package com.example.chasergame.screens;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.Typeface;
-import android.graphics.drawable.GradientDrawable;
 import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
-import android.util.Log;
-import android.view.Gravity;
-import android.view.View;
-import android.view.animation.LinearInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -35,6 +23,7 @@ import com.example.chasergame.models.SongData;
 import com.example.chasergame.models.User;
 import com.example.chasergame.utils.SharedPreferencesUtil;
 import com.example.chasergame.utils.SkinManager;
+import com.example.chasergame.views.GameView;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -44,34 +33,35 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Random;
 
-public class SecretGameActivity extends BaseActivity {
-    private static final String TAG = "SecretGameActivity";
+public class SecretGameActivity extends BaseActivity implements GameView.GameEventListener {
 
-    private SongData songData;
-    private MediaPlayer mediaPlayer;
-    private TextView tvScore, tvSongName, tvAccuracy;
-    private ProgressBar pbSongProgress;
-    private FrameLayout laneLeft, laneRight;
-    private View targetLeft, targetRight;
+    // -------------------------------------------------------------------------
+    // Views
+    // -------------------------------------------------------------------------
+    private GameView        gameView;
+    private TextView        tvScore, tvSongName, tvAccuracy;
+    private ProgressBar     pbSongProgress;
     private ConstraintLayout rootLayout;
-    private Vibrator vibrator;
-    private Skin equippedSkin;
-    private Random random = new Random();
 
-    private int currentScore = 0;
-    private int totalNotesPassed = 0;
-    private double notesHitWeight = 0; 
-    private long startTime;
-    private Handler gameHandler = new Handler(Looper.getMainLooper());
-    private List<Note> remainingNotes;
-    private boolean isGameRunning = false;
+    // -------------------------------------------------------------------------
+    // Game data
+    // -------------------------------------------------------------------------
+    private SongData songData;
+    private Skin     equippedSkin;
+    private MediaPlayer mediaPlayer;
+    private Vibrator    vibrator;
 
-    private static final long NOTE_FALL_DURATION = 2000L; 
-    private static final int PERFECT_THRESHOLD = 150;
-    private static final int GOOD_THRESHOLD = 300;
+    // -------------------------------------------------------------------------
+    // Score tracking (lives here, not in GameView)
+    // -------------------------------------------------------------------------
+    private int    currentScore     = 0;
+    private int    totalNotesPassed = 0;
+    private double notesHitWeight   = 0;
 
+    // -------------------------------------------------------------------------
+    // Lifecycle
+    // -------------------------------------------------------------------------
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -79,31 +69,9 @@ public class SecretGameActivity extends BaseActivity {
             EdgeToEdge.enable(this);
             setContentView(R.layout.activity_secret_game);
 
-            rootLayout = findViewById(R.id.game_layout);
-            tvScore = findViewById(R.id.tv_game_score);
-            tvSongName = findViewById(R.id.tv_game_song_name);
-            tvAccuracy = findViewById(R.id.tv_game_accuracy);
-            pbSongProgress = findViewById(R.id.pb_song_progress);
-            laneLeft = findViewById(R.id.lane_left);
-            laneRight = findViewById(R.id.lane_right);
-            targetLeft = findViewById(R.id.target_left);
-            targetRight = findViewById(R.id.target_right);
-
-            vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-
-            User user = SharedPreferencesUtil.getUser(this);
-            if (user != null) {
-                String skinId = user.getEquippedSkin();
-                if ("custom".equals(skinId)) {
-                    equippedSkin = SkinManager.getCustomSkinForUser(user);
-                } else {
-                    equippedSkin = SkinManager.getSkinById(skinId);
-                }
-            } else {
-                equippedSkin = SkinManager.getSkinById("default");
-            }
-            
-            applySkin();
+            bindViews();
+            resolveEquippedSkin();
+            applyBackgroundSkin();
 
             String songId = getIntent().getStringExtra("SONG_ID");
             if (songId != null) {
@@ -116,359 +84,197 @@ public class SecretGameActivity extends BaseActivity {
         }
     }
 
-    private void applySkin() {
-        if (equippedSkin == null) return;
-        rootLayout.setBackgroundColor(equippedSkin.backgroundColor);
-        targetLeft.getBackground().setTint(equippedSkin.targetColor);
-        targetRight.getBackground().setTint(equippedSkin.targetColor);
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mediaPlayer != null) {
+            mediaPlayer.release();
+            mediaPlayer = null;
+        }
+        if (gameView != null) {
+            gameView.stop();
+        }
     }
 
+    // -------------------------------------------------------------------------
+    // Setup helpers
+    // -------------------------------------------------------------------------
+    private void bindViews() {
+        rootLayout     = findViewById(R.id.game_layout);
+        tvScore        = findViewById(R.id.tv_game_score);
+        tvSongName     = findViewById(R.id.tv_game_song_name);
+        tvAccuracy     = findViewById(R.id.tv_game_accuracy);
+        pbSongProgress = findViewById(R.id.pb_song_progress);
+
+        // GameView is declared in XML — it inflates and finds its own children
+        gameView = findViewById(R.id.game_view);
+        gameView.setGameEventListener(this);
+
+        vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+    }
+
+    private void resolveEquippedSkin() {
+        User user = SharedPreferencesUtil.getUser(this);
+        if (user != null) {
+            String skinId = user.getEquippedSkin();
+            equippedSkin = "custom".equals(skinId)
+                    ? SkinManager.getCustomSkinForUser(user)
+                    : SkinManager.getSkinById(skinId);
+        } else {
+            equippedSkin = SkinManager.getSkinById("default");
+        }
+    }
+
+    private void applyBackgroundSkin() {
+        if (equippedSkin != null && rootLayout != null) {
+            rootLayout.setBackgroundColor(equippedSkin.backgroundColor);
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // Firebase → load song
+    // -------------------------------------------------------------------------
     private void loadSongData(String songId) {
-        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("rhythm_songs").child(songId);
+        DatabaseReference ref = FirebaseDatabase.getInstance()
+                .getReference("rhythm_songs").child(songId);
+
         ref.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 try {
                     songData = snapshot.getValue(SongData.class);
-                    if (songData != null) {
-                        tvSongName.setText(songData.getName());
-                        List<Note> allNotes = songData.getNotes();
-                        remainingNotes = new ArrayList<>();
-                        if (allNotes != null) {
-                            for (Note n : allNotes) {
-                                if (n != null && n.getTimestamp() >= NOTE_FALL_DURATION) {
-                                    remainingNotes.add(n);
-                                }
+                    if (songData == null) { finish(); return; }
+
+                    tvSongName.setText(songData.getName());
+
+                    // Filter out notes that are too early to animate properly
+                    List<Note> allNotes = songData.getNotes();
+                    List<Note> validNotes = new ArrayList<>();
+                    if (allNotes != null) {
+                        for (Note n : allNotes) {
+                            if (n != null && n.getTimestamp() >= 2000L) {
+                                validNotes.add(n);
                             }
                         }
-                        setupInputListeners();
-                        gameHandler.postDelayed(SecretGameActivity.this::startGame, 500);
-                    } else {
-                        finish();
                     }
+
+                    startMediaPlayer(validNotes);
                 } catch (Exception e) {
                     finish();
                 }
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                finish();
-            }
+            public void onCancelled(@NonNull DatabaseError error) { finish(); }
         });
     }
 
-    private void setupInputListeners() {
-        if (targetLeft != null) targetLeft.setOnClickListener(v -> checkHit(0));
-        if (targetRight != null) targetRight.setOnClickListener(v -> checkHit(1));
-    }
-
-    private void startGame() {
+    // -------------------------------------------------------------------------
+    // MediaPlayer
+    // -------------------------------------------------------------------------
+    private void startMediaPlayer(List<Note> validNotes) {
         if (isFinishing() || isDestroyed() || songData == null) return;
-        String resName = songData.getResName();
-        int resId = getResources().getIdentifier(resName, "raw", getPackageName());
-        if (resId == 0) {
-            finish();
-            return;
-        }
+
+        int resId = getResources().getIdentifier(
+                songData.getResName(), "raw", getPackageName());
+        if (resId == 0) { finish(); return; }
+
         try {
             mediaPlayer = MediaPlayer.create(this, resId);
-            if (mediaPlayer == null) {
-                finish();
-                return;
-            }
+            if (mediaPlayer == null) { finish(); return; }
+
             pbSongProgress.setMax(mediaPlayer.getDuration());
             mediaPlayer.setOnCompletionListener(mp -> endGame());
             mediaPlayer.start();
-            startTime = System.currentTimeMillis();
-            isGameRunning = true;
-            gameHandler.post(gameLoop);
+
+            // Hand off to GameView now that the song is playing
+            gameView.startGame(validNotes, equippedSkin);
         } catch (Exception e) {
             finish();
         }
     }
 
-    private final Runnable gameLoop = new Runnable() {
-        @Override
-        public void run() {
-            if (isGameRunning) {
-                updateGame();
-                updateProgressBar();
-                gameHandler.postDelayed(this, 16);
-            }
-        }
-    };
+    // -------------------------------------------------------------------------
+    // GameView.GameEventListener
+    // -------------------------------------------------------------------------
+    @Override
+    public void onNoteHit(int points) {
+        totalNotesPassed++;
+        notesHitWeight += (points == 300) ? 1.0 : 0.5;
+        currentScore   += points;
 
-    private void updateProgressBar() {
-        if (mediaPlayer != null && isGameRunning) {
+        tvScore.setText("Score: " + currentScore);
+        updateAccuracyDisplay();
+        vibrate(30);
+    }
+
+    @Override
+    public void onNoteMissed() {
+        totalNotesPassed++;
+        updateAccuracyDisplay();
+        vibrate(100);
+    }
+
+    @Override
+    public void onGameLoopTick() {
+        if (mediaPlayer != null) {
             pbSongProgress.setProgress(mediaPlayer.getCurrentPosition());
         }
     }
 
-    private void updateGame() {
-        if (remainingNotes == null || remainingNotes.isEmpty()) return;
-        long elapsed = System.currentTimeMillis() - startTime;
-        List<Note> toSpawn = new ArrayList<>();
-        for (Note note : remainingNotes) {
-            if (elapsed >= (note.getTimestamp() - NOTE_FALL_DURATION)) {
-                toSpawn.add(note);
-            }
-        }
-        for (Note note : toSpawn) {
-            spawnNoteView(note);
-            remainingNotes.remove(note);
-        }
-    }
-
-    private void spawnNoteView(Note note) {
-        final View noteView = new View(this);
-        noteView.setBackgroundResource(R.drawable.note_circle);
-        if (equippedSkin != null) {
-            noteView.getBackground().setTint(equippedSkin.circleColor);
-        }
-        float density = getResources().getDisplayMetrics().density;
-        final int size = (int) (60 * density);
-        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(size, size);
-        params.gravity = Gravity.CENTER_HORIZONTAL;
-        noteView.setLayoutParams(params);
-        
-        final FrameLayout parentLane = (note.getLane() == 0) ? laneLeft : laneRight;
-        if (parentLane == null) return;
-        parentLane.addView(noteView);
-        noteView.setTranslationY(-size);
-
-        float targetY;
-        if (targetLeft != null && laneLeft != null && targetLeft.getHeight() > 0) {
-            float relativeTargetTop = targetLeft.getTop() - laneLeft.getTop();
-            targetY = relativeTargetTop + (targetLeft.getHeight() - size) / 2.0f;
-        } else {
-            targetY = parentLane.getHeight() - (100 * density);
-        }
-
-        float endY = parentLane.getHeight() + size;
-        long totalDuration = (long) ((endY + size) * NOTE_FALL_DURATION / (targetY + size));
-
-        ValueAnimator animator = ValueAnimator.ofFloat(-size, endY);
-        animator.setDuration(totalDuration);
-        animator.setInterpolator(new LinearInterpolator());
-
-        final int[] trailCounter = {0};
-        animator.addUpdateListener(animation -> {
-            float val = (float) animation.getAnimatedValue();
-            noteView.setTranslationY(val);
-            
-            if (equippedSkin != null && !"none".equals(equippedSkin.effectType)) {
-                trailCounter[0]++;
-                if (trailCounter[0] % 2 == 0) {
-                    float centerX = parentLane.getLeft() + (parentLane.getWidth() / 2f);
-                    float currentY = parentLane.getTop() + val + (size / 2f);
-                    spawnTrailParticle(centerX, currentY, equippedSkin.circleColor, equippedSkin.effectType);
-                }
-            }
-        });
-
-        animator.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                if (parentLane.indexOfChild(noteView) != -1) {
-                    totalNotesPassed++;
-                    updateAccuracyDisplay();
-                    showFeedback("MISS", Color.RED, note.getLane());
-                    vibrate(100); 
-                    parentLane.removeView(noteView);
-                }
-            }
-        });
-        
-        animator.start();
-        noteView.setTag(note.getTimestamp());
-    }
-
-    private void spawnTrailParticle(float x, float y, int color, String type) {
-        final View p = new View(this);
-        float density = getResources().getDisplayMetrics().density;
-        
-        int pSize = (int) (25 * density);
-        ConstraintLayout.LayoutParams params = new ConstraintLayout.LayoutParams(pSize, pSize);
-        p.setLayoutParams(params);
-        
-        GradientDrawable shape = new GradientDrawable();
-        shape.setShape(GradientDrawable.OVAL);
-        shape.setColor(color);
-        shape.setStroke(2, Color.WHITE);
-        shape.setAlpha(180);
-        p.setBackground(shape);
-        
-        p.setX(x - pSize/2f);
-        p.setY(y - pSize/2f);
-        
-        rootLayout.addView(p, 1);
-
-        float tx = (random.nextFloat() * 40 - 20) * density;
-        float ty = (random.nextFloat() * 40 - 20) * density;
-        float scaleTarget = 0.5f;
-        long duration = 600;
-
-        if ("bubbles".equals(type)) {
-            ty = -(100 + random.nextFloat() * 100) * density;
-            duration = 1000;
-        } else if ("glow".equals(type)) {
-            scaleTarget = 3.0f;
-            duration = 400;
-        }
-
-        p.animate()
-                .translationXBy(tx)
-                .translationYBy(ty)
-                .alpha(0)
-                .scaleX(scaleTarget)
-                .scaleY(scaleTarget)
-                .setDuration(duration)
-                .withEndAction(() -> rootLayout.removeView(p))
-                .start();
-    }
-
-    private void spawnBurstParticles(View target, int color) {
-        float density = getResources().getDisplayMetrics().density;
-        float centerX = target.getX() + target.getWidth() / 2f;
-        float centerY = target.getY() + target.getHeight() / 2f;
-
-        for (int i = 0; i < 20; i++) {
-            final View p = new View(this);
-            int pSize = (int) (25 * density);
-            ConstraintLayout.LayoutParams lp = new ConstraintLayout.LayoutParams(pSize, pSize);
-            p.setLayoutParams(lp);
-            
-            GradientDrawable shape = new GradientDrawable();
-            shape.setShape(GradientDrawable.OVAL);
-            shape.setColor(color);
-            p.setBackground(shape);
-            
-            p.setX(centerX - pSize/2f);
-            p.setY(centerY - pSize/2f);
-            
-            rootLayout.addView(p);
-
-            float angle = (float) (random.nextFloat() * 2 * Math.PI);
-            float distance = (60 + random.nextFloat() * 140) * density;
-            float tx = (float) (Math.cos(angle) * distance);
-            float ty = (float) (Math.sin(angle) * distance);
-
-            p.animate()
-                    .translationXBy(tx)
-                    .translationYBy(ty)
-                    .alpha(0)
-                    .scaleX(0.1f)
-                    .scaleY(0.1f)
-                    .setDuration(500 + random.nextInt(300))
-                    .withEndAction(() -> rootLayout.removeView(p))
-                    .start();
-        }
-    }
-
-    private void checkHit(int lane) {
-        if (!isGameRunning) return;
-        long currentTime = System.currentTimeMillis() - startTime;
-        FrameLayout laneView = (lane == 0) ? laneLeft : laneRight;
-        View targetView = (lane == 0) ? targetLeft : targetRight;
-        if (laneView == null || targetView == null) return;
-
-        View bestNote = null;
-        long minDiff = Long.MAX_VALUE;
-        for (int i = 0; i < laneView.getChildCount(); i++) {
-            View v = laneView.getChildAt(i);
-            if (v.getTag() instanceof Long) {
-                long noteTimestamp = (long) v.getTag();
-                long diff = Math.abs(currentTime - noteTimestamp);
-                if (diff < minDiff) {
-                    minDiff = diff;
-                    bestNote = v;
-                }
-            }
-        }
-
-        if (bestNote != null && minDiff < GOOD_THRESHOLD) {
-            totalNotesPassed++;
-            
-            if (equippedSkin != null) {
-                spawnBurstParticles(targetView, equippedSkin.circleColor);
-            }
-
-            if (minDiff < PERFECT_THRESHOLD) {
-                currentScore += 300;
-                notesHitWeight += 1.0; 
-                showFeedback("300", Color.YELLOW, lane);
-            } else {
-                currentScore += 100;
-                notesHitWeight += 0.5;
-                showFeedback("100", Color.WHITE, lane);
-            }
-            tvScore.setText("Score: " + currentScore);
-            updateAccuracyDisplay();
-            vibrate(30); 
-            laneView.removeView(bestNote);
-        }
-    }
-
-    private void vibrate(long duration) {
-        if (vibrator != null && vibrator.hasVibrator()) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                vibrator.vibrate(VibrationEffect.createOneShot(duration, VibrationEffect.DEFAULT_AMPLITUDE));
-            } else {
-                vibrator.vibrate(duration);
-            }
-        }
-    }
-
+    // -------------------------------------------------------------------------
+    // UI helpers
+    // -------------------------------------------------------------------------
     private void updateAccuracyDisplay() {
         if (totalNotesPassed == 0) return;
         double accuracy = (notesHitWeight / totalNotesPassed) * 100.0;
         tvAccuracy.setText(String.format(Locale.US, "Acc: %.1f%%", accuracy));
     }
 
-    private void showFeedback(String text, int color, int lane) {
-        TextView tv = new TextView(this);
-        tv.setText(text);
-        tv.setTextColor(color);
-        tv.setTextSize(32);
-        tv.setTypeface(null, Typeface.BOLD);
-        FrameLayout parent = (lane == 0) ? laneLeft : laneRight;
-        if (parent == null) return;
-        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT);
-        params.gravity = Gravity.CENTER;
-        tv.setLayoutParams(params);
-        parent.addView(tv);
-        tv.animate().translationYBy(-300).alpha(0).setDuration(600).withEndAction(() -> parent.removeView(tv)).start();
+    private void vibrate(long duration) {
+        if (vibrator != null && vibrator.hasVibrator()) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                vibrator.vibrate(VibrationEffect.createOneShot(
+                        duration, VibrationEffect.DEFAULT_AMPLITUDE));
+            } else {
+                vibrator.vibrate(duration);
+            }
+        }
     }
 
+    // -------------------------------------------------------------------------
+    // End game
+    // -------------------------------------------------------------------------
     private void endGame() {
-        isGameRunning = false;
-        gameHandler.removeCallbacks(gameLoop);
-        
-        final double finalAcc = totalNotesPassed > 0 ? (notesHitWeight / totalNotesPassed) * 100.0 : 0;
-        
-        int targetScore = (songData != null) ? songData.getTargetScore() : 0;
-        boolean levelPassed = currentScore >= targetScore;
-        
+        if (gameView != null) gameView.stop();
+
+        final double finalAcc = totalNotesPassed > 0
+                ? (notesHitWeight / totalNotesPassed) * 100.0
+                : 0;
+
+        int targetScore  = (songData != null) ? songData.getTargetScore() : 0;
+        boolean passed   = currentScore >= targetScore;
+
         int earnedPoints;
-        if (levelPassed) {
+        if (passed) {
             earnedPoints = currentScore / 10;
             if (finalAcc >= 95.0) earnedPoints += 500;
-            // Update total cumulative score for leaderboard only on pass
             updateUserRhythmScore(currentScore);
         } else {
             earnedPoints = (currentScore / 10) / 3;
         }
-        
+
         updateUserPoints(earnedPoints);
-        
-        String msg = levelPassed ? "Level Passed!" : "Level Failed!";
+
+        String title = passed ? "Level Passed!" : "Level Failed!";
         new AlertDialog.Builder(this)
-                .setTitle(msg)
-                .setMessage(String.format(Locale.US, "Score: %d\nAccuracy: %.1f%%\nPoints Earned: %d", currentScore, finalAcc, earnedPoints))
+                .setTitle(title)
+                .setMessage(String.format(Locale.US,
+                        "Score: %d\nAccuracy: %.1f%%\nPoints Earned: %d",
+                        currentScore, finalAcc, earnedPoints))
                 .setCancelable(false)
                 .setPositiveButton("OK", (dialog, which) -> {
-                    Intent intent = new Intent(SecretGameActivity.this, SongSelectionActivity.class);
+                    Intent intent = new Intent(this, SongSelectionActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     startActivity(intent);
                     finish();
@@ -476,12 +282,17 @@ public class SecretGameActivity extends BaseActivity {
                 .show();
     }
 
+    // -------------------------------------------------------------------------
+    // Firebase score updates
+    // -------------------------------------------------------------------------
     private void updateUserRhythmScore(int score) {
         User user = SharedPreferencesUtil.getUser(this);
         if (user != null) {
             user.setTotalRhythmScore(user.getTotalRhythmScore() + score);
             SharedPreferencesUtil.saveUser(this, user);
-            FirebaseDatabase.getInstance().getReference("users").child(user.getId()).child("totalRhythmScore").setValue(user.getTotalRhythmScore());
+            FirebaseDatabase.getInstance().getReference("users")
+                    .child(user.getId()).child("totalRhythmScore")
+                    .setValue(user.getTotalRhythmScore());
         }
     }
 
@@ -490,18 +301,9 @@ public class SecretGameActivity extends BaseActivity {
         if (user != null) {
             user.setPoints(user.getPoints() + earnedPoints);
             SharedPreferencesUtil.saveUser(this, user);
-            FirebaseDatabase.getInstance().getReference("users").child(user.getId()).child("points").setValue(user.getPoints());
+            FirebaseDatabase.getInstance().getReference("users")
+                    .child(user.getId()).child("points")
+                    .setValue(user.getPoints());
         }
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (mediaPlayer != null) {
-            mediaPlayer.release();
-            mediaPlayer = null;
-        }
-        isGameRunning = false;
-        gameHandler.removeCallbacks(gameLoop);
     }
 }

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <!-- Lane divider -->
+    <View
+        android:id="@+id/lane_divider"
+        android:layout_width="2dp"
+        android:layout_height="0dp"
+        android:background="#33FFFFFF"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Left Lane -->
+    <FrameLayout
+        android:id="@+id/lane_left"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/lane_divider"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Right Lane -->
+    <FrameLayout
+        android:id="@+id/lane_right"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/lane_divider"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Left Target -->
+    <View
+        android:id="@+id/target_left"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_marginBottom="60dp"
+        android:background="@drawable/target_cube_bg"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@id/lane_left"
+        app:layout_constraintStart_toStartOf="@id/lane_left" />
+
+    <!-- Right Target -->
+    <View
+        android:id="@+id/target_right"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_marginBottom="60dp"
+        android:background="@drawable/target_cube_bg"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@id/lane_right"
+        app:layout_constraintStart_toStartOf="@id/lane_right" />
+
+</merge>
