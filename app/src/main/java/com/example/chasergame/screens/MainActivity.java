@@ -2,21 +2,27 @@ package com.example.chasergame.screens;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.Button;
+import android.view.View;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.graphics.Insets;
+import androidx.core.view.GravityCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.example.chasergame.R;
 import com.example.chasergame.models.User;
 import com.example.chasergame.utils.SharedPreferencesUtil;
+import com.google.android.material.navigation.NavigationView;
 
 public class MainActivity extends BaseActivity {
     private static final String TAG = "MainActivity";
+    private DrawerLayout drawerLayout;
+    private NavigationView navigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,18 +30,61 @@ public class MainActivity extends BaseActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.MainPage), (v, insets) -> {
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.drawer_layout), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
 
+        drawerLayout = findViewById(R.id.drawer_layout);
+        navigationView = findViewById(R.id.nav_view);
+
         setupButtons();
-        
-        TextView hitouser = findViewById(R.id.text_main_hitouser);
+        setupNavigationDrawer();
+        updateUIWithUserData();
+    }
+
+    private void setupNavigationDrawer() {
+        // Handle the menu icon click to open the drawer
+        findViewById(R.id.btn_open_drawer).setOnClickListener(v -> {
+            drawerLayout.openDrawer(GravityCompat.START);
+        });
+
+        // Handle navigation item clicks
+        navigationView.setNavigationItemSelectedListener(item -> {
+            int id = item.getItemId();
+
+            if (id == R.id.nav_home) {
+                drawerLayout.closeDrawer(GravityCompat.START);
+            } else if (id == R.id.nav_profile) {
+                startActivity(new Intent(this, EditProfileActivity.class));
+            } else if (id == R.id.nav_leaderboard) {
+                startActivity(new Intent(this, LeaderBoardActivity.class));
+            } else if (id == R.id.nav_shop) {
+                startActivity(new Intent(this, ShopActivity.class));
+            } else if (id == R.id.nav_logout) {
+                showLogoutDialog();
+            }
+
+            drawerLayout.closeDrawer(GravityCompat.START);
+            return true;
+        });
+    }
+
+    private void updateUIWithUserData() {
         User user = SharedPreferencesUtil.getUser(this);
-        if (SharedPreferencesUtil.isUserLoggedIn(this) && user != null) {
-            hitouser.setText("hi " + user.getUsername());
+        if (user != null) {
+            // Update main screen greeting
+            TextView hitouser = findViewById(R.id.text_main_hitouser);
+            hitouser.setText("Hi, " + user.getUsername());
+
+            // Update Drawer Header
+            View headerView = navigationView.getHeaderView(0);
+            TextView navUsername = headerView.findViewById(R.id.nav_header_username);
+            TextView navEmail = headerView.findViewById(R.id.nav_header_email);
+
+            navUsername.setText(user.getUsername());
+            navEmail.setText(user.getEmail());
         }
     }
 
@@ -44,7 +93,6 @@ public class MainActivity extends BaseActivity {
             startActivity(new Intent(MainActivity.this, LeaderBoardActivity.class));
         });
 
-        // FIXED: Navigate to the Rules activity first (using the correct spelling from Manifest)
         findViewById(R.id.btn_main_rythmgame).setOnClickListener(v ->
                 startActivity(new Intent(this, SecretGameRulesActivity.class)));
 
@@ -59,8 +107,6 @@ public class MainActivity extends BaseActivity {
 
         findViewById(R.id.btn_main_edit_profile).setOnClickListener(v -> 
             startActivity(new Intent(this, EditProfileActivity.class)));
-
-        findViewById(R.id.btn_main_logout).setOnClickListener(v -> showLogoutDialog());
     }
 
     private void showLogoutDialog() {
@@ -79,5 +125,14 @@ public class MainActivity extends BaseActivity {
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            drawerLayout.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
     }
 }
