@@ -2,7 +2,6 @@ package com.example.chasergame.screens;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
 
 import com.example.chasergame.R;
 
@@ -16,18 +15,10 @@ public class ChooseBotDifficultyActivity extends BaseActivity {
         setContentView(R.layout.activity_choose_bot_difficulty);
 
         turnTimeMs = getIntent().getLongExtra("TURN_TIME_MS", 120_000);
-    }
 
-    public void easy(View v) {
-        startGame(35); // Nerfed from 50
-    }
-
-    public void normal(View v) {
-        startGame(55); // Nerfed from 70
-    }
-
-    public void hard(View v) {
-        startGame(75); // Nerfed from 90
+        findViewById(R.id.btn_easy).setOnClickListener(v -> startGame(35));
+        findViewById(R.id.btn_normal).setOnClickListener(v -> startGame(55));
+        findViewById(R.id.btn_hard).setOnClickListener(v -> startGame(75));
     }
 
     private void startGame(int accuracy) {

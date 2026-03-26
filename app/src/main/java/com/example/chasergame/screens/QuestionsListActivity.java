@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.widget.SearchView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -15,12 +14,9 @@ import com.example.chasergame.R;
 import com.example.chasergame.adapters.QuestionsAdapter;
 import com.example.chasergame.models.Question;
 import com.example.chasergame.services.DatabaseService;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class QuestionsListActivity extends BaseActivity {
@@ -36,9 +32,13 @@ public class QuestionsListActivity extends BaseActivity {
         setSupportActionBar(toolbar);
         toolbar.setNavigationOnClickListener(v -> finish());
 
-        RecyclerView rv = findViewById(R.id.rv_questions_list);
-        SearchView searchView = findViewById(R.id.searchView);
+        setupRecyclerView();
+        setupSearchView();
+        loadQuestions();
+    }
 
+    private void setupRecyclerView() {
+        RecyclerView rv = findViewById(R.id.rv_questions_list);
         adapter = new QuestionsAdapter(new QuestionsAdapter.Listener() {
             @Override
             public void onEditClicked(String key, Question question) {
@@ -50,10 +50,12 @@ public class QuestionsListActivity extends BaseActivity {
                 confirmDelete(key);
             }
         });
-
         rv.setLayoutManager(new LinearLayoutManager(this));
         rv.setAdapter(adapter);
+    }
 
+    private void setupSearchView() {
+        SearchView searchView = findViewById(R.id.searchView);
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -67,47 +69,20 @@ public class QuestionsListActivity extends BaseActivity {
                 return true;
             }
         });
-
-        loadQuestions();
     }
 
     private void loadQuestions() {
-        FirebaseDatabase.getInstance()
-                .getReference("questions")
-                .addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        List<QuestionsAdapter.Item> items = new ArrayList<>();
+        questionService.getAllQuestions(new DatabaseService.DatabaseCallback<List<QuestionsAdapter.Item>>() {
+            @Override
+            public void onCompleted(List<QuestionsAdapter.Item> items) {
+                adapter.setItems(items);
+            }
 
-                        for (DataSnapshot child : snapshot.getChildren()) {
-                            String key = child.getKey(); // "0","1",...
-                            Question q = child.getValue(Question.class);
-                            items.add(new QuestionsAdapter.Item(key, q));
-                        }
-
-                        // ✅ sort by numeric key so list order is correct
-                        items.sort((a, b) -> {
-                            int ka = safeParseInt(a.key);
-                            int kb = safeParseInt(b.key);
-                            return Integer.compare(ka, kb);
-                        });
-
-                        adapter.setItems(items);
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-                        Toast.makeText(QuestionsListActivity.this, "Load failed: " + error.getMessage(), Toast.LENGTH_LONG).show();
-                    }
-                });
-    }
-
-    private int safeParseInt(String s) {
-        try {
-            return Integer.parseInt(s);
-        } catch (Exception e) {
-            return Integer.MAX_VALUE;
-        }
+            @Override
+            public void onFailed(Exception e) {
+                Toast.makeText(QuestionsListActivity.this, "Load failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     private void confirmDelete(String key) {
@@ -115,9 +90,7 @@ public class QuestionsListActivity extends BaseActivity {
                 .setTitle("Delete question")
                 .setMessage("Are you sure?")
                 .setPositiveButton("Delete", (d, w) -> {
-
-                    // ✅ Delete + reindex so DB becomes 0..n-1 again
-                    databaseService.deleteQuestionAndReindex(key, new DatabaseService.DatabaseCallback<>() {
+                    questionService.deleteQuestion(key, new DatabaseService.DatabaseCallback<Void>() {
                         @Override
                         public void onCompleted(Void object) {
                             Toast.makeText(QuestionsListActivity.this, "Deleted", Toast.LENGTH_SHORT).show();
@@ -129,7 +102,6 @@ public class QuestionsListActivity extends BaseActivity {
                             Toast.makeText(QuestionsListActivity.this, "Delete failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
                         }
                     });
-
                 })
                 .setNegativeButton("Cancel", null)
                 .show();
@@ -154,17 +126,16 @@ public class QuestionsListActivity extends BaseActivity {
                 .setTitle("Edit question")
                 .setView(v)
                 .setPositiveButton("Save", (d, w) -> {
-
                     Question updated = new Question(
                             etQ.getText().toString().trim(),
                             etR.getText().toString().trim(),
-                            new ArrayList<>(java.util.Arrays.asList(
+                            new ArrayList<>(Arrays.asList(
                                     etW1.getText().toString().trim(),
                                     etW2.getText().toString().trim()
                             ))
                     );
 
-                    databaseService.updateQuestion(key, updated, new DatabaseService.DatabaseCallback<>() {
+                    questionService.updateQuestion(key, updated, new DatabaseService.DatabaseCallback<Void>() {
                         @Override
                         public void onCompleted(Void object) {
                             Toast.makeText(QuestionsListActivity.this, "Updated", Toast.LENGTH_SHORT).show();

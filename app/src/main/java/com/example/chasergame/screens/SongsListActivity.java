@@ -7,7 +7,6 @@ import android.widget.EditText;
 import android.widget.SearchView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -15,13 +14,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.chasergame.R;
 import com.example.chasergame.adapters.SongsAdminAdapter;
-import com.example.chasergame.models.Note;
 import com.example.chasergame.models.SongData;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
+import com.example.chasergame.services.DatabaseService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,22 +23,23 @@ import java.util.List;
 public class SongsListActivity extends BaseActivity {
 
     private SongsAdminAdapter adapter;
-    private DatabaseReference mDatabase;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_songs_list);
 
-        mDatabase = FirebaseDatabase.getInstance().getReference("rhythm_songs");
-
         Toolbar toolbar = findViewById(R.id.toolbarSongs);
         setSupportActionBar(toolbar);
         toolbar.setNavigationOnClickListener(v -> finish());
 
-        RecyclerView rv = findViewById(R.id.rv_songs_list);
-        SearchView searchView = findViewById(R.id.searchViewSongs);
+        setupRecyclerView();
+        setupSearchView();
+        loadSongs();
+    }
 
+    private void setupRecyclerView() {
+        RecyclerView rv = findViewById(R.id.rv_songs_list);
         adapter = new SongsAdminAdapter(new SongsAdminAdapter.Listener() {
             @Override
             public void onEditClicked(String key, SongData song) {
@@ -56,10 +51,12 @@ public class SongsListActivity extends BaseActivity {
                 confirmDelete(key);
             }
         });
-
         rv.setLayoutManager(new LinearLayoutManager(this));
         rv.setAdapter(adapter);
+    }
 
+    private void setupSearchView() {
+        SearchView searchView = findViewById(R.id.searchViewSongs);
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -73,28 +70,36 @@ public class SongsListActivity extends BaseActivity {
                 return true;
             }
         });
-
-        loadSongs();
     }
 
     private void loadSongs() {
-        mDatabase.addValueEventListener(new ValueEventListener() {
+        songService.getAllSongs(new DatabaseService.DatabaseCallback<List<SongData>>() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
+            public void onCompleted(List<SongData> songs) {
                 List<SongsAdminAdapter.Item> items = new ArrayList<>();
-                for (DataSnapshot child : snapshot.getChildren()) {
-                    String key = child.getKey();
-                    SongData song = child.getValue(SongData.class);
-                    if (key != null && song != null) {
-                        items.add(new SongsAdminAdapter.Item(key, song));
+                // If we need keys, we should probably change ISongRepository to return Items with keys
+                // For now, assuming SongData might have an ID or using the list index if keys are not stored in model
+                // However, in Firebase, keys are separate. Let's assume the previous logic.
+                // Re-fetching from DatabaseService with keys if necessary.
+
+                // Let's call a more specific method or update DatabaseService to provide keys with SongData
+                // For simplicity in this step, I'll update DatabaseService's getSongList to return Items.
+                databaseService.getSongListWithKeys(new DatabaseService.DatabaseCallback<List<SongsAdminAdapter.Item>>() {
+                    @Override
+                    public void onCompleted(List<SongsAdminAdapter.Item> items) {
+                        adapter.setItems(items);
                     }
-                }
-                adapter.setItems(items);
+
+                    @Override
+                    public void onFailed(Exception e) {
+                        Toast.makeText(SongsListActivity.this, "Load failed", Toast.LENGTH_SHORT).show();
+                    }
+                });
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(SongsListActivity.this, "Load failed: " + error.getMessage(), Toast.LENGTH_LONG).show();
+            public void onFailed(Exception e) {
+                Toast.makeText(SongsListActivity.this, "Load failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
     }
@@ -104,9 +109,18 @@ public class SongsListActivity extends BaseActivity {
                 .setTitle("Delete Song")
                 .setMessage("Are you sure you want to delete this song?")
                 .setPositiveButton("Delete", (d, w) -> {
-                    mDatabase.child(key).removeValue()
-                            .addOnSuccessListener(aVoid -> Toast.makeText(SongsListActivity.this, "Song deleted.", Toast.LENGTH_SHORT).show())
-                            .addOnFailureListener(e -> Toast.makeText(SongsListActivity.this, "Delete failed: " + e.getMessage(), Toast.LENGTH_LONG).show());
+                    songService.deleteSong(key, new DatabaseService.DatabaseCallback<Void>() {
+                        @Override
+                        public void onCompleted(Void object) {
+                            Toast.makeText(SongsListActivity.this, "Song deleted.", Toast.LENGTH_SHORT).show();
+                            loadSongs();
+                        }
+
+                        @Override
+                        public void onFailed(Exception e) {
+                            Toast.makeText(SongsListActivity.this, "Delete failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                        }
+                    });
                 })
                 .setNegativeButton("Cancel", null)
                 .show();
@@ -125,7 +139,7 @@ public class SongsListActivity extends BaseActivity {
         etDifficulty.setText(song.getDifficulty());
         etResId.setText(song.getResName());
         etTargetScore.setText(String.valueOf(song.getTargetScore()));
-        etBeatmap.setText(notesToString(song.getNotes()));
+        etBeatmap.setText(songService.notesToString(song.getNotes()));
 
         new AlertDialog.Builder(this)
                 .setTitle("Edit Song")
@@ -144,54 +158,21 @@ public class SongsListActivity extends BaseActivity {
                     }
 
                     int targetScore = Integer.parseInt(scoreStr);
-                    List<Note> notes = parseBeatmap(beatmapStr);
 
-                    if (notes.isEmpty()) {
-                        Toast.makeText(this, "Invalid beatmap format", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
+                    songService.updateSong(key, name, difficulty, resName, targetScore, beatmapStr, new DatabaseService.DatabaseCallback<Void>() {
+                        @Override
+                        public void onCompleted(Void object) {
+                            Toast.makeText(SongsListActivity.this, "Song updated.", Toast.LENGTH_SHORT).show();
+                            loadSongs();
+                        }
 
-                    SongData updatedSong = new SongData(name, difficulty, 0, notes, targetScore);
-                    updatedSong.setResName(resName);
-
-                    mDatabase.child(key).setValue(updatedSong)
-                            .addOnSuccessListener(aVoid -> Toast.makeText(SongsListActivity.this, "Song updated.", Toast.LENGTH_SHORT).show())
-                            .addOnFailureListener(e -> Toast.makeText(SongsListActivity.this, "Update failed: " + e.getMessage(), Toast.LENGTH_LONG).show());
+                        @Override
+                        public void onFailed(Exception e) {
+                            Toast.makeText(SongsListActivity.this, "Update failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                        }
+                    });
                 })
                 .setNegativeButton("Cancel", null)
                 .show();
-    }
-
-    private List<Note> parseBeatmap(String beatmapStr) {
-        List<Note> notes = new ArrayList<>();
-        try {
-            String[] entries = beatmapStr.split(";");
-            for (String entry : entries) {
-                String[] parts = entry.split(",");
-                if (parts.length == 2) {
-                    long time = Long.parseLong(parts[0].trim());
-                    int lane = Integer.parseInt(parts[1].trim());
-                    notes.add(new Note(time, lane));
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return notes;
-    }
-
-    private String notesToString(List<Note> notes) {
-        if (notes == null || notes.isEmpty()) {
-            return "";
-        }
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < notes.size(); i++) {
-            Note note = notes.get(i);
-            sb.append(note.getTimestamp()).append(",").append(note.getLane());
-            if (i < notes.size() - 1) {
-                sb.append(";");
-            }
-        }
-        return sb.toString();
     }
 }

@@ -5,76 +5,56 @@ import android.os.Bundle;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.example.chasergame.R;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-
-import java.util.UUID;
+import com.example.chasergame.models.User;
+import com.example.chasergame.services.RoomService;
 
 public class JoinGameActivity extends BaseActivity {
+
+    private RoomService roomService;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_join_game);
 
+        roomService = new RoomService();
         EditText etRoomCode = findViewById(R.id.etRoomCode);
 
         findViewById(R.id.btnJoinRoom).setOnClickListener(v -> {
-
             String roomId = etRoomCode.getText().toString().trim().toUpperCase();
             if (roomId.isEmpty()) {
                 Toast.makeText(this, "Enter room code", Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            String playerId = UUID.randomUUID().toString();
+            User user = authService.getCurrentUser();
+            if (user == null) {
+                Toast.makeText(this, "User not logged in", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
-            FirebaseDatabase.getInstance()
-                    .getReference("rooms")
-                    .child(roomId)
-                    .addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+            roomService.joinRoom(roomId, user.getId(), new RoomService.RoomCallback() {
+                @Override
+                public void onRoomCreated(String roomId) {
+                }
 
-                            if (!snapshot.exists()) {
-                                Toast.makeText(JoinGameActivity.this, "Room not found", Toast.LENGTH_SHORT).show();
-                                return;
-                            }
+                @Override
+                public void onJoined() {
+                    Intent i = new Intent(JoinGameActivity.this, WaitingRoomActivity.class);
+                    i.putExtra("ROOM_ID", roomId);
+                    i.putExtra("PLAYER_ID", user.getId());
+                    startActivity(i);
+                    finish();
+                }
 
-                            long count = snapshot.child("players").getChildrenCount();
-
-                            if (count >= 2) {
-                                Toast.makeText(JoinGameActivity.this, "Room full", Toast.LENGTH_SHORT).show();
-                                return;
-                            }
-
-                            // הוספת השחקן השני
-                            snapshot.getRef().child("players").child(playerId).setValue(true);
-
-                            // אם עכשיו יש 2 -> שדרג ל ready
-                            if (count == 1) {
-                                snapshot.getRef().child("status").setValue("ready");
-                            }
-
-                            // כניסה לחדר המתנה
-                            Intent i = new Intent(JoinGameActivity.this, WaitingRoomActivity.class);
-                            i.putExtra("ROOM_ID", roomId);
-                            i.putExtra("PLAYER_ID", playerId);
-                            startActivity(i);
-                            finish();
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
-                            Toast.makeText(JoinGameActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
-                        }
-                    });
+                @Override
+                public void onFailed(String error) {
+                    Toast.makeText(JoinGameActivity.this, error, Toast.LENGTH_SHORT).show();
+                }
+            });
         });
     }
 }

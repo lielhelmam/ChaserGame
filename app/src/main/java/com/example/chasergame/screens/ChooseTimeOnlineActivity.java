@@ -8,20 +8,19 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 
 import com.example.chasergame.R;
-import com.google.firebase.database.FirebaseDatabase;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
-import java.util.UUID;
+import com.example.chasergame.models.User;
+import com.example.chasergame.services.RoomService;
 
 public class ChooseTimeOnlineActivity extends BaseActivity {
+
+    private RoomService roomService;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_choose_time_online);
 
+        roomService = new RoomService();
         boolean isPublic = getIntent().getBooleanExtra("IS_PUBLIC", false);
 
         NumberPicker pickerMinutes = findViewById(R.id.pickerMinutes);
@@ -33,7 +32,6 @@ public class ChooseTimeOnlineActivity extends BaseActivity {
         pickerSeconds.setMaxValue(59);
 
         findViewById(R.id.btnCreateRoom).setOnClickListener(v -> {
-
             int minutes = pickerMinutes.getValue();
             int seconds = pickerSeconds.getValue();
 
@@ -43,41 +41,32 @@ public class ChooseTimeOnlineActivity extends BaseActivity {
             }
 
             long timeMs = (minutes * 60L + seconds) * 1000L;
+            User user = authService.getCurrentUser();
 
-            String roomId = generateRoomCode();
-            String playerId = UUID.randomUUID().toString();
+            if (user == null) {
+                Toast.makeText(this, "User not logged in", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
-            Map<String, Object> room = new HashMap<>();
-            room.put("status", "waiting");
-            room.put("timeMs", timeMs);
-            room.put("hostId", playerId);
-            room.put("type", isPublic ? "public" : "private");
+            roomService.createRoom(user.getId(), user.getUsername(), timeMs, new RoomService.RoomCallback() {
+                @Override
+                public void onRoomCreated(String roomId) {
+                    Intent i = new Intent(ChooseTimeOnlineActivity.this, WaitingRoomActivity.class);
+                    i.putExtra("ROOM_ID", roomId);
+                    i.putExtra("PLAYER_ID", user.getId());
+                    startActivity(i);
+                    finish();
+                }
 
-            Map<String, Object> players = new HashMap<>();
-            players.put(playerId, true);
-            room.put("players", players);
+                @Override
+                public void onJoined() {
+                }
 
-            FirebaseDatabase.getInstance()
-                    .getReference("rooms")
-                    .child(roomId)
-                    .setValue(room)
-                    .addOnSuccessListener(unused -> {
-                        Intent i = new Intent(this, WaitingRoomActivity.class);
-                        i.putExtra("ROOM_ID", roomId);
-                        i.putExtra("PLAYER_ID", playerId);
-                        startActivity(i);
-                        finish();
-                    });
+                @Override
+                public void onFailed(String error) {
+                    Toast.makeText(ChooseTimeOnlineActivity.this, error, Toast.LENGTH_SHORT).show();
+                }
+            });
         });
-    }
-
-    private String generateRoomCode() {
-        String chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-        Random r = new Random();
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < 6; i++) {
-            sb.append(chars.charAt(r.nextInt(chars.length())));
-        }
-        return sb.toString();
     }
 }

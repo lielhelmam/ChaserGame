@@ -2,6 +2,8 @@ package com.example.chasergame.screens;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.TextView;
@@ -16,14 +18,24 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.example.chasergame.R;
 import com.example.chasergame.models.User;
+import com.example.chasergame.services.AuthService;
 import com.example.chasergame.services.DatabaseService;
-import com.example.chasergame.utils.SharedPreferencesUtil;
+import com.example.chasergame.services.LeaderboardService;
+import com.example.chasergame.services.QuestionService;
+import com.example.chasergame.services.ShopService;
+import com.example.chasergame.services.SongService;
 import com.google.android.material.navigation.NavigationView;
 
-public class BaseActivity extends AppCompatActivity {
+public abstract class BaseActivity extends AppCompatActivity {
 
     protected DatabaseService databaseService;
+    protected AuthService authService;
+    protected QuestionService questionService;
+    protected SongService songService;
+    protected LeaderboardService leaderboardService;
+    protected ShopService shopService;
     protected DrawerLayout drawerLayout;
+
     private final OnBackPressedCallback drawerBackCallback = new OnBackPressedCallback(false) {
         @Override
         public void handleOnBackPressed() {
@@ -32,6 +44,7 @@ public class BaseActivity extends AppCompatActivity {
             }
         }
     };
+
     protected NavigationView navigationView;
     private FrameLayout contentFrame;
     private TextView topBarTitle;
@@ -41,6 +54,11 @@ public class BaseActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         databaseService = DatabaseService.getInstance();
+        authService = new AuthService(this, databaseService);
+        questionService = new QuestionService(databaseService);
+        songService = new SongService(databaseService);
+        leaderboardService = new LeaderboardService(databaseService);
+        shopService = new ShopService(databaseService);
         getOnBackPressedDispatcher().addCallback(this, drawerBackCallback);
     }
 
@@ -55,17 +73,19 @@ public class BaseActivity extends AppCompatActivity {
         getLayoutInflater().inflate(layoutResID, contentFrame, true);
         super.setContentView(drawerLayout);
 
-        drawerLayout.addDrawerListener(new DrawerLayout.SimpleDrawerListener() {
-            @Override
-            public void onDrawerOpened(View drawerView) {
-                drawerBackCallback.setEnabled(true);
-            }
+        if (drawerLayout != null) {
+            drawerLayout.addDrawerListener(new DrawerLayout.SimpleDrawerListener() {
+                @Override
+                public void onDrawerOpened(View drawerView) {
+                    drawerBackCallback.setEnabled(true);
+                }
 
-            @Override
-            public void onDrawerClosed(View drawerView) {
-                drawerBackCallback.setEnabled(false);
-            }
-        });
+                @Override
+                public void onDrawerClosed(View drawerView) {
+                    drawerBackCallback.setEnabled(false);
+                }
+            });
+        }
 
         setupBaseNavigation();
     }
@@ -82,22 +102,15 @@ public class BaseActivity extends AppCompatActivity {
             int id = item.getItemId();
 
             if (id == R.id.nav_home) {
-                if (!(this instanceof MainActivity)) {
-                    startActivity(new Intent(this, MainActivity.class));
-                    finish();
-                }
+                navigateTo(MainActivity.class, true);
             } else if (id == R.id.nav_profile) {
-                if (!(this instanceof EditProfileActivity)) {
-                    startActivity(new Intent(this, EditProfileActivity.class));
-                }
+                navigateTo(EditProfileActivity.class, false);
             } else if (id == R.id.nav_leaderboard) {
-                if (!(this instanceof LeaderBoardActivity)) {
-                    startActivity(new Intent(this, LeaderBoardActivity.class));
-                }
+                navigateTo(LeaderBoardActivity.class, false);
             } else if (id == R.id.nav_shop) {
-                if (!(this instanceof ShopActivity)) {
-                    startActivity(new Intent(this, ShopActivity.class));
-                }
+                navigateTo(ShopActivity.class, false);
+            } else if (id == R.id.nav_admin) {
+                navigateTo(AdminActivity.class, false);
             } else if (id == R.id.nav_logout) {
                 showLogoutDialog();
             }
@@ -106,11 +119,18 @@ public class BaseActivity extends AppCompatActivity {
             return true;
         });
 
-        updateHeaderData();
+        updateHeaderAndMenu();
     }
 
-    private void updateHeaderData() {
-        User user = SharedPreferencesUtil.getUser(this);
+    protected void navigateTo(Class<?> cls, boolean finishCurrent) {
+        if (!this.getClass().equals(cls)) {
+            startActivity(new Intent(this, cls));
+            if (finishCurrent) finish();
+        }
+    }
+
+    private void updateHeaderAndMenu() {
+        User user = authService.getCurrentUser();
         if (user != null && navigationView != null) {
             View headerView = navigationView.getHeaderView(0);
             if (headerView != null) {
@@ -121,15 +141,18 @@ public class BaseActivity extends AppCompatActivity {
                 if (navEmail != null) navEmail.setText(user.getEmail());
             }
 
+            Menu menu = navigationView.getMenu();
+            MenuItem adminItem = menu.findItem(R.id.nav_admin);
+            if (adminItem != null) {
+                adminItem.setVisible(user.isAdmin());
+            }
+
             if (topBarTitle != null) {
                 topBarTitle.setText("Hi, " + user.getUsername());
             }
         }
     }
 
-    /**
-     * Call this in onCreate() AFTER setContentView() to hide the navigation drawer
-     */
     protected void hideNavigationDrawer() {
         if (drawerLayout != null) {
             drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
@@ -140,9 +163,6 @@ public class BaseActivity extends AppCompatActivity {
         }
     }
 
-    /**
-     * Call this in onCreate() AFTER setContentView() to hide the top bar
-     */
     protected void hideTopBar() {
         if (topBar != null) {
             topBar.setVisibility(View.GONE);
@@ -165,8 +185,8 @@ public class BaseActivity extends AppCompatActivity {
                 .show();
     }
 
-    private void signOut() {
-        SharedPreferencesUtil.signOutUser(this);
+    protected void signOut() {
+        authService.logout();
         Intent intent = new Intent(this, LandingActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);

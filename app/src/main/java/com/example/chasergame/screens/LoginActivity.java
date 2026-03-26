@@ -10,11 +10,9 @@ import android.widget.TextView;
 import com.example.chasergame.R;
 import com.example.chasergame.models.User;
 import com.example.chasergame.services.DatabaseService;
-import com.example.chasergame.utils.SharedPreferencesUtil;
 import com.example.chasergame.utils.Validator;
 
 public class LoginActivity extends BaseActivity implements View.OnClickListener {
-    private static final String TAG = "LoginActivity";
     private EditText etUsername, etPassword;
     private Button btnLogin;
     private TextView tvRegister;
@@ -27,19 +25,8 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         hideNavigationDrawer();
         hideTopBar();
 
-        User user = SharedPreferencesUtil.getUser(this);
-
-        if (SharedPreferencesUtil.isUserLoggedIn(this)) {
-            Intent intent;
-
-            if (user != null && user.isAdmin()) {
-                intent = new Intent(this, AdminActivity.class);
-            } else {
-                intent = new Intent(this, MainActivity.class);
-            }
-
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
+        if (authService.isUserLoggedIn()) {
+            navigateToHome(authService.getCurrentUser());
         }
 
         etUsername = findViewById(R.id.LoginEnterUserName);
@@ -50,26 +37,20 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         if (btnLogin != null) btnLogin.setOnClickListener(this);
         if (tvRegister != null) tvRegister.setOnClickListener(this);
 
-        Button goback = findViewById(R.id.btn_login_goback);
-        if (goback != null) {
-            goback.setOnClickListener(view -> {
-                Intent intentreg = new Intent(LoginActivity.this, LandingActivity.class);
-                startActivity(intentreg);
-            });
-        }
+        findViewById(R.id.btn_login_goback).setOnClickListener(view ->
+                startActivity(new Intent(LoginActivity.this, LandingActivity.class)));
     }
 
     @Override
     public void onClick(View v) {
-        if (btnLogin != null && v.getId() == btnLogin.getId()) {
+        if (v.getId() == R.id.btn_login_check) {
             String username = etUsername.getText().toString().trim();
             String password = etPassword.getText().toString().trim();
 
-            if (!checkInput(username, password)) return;
-
-            loginUser(username, password);
-
-        } else if (tvRegister != null && v.getId() == tvRegister.getId()) {
+            if (checkInput(username, password)) {
+                loginUser(username, password);
+            }
+        } else if (v.getId() == R.id.Login_tv_register) {
             startActivity(new Intent(LoginActivity.this, SignupActivity.class));
         }
     }
@@ -80,44 +61,40 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
             etUsername.requestFocus();
             return false;
         }
-
         if (!Validator.isPasswordValid(password)) {
             etPassword.setError("Password must be at least 6 characters");
             etPassword.requestFocus();
             return false;
         }
-
         return true;
     }
 
     private void loginUser(String username, String password) {
-        databaseService.getUserByUsernameAndPassword(username, password, new DatabaseService.DatabaseCallback<>() {
+        authService.login(username, password, new DatabaseService.DatabaseCallback<User>() {
             @Override
             public void onCompleted(User user) {
-
                 if (user == null) {
                     etPassword.setError("Invalid username or password");
                     etPassword.requestFocus();
-                    SharedPreferencesUtil.signOutUser(LoginActivity.this);
-                    return;
+                    authService.logout();
+                } else {
+                    navigateToHome(user);
                 }
-
-                SharedPreferencesUtil.saveUser(LoginActivity.this, user);
-
-                Intent intent = user.isAdmin()
-                        ? new Intent(LoginActivity.this, AdminActivity.class)
-                        : new Intent(LoginActivity.this, MainActivity.class);
-
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(intent);
             }
 
             @Override
             public void onFailed(Exception e) {
                 etPassword.setError("Login failed: " + e.getMessage());
                 etPassword.requestFocus();
-                SharedPreferencesUtil.signOutUser(LoginActivity.this);
+                authService.logout();
             }
         });
+    }
+
+    private void navigateToHome(User user) {
+        Class<?> destination = user.isAdmin() ? AdminActivity.class : MainActivity.class;
+        Intent intent = new Intent(this, destination);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
     }
 }

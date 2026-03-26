@@ -10,7 +10,6 @@ import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.widget.Toolbar;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -21,15 +20,12 @@ import com.example.chasergame.R;
 import com.example.chasergame.adapters.UserAdapter;
 import com.example.chasergame.models.User;
 import com.example.chasergame.services.DatabaseService;
-import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.List;
 
 public class UsersListActivity extends BaseActivity {
 
     private static final String TAG = "UsersListActivity";
-
-    Toolbar tb;
     private UserAdapter userAdapter;
 
     @Override
@@ -37,13 +33,21 @@ public class UsersListActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_users_list);
+
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-        SearchView searchView = findViewById(R.id.searchView);
 
+        setupSearchView();
+        setupRecyclerView();
+
+        findViewById(R.id.toolbar).setOnClickListener(v -> navigateTo(AdminActivity.class, true));
+    }
+
+    private void setupSearchView() {
+        SearchView searchView = findViewById(R.id.searchView);
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -57,21 +61,14 @@ public class UsersListActivity extends BaseActivity {
                 return true;
             }
         });
+    }
 
-
-        tb = findViewById(R.id.toolbar);
-        tb.setOnClickListener(view -> {
-            Intent intent = new Intent(UsersListActivity.this, AdminActivity.class);
-            startActivity(intent);
-        });
-
+    private void setupRecyclerView() {
         RecyclerView usersList = findViewById(R.id.rv_users_list);
         usersList.setLayoutManager(new LinearLayoutManager(this));
         userAdapter = new UserAdapter(new UserAdapter.OnUserClickListener() {
             @Override
             public void onUserClick(User user) {
-                // Handle user click
-                Log.d(TAG, "User clicked: " + user);
                 Intent intent = new Intent(UsersListActivity.this, UserProfileActivity.class);
                 intent.putExtra("USER_UID", user.getId());
                 startActivity(intent);
@@ -79,69 +76,72 @@ public class UsersListActivity extends BaseActivity {
 
             @Override
             public void onLongUserClick(User user) {
-                // Handle long user click to edit points
                 showEditPointsDialog(user);
             }
 
             @Override
             public void onDeleteClick(User user) {
-                new AlertDialog.Builder(UsersListActivity.this)
-                        .setTitle("Delete User")
-                        .setMessage("Are you sure you want to delete " + user.getUsername() + "?")
-                        .setPositiveButton("Yes", (dialog, which) -> {
-                            FirebaseDatabase database = FirebaseDatabase.getInstance();
-                            database.getReference("users")
-                                    .child(user.getId())
-                                    .removeValue()
-                                    .addOnSuccessListener(aVoid -> {
-                                        Log.d(TAG, "User deleted.");
-                                        userAdapter.removeUser(user);
-                                    })
-                                    .addOnFailureListener(e -> Log.e(TAG, "Delete failed: " + e.getMessage()));
-                        })
-                        .setNegativeButton("No", null)
-                        .show();
+                confirmDelete(user);
             }
         });
         usersList.setAdapter(userAdapter);
     }
 
-    private void showEditPointsDialog(User user) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Edit Points for " + user.getUsername());
+    private void confirmDelete(User user) {
+        new AlertDialog.Builder(this)
+                .setTitle("Delete User")
+                .setMessage("Are you sure you want to delete " + user.getUsername() + "?")
+                .setPositiveButton("Yes", (dialog, which) -> {
+                    databaseService.deleteUserById(user.getId(), new DatabaseService.DatabaseCallback<Void>() {
+                        @Override
+                        public void onCompleted(Void unused) {
+                            userAdapter.removeUser(user);
+                            Toast.makeText(UsersListActivity.this, "User deleted", Toast.LENGTH_SHORT).show();
+                        }
 
+                        @Override
+                        public void onFailed(Exception e) {
+                            Toast.makeText(UsersListActivity.this, "Delete failed", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                })
+                .setNegativeButton("No", null)
+                .show();
+    }
+
+    private void showEditPointsDialog(User user) {
         final EditText input = new EditText(this);
         input.setInputType(InputType.TYPE_CLASS_NUMBER);
         input.setText(String.valueOf(user.getPoints()));
-        builder.setView(input);
 
-        builder.setPositiveButton("Save", (dialog, which) -> {
-            String newPointsStr = input.getText().toString();
-            if (!newPointsStr.isEmpty()) {
-                int newPoints = Integer.parseInt(newPointsStr);
-                user.setPoints(newPoints);
+        new AlertDialog.Builder(this)
+                .setTitle("Edit Points for " + user.getUsername())
+                .setView(input)
+                .setPositiveButton("Save", (dialog, which) -> {
+                    String newPointsStr = input.getText().toString();
+                    if (!newPointsStr.isEmpty()) {
+                        user.setPoints(Integer.parseInt(newPointsStr));
+                        databaseService.updateUser(user, new DatabaseService.DatabaseCallback<Void>() {
+                            @Override
+                            public void onCompleted(Void unused) {
+                                userAdapter.updateUser(user);
+                                Toast.makeText(UsersListActivity.this, "Points updated", Toast.LENGTH_SHORT).show();
+                            }
 
-                FirebaseDatabase.getInstance().getReference("users")
-                        .child(user.getId())
-                        .child("points")
-                        .setValue(newPoints)
-                        .addOnSuccessListener(aVoid -> {
-                            Toast.makeText(UsersListActivity.this, "Points updated", Toast.LENGTH_SHORT).show();
-                            userAdapter.updateUser(user);
-                        })
-                        .addOnFailureListener(e -> Toast.makeText(UsersListActivity.this, "Update failed", Toast.LENGTH_SHORT).show());
-            }
-        });
-        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
-
-        builder.show();
+                            @Override
+                            public void onFailed(Exception e) {
+                            }
+                        });
+                    }
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
     }
-
 
     @Override
     protected void onResume() {
         super.onResume();
-        databaseService.getUserList(new DatabaseService.DatabaseCallback<>() {
+        databaseService.getUserList(new DatabaseService.DatabaseCallback<List<User>>() {
             @Override
             public void onCompleted(List<User> users) {
                 userAdapter.setUserList(users);
@@ -149,9 +149,8 @@ public class UsersListActivity extends BaseActivity {
 
             @Override
             public void onFailed(Exception e) {
-                Log.e(TAG, "Failed to get users list", e);
+                Log.e(TAG, "Failed to load users", e);
             }
         });
     }
-
 }

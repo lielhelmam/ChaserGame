@@ -9,7 +9,7 @@ import com.example.chasergame.R;
 
 public class SplashActivity extends BaseActivity {
 
-    private static final int SPLASH_DELAY = 2000; // 2 seconds
+    private static final int SPLASH_DELAY = 2000;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -20,9 +20,15 @@ public class SplashActivity extends BaseActivity {
         hideTopBar();
 
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            Intent intent = new Intent(SplashActivity.this, LandingActivity.class);
-            startActivity(intent);
-            finish();
+            if (authService.isUserLoggedIn()) {
+                Intent intent = authService.getNextActivityIntent();
+                if (intent != null) {
+                    startActivity(intent);
+                    finish();
+                    return;
+                }
+            }
+            navigateTo(LandingActivity.class, true);
         }, SPLASH_DELAY);
     }
 }

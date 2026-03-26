@@ -7,13 +7,8 @@ import android.widget.Button;
 import androidx.appcompat.app.AlertDialog;
 
 import com.example.chasergame.R;
-import com.example.chasergame.models.User;
-import com.example.chasergame.utils.SharedPreferencesUtil;
 
 public class LandingActivity extends BaseActivity {
-    Button BtnReg;
-    Button exitBtn;
-    Button BtnLog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,48 +18,45 @@ public class LandingActivity extends BaseActivity {
         hideNavigationDrawer();
         hideTopBar();
 
-        User user = SharedPreferencesUtil.getUser(this);
-
-        if (SharedPreferencesUtil.isUserLoggedIn(this)) {
-            Intent intent;
-
-            if (user != null && user.isAdmin()) {
-                intent = new Intent(this, AdminActivity.class);
-            } else {
-                intent = new Intent(this, MainActivity.class);
+        if (authService.isUserLoggedIn()) {
+            Intent intent = authService.getNextActivityIntent();
+            if (intent != null) {
+                startActivity(intent);
+                finish();
             }
-
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
         }
 
-        BtnReg = findViewById(R.id.btn_main_gotosignup);
-        if (BtnReg != null) {
-            BtnReg.setOnClickListener(view -> {
-                Intent intentreg = new Intent(LandingActivity.this, SignupActivity.class);
-                startActivity(intentreg);
-            });
+        setupButtons();
+    }
+
+    private void setupButtons() {
+        Button btnReg = findViewById(R.id.btn_main_gotosignup);
+        if (btnReg != null) {
+            btnReg.setOnClickListener(view ->
+                    startActivity(new Intent(this, SignupActivity.class)));
         }
 
-        BtnLog = findViewById(R.id.btn_main_gotologin);
-        if (BtnLog != null) {
-            BtnLog.setOnClickListener(view -> {
-                Intent intentLog = new Intent(LandingActivity.this, LoginActivity.class);
-                startActivity(intentLog);
-            });
+        Button btnLog = findViewById(R.id.btn_main_gotologin);
+        if (btnLog != null) {
+            btnLog.setOnClickListener(view ->
+                    startActivity(new Intent(this, LoginActivity.class)));
         }
 
-        exitBtn = findViewById(R.id.btn_main_exit);
+        Button exitBtn = findViewById(R.id.btn_main_exit);
         if (exitBtn != null) {
-            exitBtn.setOnClickListener(v -> new AlertDialog.Builder(LandingActivity.this)
-                    .setTitle("Exit App")
-                    .setMessage("Are you sure?")
-                    .setPositiveButton("Yes", (dialog, which) -> {
-                        finishAffinity();
-                        System.exit(0);
-                    })
-                    .setNegativeButton("No", null)
-                    .show());
+            exitBtn.setOnClickListener(v -> showExitDialog());
         }
+    }
+
+    private void showExitDialog() {
+        new AlertDialog.Builder(this)
+                .setTitle("Exit App")
+                .setMessage("Are you sure?")
+                .setPositiveButton("Yes", (dialog, which) -> {
+                    finishAffinity();
+                    System.exit(0);
+                })
+                .setNegativeButton("No", null)
+                .show();
     }
 }

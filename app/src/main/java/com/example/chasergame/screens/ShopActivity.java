@@ -18,29 +18,20 @@ import com.example.chasergame.R;
 import com.example.chasergame.adapters.SkinsAdapter;
 import com.example.chasergame.models.Skin;
 import com.example.chasergame.models.User;
-import com.example.chasergame.utils.SharedPreferencesUtil;
+import com.example.chasergame.services.DatabaseService;
 import com.example.chasergame.utils.SkinManager;
-import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.List;
 
 public class ShopActivity extends BaseActivity {
 
-    private static final int GIFT_AMOUNT = 100000;
     private static final int[] PRESET_COLORS = {
-            Color.WHITE,   // White
-            Color.BLACK,   // Black
-            Color.parseColor("#B71C1C"), // Dark Red
-            Color.GREEN,   // Green
-            Color.BLUE,    // Blue
-            Color.parseColor("#FBC02D"), // Dark Yellow
-            Color.CYAN,    // Cyan
-            Color.MAGENTA, // Magenta
-            Color.parseColor("#FFA500"), // Orange
-            Color.parseColor("#800080"), // Purple
-            Color.parseColor("#FFD700"), // Gold
-            Color.GRAY     // Gray
+            Color.WHITE, Color.BLACK, Color.parseColor("#B71C1C"), Color.GREEN,
+            Color.BLUE, Color.parseColor("#FBC02D"), Color.CYAN, Color.MAGENTA,
+            Color.parseColor("#FFA500"), Color.parseColor("#800080"),
+            Color.parseColor("#FFD700"), Color.GRAY
     };
+
     private TextView tvPoints;
     private RecyclerView rvSkins;
     private Button btnClaimGift;
@@ -57,7 +48,7 @@ public class ShopActivity extends BaseActivity {
         btnClaimGift = findViewById(R.id.btn_claim_gift);
         findViewById(R.id.btn_back_from_shop).setOnClickListener(v -> finish());
 
-        currentUser = SharedPreferencesUtil.getUser(this);
+        currentUser = authService.getCurrentUser();
         if (currentUser == null) {
             finish();
             return;
@@ -71,22 +62,23 @@ public class ShopActivity extends BaseActivity {
     }
 
     private void checkGiftStatus() {
-        if (!currentUser.isGiftClaimed()) {
-            btnClaimGift.setVisibility(View.VISIBLE);
-        } else {
-            btnClaimGift.setVisibility(View.GONE);
-        }
+        btnClaimGift.setVisibility(currentUser.isGiftClaimed() ? View.GONE : View.VISIBLE);
     }
 
     private void claimGift() {
-        if (!currentUser.isGiftClaimed()) {
-            currentUser.setPoints(currentUser.getPoints() + GIFT_AMOUNT);
-            currentUser.setGiftClaimed(true);
-            saveUser();
-            updateUI();
-            btnClaimGift.setVisibility(View.GONE);
-            Toast.makeText(this, "You received 100,000 points! Enjoy!", Toast.LENGTH_LONG).show();
-        }
+        shopService.claimGift(currentUser, new DatabaseService.DatabaseCallback<Void>() {
+            @Override
+            public void onCompleted(Void unused) {
+                updateUI();
+                checkGiftStatus();
+                Toast.makeText(ShopActivity.this, "Gift claimed!", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFailed(Exception e) {
+                Toast.makeText(ShopActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void updateUI() {
@@ -98,22 +90,34 @@ public class ShopActivity extends BaseActivity {
         adapter = new SkinsAdapter(skins, currentUser, new SkinsAdapter.OnSkinActionListener() {
             @Override
             public void onBuy(Skin skin) {
-                if (currentUser.getPoints() >= skin.price) {
-                    currentUser.setPoints(currentUser.getPoints() - skin.price);
-                    currentUser.getOwnedSkins().add(skin.id);
-                    saveUser();
-                    updateUI();
-                    adapter.notifyDataSetChanged();
-                    Toast.makeText(ShopActivity.this, "Purchased " + skin.name, Toast.LENGTH_SHORT).show();
-                }
+                shopService.buySkin(currentUser, skin, new DatabaseService.DatabaseCallback<Void>() {
+                    @Override
+                    public void onCompleted(Void unused) {
+                        updateUI();
+                        adapter.notifyDataSetChanged();
+                        Toast.makeText(ShopActivity.this, "Purchased " + skin.name, Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onFailed(Exception e) {
+                        Toast.makeText(ShopActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
             }
 
             @Override
             public void onEquip(Skin skin) {
-                currentUser.setEquippedSkin(skin.id);
-                saveUser();
-                adapter.notifyDataSetChanged();
-                Toast.makeText(ShopActivity.this, "Equipped " + skin.name, Toast.LENGTH_SHORT).show();
+                shopService.equipSkin(currentUser, skin.id, new DatabaseService.DatabaseCallback<Void>() {
+                    @Override
+                    public void onCompleted(Void unused) {
+                        adapter.notifyDataSetChanged();
+                        Toast.makeText(ShopActivity.this, "Equipped " + skin.name, Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onFailed(Exception e) {
+                    }
+                });
             }
 
             @Override
@@ -126,33 +130,41 @@ public class ShopActivity extends BaseActivity {
     }
 
     private void showEditCustomSkinDialog() {
-        View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_edit_custom_skin, null);
-        Spinner spCircle = dialogView.findViewById(R.id.sp_custom_circle_color);
-        Spinner spTarget = dialogView.findViewById(R.id.sp_custom_target_color);
-        Spinner spBg = dialogView.findViewById(R.id.sp_custom_bg_color);
-        Spinner spEffect = dialogView.findViewById(R.id.sp_custom_effect);
+        View v = LayoutInflater.from(this).inflate(R.layout.dialog_edit_custom_skin, null);
+        Spinner spCircle = v.findViewById(R.id.sp_custom_circle_color);
+        Spinner spTarget = v.findViewById(R.id.sp_custom_target_color);
+        Spinner spBg = v.findViewById(R.id.sp_custom_bg_color);
+        Spinner spEffect = v.findViewById(R.id.sp_custom_effect);
 
         spCircle.setSelection(getColorIndex(currentUser.getCustomCircleColor()));
         spTarget.setSelection(getColorIndex(currentUser.getCustomTargetColor()));
         spBg.setSelection(getColorIndex(currentUser.getCustomBackgroundColor()));
 
-        ArrayAdapter<CharSequence> effectAdapter = (ArrayAdapter<CharSequence>) spEffect.getAdapter();
         if (currentUser.getCustomEffectType() != null) {
+            ArrayAdapter<CharSequence> effectAdapter = (ArrayAdapter<CharSequence>) spEffect.getAdapter();
             int pos = effectAdapter.getPosition(currentUser.getCustomEffectType());
             if (pos >= 0) spEffect.setSelection(pos);
         }
 
         new AlertDialog.Builder(this)
-                .setView(dialogView)
+                .setView(v)
                 .setPositiveButton("Save", (dialog, which) -> {
-                    currentUser.setCustomCircleColor(PRESET_COLORS[spCircle.getSelectedItemPosition()]);
-                    currentUser.setCustomTargetColor(PRESET_COLORS[spTarget.getSelectedItemPosition()]);
-                    currentUser.setCustomBackgroundColor(PRESET_COLORS[spBg.getSelectedItemPosition()]);
-                    currentUser.setCustomEffectType(spEffect.getSelectedItem().toString());
+                    int circle = PRESET_COLORS[spCircle.getSelectedItemPosition()];
+                    int target = PRESET_COLORS[spTarget.getSelectedItemPosition()];
+                    int bg = PRESET_COLORS[spBg.getSelectedItemPosition()];
+                    String effect = spEffect.getSelectedItem().toString();
 
-                    saveUser();
-                    adapter.notifyDataSetChanged();
-                    Toast.makeText(this, "Custom skin updated!", Toast.LENGTH_SHORT).show();
+                    shopService.updateCustomSkin(currentUser, circle, target, bg, effect, new DatabaseService.DatabaseCallback<Void>() {
+                        @Override
+                        public void onCompleted(Void unused) {
+                            adapter.notifyDataSetChanged();
+                            Toast.makeText(ShopActivity.this, "Custom skin updated!", Toast.LENGTH_SHORT).show();
+                        }
+
+                        @Override
+                        public void onFailed(Exception e) {
+                        }
+                    });
                 })
                 .setNegativeButton("Cancel", null)
                 .show();
@@ -163,12 +175,5 @@ public class ShopActivity extends BaseActivity {
             if (PRESET_COLORS[i] == color) return i;
         }
         return 0;
-    }
-
-    private void saveUser() {
-        SharedPreferencesUtil.saveUser(this, currentUser);
-        FirebaseDatabase.getInstance().getReference("users")
-                .child(currentUser.getId())
-                .setValue(currentUser);
     }
 }

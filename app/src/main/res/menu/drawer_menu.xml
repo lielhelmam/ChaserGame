@@ -17,6 +17,12 @@
             android:id="@+id/nav_shop"
             android:icon="@android:drawable/ic_menu_revert"
             android:title="Shop" />
+        <!-- Admin Section (Hidden by default) -->
+        <item
+            android:id="@+id/nav_admin"
+            android:icon="@android:drawable/ic_menu_manage"
+            android:title="Admin Dashboard"
+            android:visible="false" />
     </group>
 
     <item android:title="Account">

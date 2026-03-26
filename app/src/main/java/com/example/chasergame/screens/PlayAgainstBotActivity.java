@@ -1,9 +1,7 @@
 package com.example.chasergame.screens;
 
-import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
-import android.os.CountDownTimer;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
@@ -12,18 +10,17 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 
 import com.example.chasergame.R;
+import com.example.chasergame.adapters.QuestionsAdapter;
 import com.example.chasergame.models.Question;
 import com.example.chasergame.models.User;
-import com.example.chasergame.utils.SharedPreferencesUtil;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
+import com.example.chasergame.services.BotService;
+import com.example.chasergame.services.DatabaseService;
+import com.example.chasergame.services.GameEngine;
+import com.example.chasergame.utils.GameTimer;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -33,149 +30,38 @@ import java.util.Random;
 public class PlayAgainstBotActivity extends BaseActivity {
 
     private static final int VISIBLE_STEPS = 14;
-    // ===== Game =====
     private final Random rnd = new Random();
-    // ===== UI =====
+
     private FrameLayout progressContainer;
-    private TextView markerP1, markerP2;
-    private TextView tvTurn, tvTimer, tvScoreP1, tvScoreP2, tvTarget, tvQuestion;
+    private TextView markerP1, markerP2, tvTurn, tvTimer, tvScoreP1, tvScoreP2, tvTarget, tvQuestion;
     private Button btnA, btnB, btnC;
     private int defaultBtnColor;
-    private int currentPlayer = 1;
-    private boolean isTurnRunning = false;
-    private int scoreP1 = 0;
-    private int scoreBot = 0;
-    private View progressTrack;
-    private int p1Pos = 0;
-    private int botPos = 0;
 
-    // ===== Timer =====
-    private CountDownTimer turnTimer;
-    private long turnDurationMillis;
-    private long millisLeft;
+    private GameEngine gameEngine;
+    private BotService botService;
+    private GameTimer gameTimer;
 
-    // ===== Bot =====
-    private int botAccuracy = 70;
-
-    // ===== Firebase =====
-    private int questionsCount = -1;
+    private List<QuestionsAdapter.Item> questionsList;
     private String currentCorrect;
+    private int botAccuracy;
+    private long turnDurationMillis;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_play_against_bot);
 
-        // ----- bind UI -----
-        progressContainer = findViewById(R.id.One_Device_progressContainer);
-        markerP1 = findViewById(R.id.markerP1);
-        markerP2 = findViewById(R.id.markerP2);
-
-        progressTrack = findViewById(R.id.progressTrack);
-
-        tvTurn = findViewById(R.id.One_Device_tvTurn);
-        tvTimer = findViewById(R.id.One_Device_tvTimer);
-        tvScoreP1 = findViewById(R.id.One_Device_tvScoreP1);
-        tvScoreP2 = findViewById(R.id.One_Device_tvScoreP2);
-        tvTarget = findViewById(R.id.One_Device_tvTarget);
-
-        tvQuestion = findViewById(R.id.Bot_tvQuestion);
-        btnA = findViewById(R.id.Bot_btnAnswerA);
-        btnB = findViewById(R.id.Bot_btnAnswerB);
-        btnC = findViewById(R.id.Bot_btnAnswerC);
-
-        if (btnA.getBackgroundTintList() != null) {
-            defaultBtnColor = btnA.getBackgroundTintList().getDefaultColor();
-        }
-
-        btnA.setOnClickListener(v -> onAnswerClicked(btnA));
-        btnB.setOnClickListener(v -> onAnswerClicked(btnB));
-        btnC.setOnClickListener(v -> onAnswerClicked(btnC));
-
-        turnDurationMillis = getIntent().getLongExtra("TURN_TIME_MS", 120_000);
-        botAccuracy = getIntent().getIntExtra("BOT_ACCURACY", 70);
-
-        millisLeft = turnDurationMillis;
-        tvTimer.setText(formatTime(millisLeft));
-
-        buildChaseTrackUI();
-        progressContainer.post(this::updateMarkersUI);
-
-        updateTurnUI();
-        updateScoresUI();
-
-        setInputsEnabled(false);
-        tvQuestion.setText("Loading questions...");
-
-        loadQuestionsCountThenStart();
+        initServices();
+        initUI();
+        loadData();
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        isTurnRunning = false;
-        cancelTimer();
-        if (!isFinishing()) {
-            finish();
-        }
-    }
-
-    // ===== Start flow =====
-    private void loadQuestionsCountThenStart() {
-        FirebaseDatabase.getInstance()
-                .getReference("questions")
-                .addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        if (isFinishing()) return;
-                        questionsCount = (int) snapshot.getChildrenCount();
-                        if (questionsCount <= 0) {
-                            Toast.makeText(PlayAgainstBotActivity.this, "No questions", Toast.LENGTH_LONG).show();
-                            goHome();
-                            return;
-                        }
-                        startTurn();
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-                        if (isFinishing()) return;
-                        goHome();
-                    }
-                });
-    }
-
-    private void startTurn() {
-        isTurnRunning = true;
-        millisLeft = turnDurationMillis;
-
-        updateTurnUI();
-        tvTimer.setText(formatTime(millisLeft));
-        startTimer();
-        loadRandomQuestion();
-
-        setInputsEnabled(currentPlayer == 1);
-    }
-
-    private void endTurn() {
-        cancelTimer();
-        isTurnRunning = false;
-
-        if (currentPlayer == 1) {
-            currentPlayer = 2;
-            startTurn();
-        } else {
-            endGame("Time is up! You survived the bot!", true);
-        }
-    }
-
-    // ===== Timer =====
-    private void startTimer() {
-        cancelTimer();
-        turnTimer = new CountDownTimer(millisLeft, 1000) {
+    private void initServices() {
+        gameEngine = new GameEngine(VISIBLE_STEPS);
+        botService = new BotService();
+        gameTimer = new GameTimer(new GameTimer.TimerListener() {
             @Override
             public void onTick(long ms) {
-                millisLeft = ms;
                 tvTimer.setText(formatTime(ms));
             }
 
@@ -183,39 +69,81 @@ public class PlayAgainstBotActivity extends BaseActivity {
             public void onFinish() {
                 endTurn();
             }
-        }.start();
+        });
+
+        turnDurationMillis = getIntent().getLongExtra("TURN_TIME_MS", 120_000);
+        botAccuracy = getIntent().getIntExtra("BOT_ACCURACY", 70);
     }
 
-    private void cancelTimer() {
-        if (turnTimer != null) turnTimer.cancel();
-        turnTimer = null;
+    private void initUI() {
+        progressContainer = findViewById(R.id.One_Device_progressContainer);
+        markerP1 = findViewById(R.id.markerP1);
+        markerP2 = findViewById(R.id.markerP2);
+        tvTurn = findViewById(R.id.One_Device_tvTurn);
+        tvTimer = findViewById(R.id.One_Device_tvTimer);
+        tvScoreP1 = findViewById(R.id.One_Device_tvScoreP1);
+        tvScoreP2 = findViewById(R.id.One_Device_tvScoreP2);
+        tvTarget = findViewById(R.id.One_Device_tvTarget);
+        tvQuestion = findViewById(R.id.Bot_tvQuestion);
+        btnA = findViewById(R.id.Bot_btnAnswerA);
+        btnB = findViewById(R.id.Bot_btnAnswerB);
+        btnC = findViewById(R.id.Bot_btnAnswerC);
+
+        defaultBtnColor = btnA.getBackgroundTintList().getDefaultColor();
+
+        btnA.setOnClickListener(v -> onAnswerClicked(btnA));
+        btnB.setOnClickListener(v -> onAnswerClicked(btnB));
+        btnC.setOnClickListener(v -> onAnswerClicked(btnC));
+
+        buildChaseTrackUI();
+        updateMarkersUI();
+        updateTurnUI();
+        updateScoresUI();
+        setInputsEnabled(false);
     }
 
-    private String formatTime(long ms) {
-        long s = ms / 1000;
-        return String.format("%02d:%02d", s / 60, s % 60);
+    private void loadData() {
+        tvQuestion.setText("Loading questions...");
+        questionService.getAllQuestions(new DatabaseService.DatabaseCallback<List<QuestionsAdapter.Item>>() {
+            @Override
+            public void onCompleted(List<QuestionsAdapter.Item> items) {
+                questionsList = items;
+                if (items.isEmpty()) {
+                    Toast.makeText(PlayAgainstBotActivity.this, "No questions", Toast.LENGTH_LONG).show();
+                    finish();
+                } else {
+                    startTurn();
+                }
+            }
+
+            @Override
+            public void onFailed(Exception e) {
+                finish();
+            }
+        });
     }
 
-    // ===== Questions =====
+    private void startTurn() {
+        updateTurnUI();
+        gameTimer.start(turnDurationMillis);
+        loadRandomQuestion();
+        setInputsEnabled(gameEngine.getCurrentPlayer() == 1);
+    }
+
+    private void endTurn() {
+        gameTimer.cancel();
+        if (gameEngine.getCurrentPlayer() == 1) {
+            gameEngine.switchPlayer();
+            startTurn();
+        } else {
+            endGame("Time is up! You survived!", true);
+        }
+    }
+
     private void loadRandomQuestion() {
-        if (!isTurnRunning) return;
-        int index = rnd.nextInt(questionsCount);
-        FirebaseDatabase.getInstance()
-                .getReference("questions")
-                .child(String.valueOf(index))
-                .addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snap) {
-                        if (!isTurnRunning) return;
-                        Question q = snap.getValue(Question.class);
-                        if (q != null) showQuestion(q);
-                        else loadRandomQuestion();
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-                    }
-                });
+        int index = rnd.nextInt(questionsList.size());
+        Question q = questionsList.get(index).value;
+        showQuestion(q);
     }
 
     private void showQuestion(Question q) {
@@ -232,71 +160,95 @@ public class PlayAgainstBotActivity extends BaseActivity {
         btnC.setText(options.get(2));
 
         resetButtonColors();
-
-        if (currentPlayer == 2) simulateBotAnswer();
+        if (gameEngine.getCurrentPlayer() == 2) simulateBotAnswer();
     }
 
-    // ===== Bot =====
     private void simulateBotAnswer() {
-        int botMaxDelay = 3500;
-        int botMinDelay = 1500;
-        int delay = botMinDelay + rnd.nextInt(botMaxDelay - botMinDelay);
-        tvQuestion.postDelayed(() -> {
-            if (!isTurnRunning) return;
-
-            boolean correct = rnd.nextInt(100) < botAccuracy;
+        botService.simulateAnswer(botAccuracy, correct -> {
             Button chosen = correct ? findCorrectButton() : pickWrongButton();
             if (chosen != null) onAnswerClicked(chosen);
-        }, delay);
+        });
     }
 
-    // ===== Answers =====
     private void onAnswerClicked(Button btn) {
-        if (!isTurnRunning) return;
-
         boolean correct = btn.getText().toString().equals(currentCorrect);
         setInputsEnabled(false);
-
         btn.setBackgroundTintList(ColorStateList.valueOf(correct ? 0xFF2E7D32 : 0xFFC62828));
 
         if (correct) {
-            if (currentPlayer == 1) {
-                scoreP1++;
-                p1Pos++;
-            } else {
-                scoreBot++;
-                botPos++;
-            }
+            gameEngine.onCorrectAnswer();
             updateScoresUI();
             updateMarkersUI();
         }
 
         btn.postDelayed(() -> {
-            if (!isTurnRunning) return;
-            if (correct && currentPlayer == 2 && botPos >= p1Pos) {
-                endGame("Oh no! The bot caught you!", false);
+            if (correct && gameEngine.isCaught()) {
+                endGame("Caught by the bot!", false);
                 return;
             }
-
             resetButtonColors();
             loadRandomQuestion();
-            setInputsEnabled(currentPlayer == 1);
+            setInputsEnabled(gameEngine.getCurrentPlayer() == 1);
         }, correct ? 700 : 1500);
     }
 
-    private Button findCorrectButton() {
-        if (btnA.getText().equals(currentCorrect)) return btnA;
-        if (btnB.getText().equals(currentCorrect)) return btnB;
-        if (btnC.getText().equals(currentCorrect)) return btnC;
-        return null;
+    private void endGame(String msg, boolean playerWon) {
+        gameTimer.cancel();
+        botService.cancel();
+
+        if (playerWon) {
+            User user = authService.getCurrentUser();
+            String winField = botAccuracy < 50 ? "botWinsEasy" : (botAccuracy < 75 ? "botWinsNormal" : "botWinsHard");
+            databaseService.updateUserWins(user.getId(), winField, null);
+        }
+
+        new AlertDialog.Builder(this)
+                .setTitle(playerWon ? "Victory!" : "Game Over")
+                .setMessage(msg)
+                .setCancelable(false)
+                .setPositiveButton("Main Menu", (d, w) -> navigateTo(MainActivity.class, true))
+                .show();
     }
 
-    private Button pickWrongButton() {
-        List<Button> list = new ArrayList<>();
-        if (!btnA.getText().equals(currentCorrect)) list.add(btnA);
-        if (!btnB.getText().equals(currentCorrect)) list.add(btnB);
-        if (!btnC.getText().equals(currentCorrect)) list.add(btnC);
-        return list.get(rnd.nextInt(list.size()));
+    // region UI Helpers
+    private void buildChaseTrackUI() {
+        LinearLayout cellsRow = new LinearLayout(this);
+        cellsRow.setOrientation(LinearLayout.HORIZONTAL);
+        cellsRow.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, dp(12), Gravity.CENTER_VERTICAL));
+
+        for (int i = 0; i < VISIBLE_STEPS; i++) {
+            View cell = new View(this);
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, dp(12), 1f);
+            lp.setMargins(dp(2), 0, dp(2), 0);
+            cell.setLayoutParams(lp);
+            cell.setBackgroundColor((i == 0 || i == VISIBLE_STEPS - 1) ? 0xFFFFFFFF : 0xFF333333);
+            cellsRow.addView(cell);
+        }
+        progressContainer.addView(cellsRow, 0);
+    }
+
+    private void updateMarkersUI() {
+        progressContainer.post(() -> {
+            float stepPx = (progressContainer.getWidth() - progressContainer.getPaddingLeft() - progressContainer.getPaddingRight()) / (float) VISIBLE_STEPS;
+            markerP1.setX(progressContainer.getPaddingLeft() + (gameEngine.getP1Pos() * stepPx));
+            markerP2.setX(progressContainer.getPaddingLeft() + (gameEngine.getP2Pos() * stepPx));
+        });
+    }
+
+    private void updateTurnUI() {
+        tvTurn.setText(gameEngine.getCurrentPlayer() == 1 ? "Your Turn" : "Bot Turn");
+        tvTarget.setVisibility(gameEngine.getCurrentPlayer() == 2 ? View.VISIBLE : View.GONE);
+    }
+
+    private void updateScoresUI() {
+        tvScoreP1.setText("You: " + gameEngine.getP1Score());
+        tvScoreP2.setText("Bot: " + gameEngine.getP2Score());
+    }
+
+    private void setInputsEnabled(boolean e) {
+        btnA.setEnabled(e);
+        btnB.setEnabled(e);
+        btnC.setEnabled(e);
     }
 
     private void resetButtonColors() {
@@ -306,116 +258,27 @@ public class PlayAgainstBotActivity extends BaseActivity {
         btnC.setBackgroundTintList(c);
     }
 
-    // ===== UI =====
-    private void updateTurnUI() {
-        tvTurn.setText(currentPlayer == 1 ? "Your Turn" : "Bot Turn");
-        tvTarget.setVisibility(currentPlayer == 2 ? View.VISIBLE : View.GONE);
-    }
-
-    private void updateScoresUI() {
-        tvScoreP1.setText("You: " + scoreP1);
-        tvScoreP2.setText("Bot: " + scoreBot);
-    }
-
-    private void setInputsEnabled(boolean e) {
-        btnA.setEnabled(e);
-        btnB.setEnabled(e);
-        btnC.setEnabled(e);
-    }
-
-    private void buildChaseTrackUI() {
-        if (progressTrack != null) progressTrack.setVisibility(View.GONE);
-
-        LinearLayout cellsRow = new LinearLayout(this);
-        cellsRow.setOrientation(LinearLayout.HORIZONTAL);
-        cellsRow.setGravity(Gravity.CENTER_VERTICAL);
-
-        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
-                FrameLayout.LayoutParams.MATCH_PARENT,
-                dp(12)
-        );
-        lp.gravity = Gravity.CENTER_VERTICAL;
-        cellsRow.setLayoutParams(lp);
-
-        int cellColor = 0xFF333333;
-        int startFinishColor = 0xFFFFFFFF;
-
-        for (int i = 0; i < VISIBLE_STEPS; i++) {
-            View cell = new View(this);
-            LinearLayout.LayoutParams clp = new LinearLayout.LayoutParams(0, dp(12), 1f);
-            int m = dp(2);
-            clp.setMargins(m, 0, m, 0);
-            cell.setLayoutParams(clp);
-
-            if (i == 0 || i == VISIBLE_STEPS - 1) {
-                cell.setBackgroundColor(startFinishColor);
-            } else {
-                cell.setBackgroundColor(cellColor);
-            }
-            cellsRow.addView(cell);
-        }
-
-        progressContainer.addView(cellsRow, 0);
-        markerP1.bringToFront();
-        markerP2.bringToFront();
-    }
-
-    private void updateMarkersUI() {
-        int containerW = progressContainer.getWidth();
-        if (containerW <= 0) return;
-
-        int paddingL = progressContainer.getPaddingLeft();
-        int paddingR = progressContainer.getPaddingRight();
-        int trackW = containerW - paddingL - paddingR;
-
-        float stepPx = trackW / (float) VISIBLE_STEPS;
-
-        float p1Screen = p1Pos;
-        float p2Screen = botPos;
-
-        p1Screen = Math.max(0, Math.min(VISIBLE_STEPS, p1Screen));
-        p2Screen = Math.max(0, Math.min(VISIBLE_STEPS, p2Screen));
-
-        float x1 = paddingL + (p1Screen * stepPx);
-        float x2 = paddingL + (p2Screen * stepPx);
-
-        markerP1.setX(x1);
-        markerP2.setX(x2);
-
-        if (Math.abs(x1 - x2) < 10f) markerP2.setTranslationY(-18f);
-        else markerP2.setTranslationY(0f);
-    }
-
-    private void endGame(String msg, boolean playerWon) {
-        cancelTimer();
-        isTurnRunning = false;
-
-        if (playerWon) {
-            User user = SharedPreferencesUtil.getUser(this);
-            if (user != null) {
-                String winField = "botWinsNormal"; // default
-                if (botAccuracy == 35) winField = "botWinsEasy";
-                else if (botAccuracy == 75) winField = "botWinsHard";
-
-                databaseService.updateUserWins(user.getId(), winField, null);
-            }
-        }
-
-        new AlertDialog.Builder(this)
-                .setTitle(playerWon ? "Victory!" : "Game Over")
-                .setMessage(msg + "\n\nYour score: " + scoreP1 + "\nBot score: " + scoreBot)
-                .setCancelable(false)
-                .setPositiveButton("Main Menu", (dialog, which) -> goHome())
-                .show();
+    private String formatTime(long ms) {
+        long s = ms / 1000;
+        return String.format("%02d:%02d", s / 60, s % 60);
     }
 
     private int dp(int v) {
-        float d = getResources().getDisplayMetrics().density;
-        return Math.round(v * d);
+        return Math.round(v * getResources().getDisplayMetrics().density);
     }
 
-    private void goHome() {
-        startActivity(new Intent(this, MainActivity.class));
-        finish();
+    private Button findCorrectButton() {
+        if (btnA.getText().equals(currentCorrect)) return btnA;
+        if (btnB.getText().equals(currentCorrect)) return btnB;
+        return btnC;
     }
+
+    private Button pickWrongButton() {
+        List<Button> list = new ArrayList<>();
+        if (!btnA.getText().equals(currentCorrect)) list.add(btnA);
+        if (!btnB.getText().equals(currentCorrect)) list.add(btnB);
+        if (!btnC.getText().equals(currentCorrect)) list.add(btnC);
+        return list.get(rnd.nextInt(list.size()));
+    }
+    // endregion
 }

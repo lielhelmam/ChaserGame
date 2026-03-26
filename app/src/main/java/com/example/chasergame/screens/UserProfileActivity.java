@@ -2,9 +2,7 @@ package com.example.chasergame.screens;
 
 import android.os.Bundle;
 import android.text.InputType;
-import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -41,6 +39,19 @@ public class UserProfileActivity extends BaseActivity {
             return insets;
         });
 
+        initViews();
+
+        userId = getIntent().getStringExtra("USER_UID");
+        if (userId == null || userId.trim().isEmpty()) {
+            Toast.makeText(this, "No user specified", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+
+        loadUser();
+    }
+
+    private void initViews() {
         tvName = findViewById(R.id.tv_profile_name);
         tvEmail = findViewById(R.id.tv_profile_email);
         tvPassword = findViewById(R.id.tv_profile_password);
@@ -53,32 +64,16 @@ public class UserProfileActivity extends BaseActivity {
         tvBotWinsHard = findViewById(R.id.tv_bot_wins_hard);
         tvOneDeviceWins = findViewById(R.id.tv_one_device_wins);
 
-        Button btnEditOnlineWins = findViewById(R.id.btn_edit_online_wins);
-        Button btnEditBotEasy = findViewById(R.id.btn_edit_bot_wins_easy);
-        Button btnEditBotNormal = findViewById(R.id.btn_edit_bot_wins_normal);
-        Button btnEditBotHard = findViewById(R.id.btn_edit_bot_wins_hard);
-        Button btnEditOneDeviceWins = findViewById(R.id.btn_edit_one_device_wins);
-
-        userId = getIntent().getStringExtra("USER_UID");
-        if (userId == null || userId.trim().isEmpty()) {
-            Log.e(TAG, "No USER_UID passed to activity");
-            Toast.makeText(this, "No user specified", Toast.LENGTH_SHORT).show();
-            finish();
-            return;
-        }
-
-        loadUser();
-
-        btnEditOnlineWins.setOnClickListener(v -> showEditWinsDialog("onlineWins", currentUser.getOnlineWins()));
-        btnEditBotEasy.setOnClickListener(v -> showEditWinsDialog("botWinsEasy", currentUser.getBotWinsEasy()));
-        btnEditBotNormal.setOnClickListener(v -> showEditWinsDialog("botWinsNormal", currentUser.getBotWinsNormal()));
-        btnEditBotHard.setOnClickListener(v -> showEditWinsDialog("botWinsHard", currentUser.getBotWinsHard()));
-        btnEditOneDeviceWins.setOnClickListener(v -> showEditWinsDialog("oneDeviceWins", currentUser.getOneDeviceWins()));
+        findViewById(R.id.btn_edit_online_wins).setOnClickListener(v -> showEditWinsDialog("onlineWins", currentUser.getOnlineWins()));
+        findViewById(R.id.btn_edit_bot_wins_easy).setOnClickListener(v -> showEditWinsDialog("botWinsEasy", currentUser.getBotWinsEasy()));
+        findViewById(R.id.btn_edit_bot_wins_normal).setOnClickListener(v -> showEditWinsDialog("botWinsNormal", currentUser.getBotWinsNormal()));
+        findViewById(R.id.btn_edit_bot_wins_hard).setOnClickListener(v -> showEditWinsDialog("botWinsHard", currentUser.getBotWinsHard()));
+        findViewById(R.id.btn_edit_one_device_wins).setOnClickListener(v -> showEditWinsDialog("oneDeviceWins", currentUser.getOneDeviceWins()));
     }
 
     private void loadUser() {
         progressBar.setVisibility(View.VISIBLE);
-        databaseService.getUser(userId, new DatabaseService.DatabaseCallback<>() {
+        databaseService.getUser(userId, new DatabaseService.DatabaseCallback<User>() {
             @Override
             public void onCompleted(User user) {
                 progressBar.setVisibility(View.GONE);
@@ -93,7 +88,6 @@ public class UserProfileActivity extends BaseActivity {
             @Override
             public void onFailed(Exception e) {
                 progressBar.setVisibility(View.GONE);
-                Log.e(TAG, "Failed to load user", e);
                 Toast.makeText(UserProfileActivity.this, "Failed to load user", Toast.LENGTH_SHORT).show();
             }
         });
@@ -103,7 +97,7 @@ public class UserProfileActivity extends BaseActivity {
         tvName.setText(user.getUsername() == null ? "-" : user.getUsername());
         tvEmail.setText(user.getEmail() == null ? "-" : user.getEmail());
         tvPassword.setText(user.getPassword() == null ? "-" : user.getPassword());
-        tvAdmin.setText((user.isAdmin ? "Yes" : "No"));
+        tvAdmin.setText((user.isAdmin() ? "Yes" : "No"));
 
         tvOnlineWins.setText(String.valueOf(user.getOnlineWins()));
         tvBotWinsEasy.setText(String.valueOf(user.getBotWinsEasy()));
@@ -113,22 +107,19 @@ public class UserProfileActivity extends BaseActivity {
     }
 
     private void showEditWinsDialog(String field, int currentVal) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Edit " + field);
-
         final EditText input = new EditText(this);
         input.setInputType(InputType.TYPE_CLASS_NUMBER);
         input.setText(String.valueOf(currentVal));
-        builder.setView(input);
 
-        builder.setPositiveButton("Save", (dialog, which) -> {
-            String value = input.getText().toString();
-            if (!value.isEmpty()) {
-                updateWins(field, Integer.parseInt(value));
-            }
-        });
-        builder.setNegativeButton("Cancel", null);
-        builder.show();
+        new AlertDialog.Builder(this)
+                .setTitle("Edit " + field)
+                .setView(input)
+                .setPositiveButton("Save", (dialog, which) -> {
+                    String value = input.getText().toString();
+                    if (!value.isEmpty()) updateWins(field, Integer.parseInt(value));
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
     }
 
     private void updateWins(String field, int newWins) {
@@ -152,10 +143,10 @@ public class UserProfileActivity extends BaseActivity {
                 break;
         }
 
-        databaseService.updateUser(currentUser, new DatabaseService.DatabaseCallback<>() {
+        databaseService.updateUser(currentUser, new DatabaseService.DatabaseCallback<Void>() {
             @Override
             public void onCompleted(Void unused) {
-                Toast.makeText(UserProfileActivity.this, "Updated successfully", Toast.LENGTH_SHORT).show();
+                Toast.makeText(UserProfileActivity.this, "Updated", Toast.LENGTH_SHORT).show();
                 showUserData(currentUser);
             }
 

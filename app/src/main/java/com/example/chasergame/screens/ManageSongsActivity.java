@@ -7,25 +7,16 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.example.chasergame.R;
-import com.example.chasergame.models.Note;
-import com.example.chasergame.models.SongData;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-
-import java.util.ArrayList;
-import java.util.List;
+import com.example.chasergame.services.DatabaseService;
 
 public class ManageSongsActivity extends BaseActivity {
 
     private EditText etName, etDifficulty, etResId, etTargetScore, etBeatmap;
-    private DatabaseReference mDatabase;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_manage_songs);
-
-        mDatabase = FirebaseDatabase.getInstance().getReference("rhythm_songs");
 
         etName = findViewById(R.id.et_song_name);
         etDifficulty = findViewById(R.id.et_song_difficulty);
@@ -50,44 +41,25 @@ public class ManageSongsActivity extends BaseActivity {
             return;
         }
 
-        int targetScore = Integer.parseInt(scoreStr);
-        List<Note> notes = parseBeatmap(beatmapStr);
-
-        if (notes.isEmpty()) {
-            Toast.makeText(this, "Invalid beatmap format", Toast.LENGTH_SHORT).show();
+        int targetScore;
+        try {
+            targetScore = Integer.parseInt(scoreStr);
+        } catch (NumberFormatException e) {
+            Toast.makeText(this, "Invalid score", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        String songId = mDatabase.push().getKey();
-        if (songId == null) return;
-
-        // Create SongData and set the resource name correctly
-        SongData song = new SongData(name, difficulty, 0, notes, targetScore);
-        song.setResName(resName); // FIX: Setting the resource name for Firebase
-
-        mDatabase.child(songId).setValue(song)
-                .addOnSuccessListener(aVoid -> {
-                    Toast.makeText(ManageSongsActivity.this, "Song saved successfully!", Toast.LENGTH_SHORT).show();
-                    finish();
-                })
-                .addOnFailureListener(e -> Toast.makeText(ManageSongsActivity.this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show());
-    }
-
-    private List<Note> parseBeatmap(String beatmapStr) {
-        List<Note> notes = new ArrayList<>();
-        try {
-            String[] entries = beatmapStr.split(";");
-            for (String entry : entries) {
-                String[] parts = entry.split(",");
-                if (parts.length == 2) {
-                    long time = Long.parseLong(parts[0].trim());
-                    int lane = Integer.parseInt(parts[1].trim());
-                    notes.add(new Note(time, lane));
-                }
+        songService.addSong(name, difficulty, resName, targetScore, beatmapStr, new DatabaseService.DatabaseCallback<Void>() {
+            @Override
+            public void onCompleted(Void unused) {
+                Toast.makeText(ManageSongsActivity.this, "Song saved successfully!", Toast.LENGTH_SHORT).show();
+                finish();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return notes;
+
+            @Override
+            public void onFailed(Exception e) {
+                Toast.makeText(ManageSongsActivity.this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }
