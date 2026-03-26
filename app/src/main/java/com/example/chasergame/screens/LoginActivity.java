@@ -7,11 +7,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import androidx.activity.EdgeToEdge;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
-
 import com.example.chasergame.R;
 import com.example.chasergame.models.User;
 import com.example.chasergame.services.DatabaseService;
@@ -27,14 +22,10 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_login);
-
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.MainPage), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
+        
+        hideNavigationDrawer();
+        hideTopBar();
 
         User user = SharedPreferencesUtil.getUser(this);
 
@@ -56,19 +47,21 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         btnLogin = findViewById(R.id.btn_login_check);
         tvRegister = findViewById(R.id.Login_tv_register);
 
-        btnLogin.setOnClickListener(this);
-        tvRegister.setOnClickListener(this);
+        if (btnLogin != null) btnLogin.setOnClickListener(this);
+        if (tvRegister != null) tvRegister.setOnClickListener(this);
 
         Button goback = findViewById(R.id.btn_login_goback);
-        goback.setOnClickListener(view -> {
-            Intent intentreg = new Intent(LoginActivity.this, LandingActivity.class);
-            startActivity(intentreg);
-        });
+        if (goback != null) {
+            goback.setOnClickListener(view -> {
+                Intent intentreg = new Intent(LoginActivity.this, LandingActivity.class);
+                startActivity(intentreg);
+            });
+        }
     }
 
     @Override
     public void onClick(View v) {
-        if (v.getId() == btnLogin.getId()) {
+        if (btnLogin != null && v.getId() == btnLogin.getId()) {
             String username = etUsername.getText().toString().trim();
             String password = etPassword.getText().toString().trim();
 
@@ -76,7 +69,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
 
             loginUser(username, password);
 
-        } else if (v.getId() == tvRegister.getId()) {
+        } else if (tvRegister != null && v.getId() == tvRegister.getId()) {
             startActivity(new Intent(LoginActivity.this, SignupActivity.class));
         }
     }

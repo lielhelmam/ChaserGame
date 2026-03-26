@@ -4,38 +4,26 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 
-import androidx.activity.EdgeToEdge;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
-
 import com.example.chasergame.R;
 
-public class SecretGameRulesActivity extends AppCompatActivity {
+public class SecretGameRulesActivity extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_secret_game_rules);
-
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
+        setTopBarTitle("Rhythm Game Rules");
 
         Button btnStartGame = findViewById(R.id.btn_start_secret_game);
         btnStartGame.setOnClickListener(v -> {
             Intent intent = new Intent(SecretGameRulesActivity.this, SongSelectionActivity.class);
             startActivity(intent);
-            finish(); // Optional: finish rules activity so user doesn't go back to it from game
+            finish();
         });
 
         Button btnBackToMain = findViewById(R.id.btn_back_to_main);
         btnBackToMain.setOnClickListener(v -> {
-            finish(); // Just go back to MainActivity
+            finish();
         });
     }
 }

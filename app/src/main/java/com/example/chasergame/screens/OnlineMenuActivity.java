@@ -18,6 +18,7 @@ public class OnlineMenuActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_online_menu);
+        setTopBarTitle("Online Trivia");
 
         // Private options
         findViewById(R.id.btnCreateGame).setOnClickListener(v -> {
@@ -51,7 +52,6 @@ public class OnlineMenuActivity extends BaseActivity {
                             String status = roomSnap.child("status").getValue(String.class);
                             long playerCount = roomSnap.child("players").getChildrenCount();
                             
-                            // If room is waiting and has only 1 player, join it!
                             if ("waiting".equals(status) && playerCount == 1) {
                                 String roomId = roomSnap.getKey();
                                 String playerId = UUID.randomUUID().toString();

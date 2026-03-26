@@ -5,33 +5,38 @@ import android.os.Bundle;
 import android.widget.NumberPicker;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import com.example.chasergame.R;
 
-public class ChooseTimeBotActivity extends AppCompatActivity {
+public class ChooseTimeBotActivity extends BaseActivity {
     private NumberPicker pickerMinutes, pickerSeconds;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_choose_time);
+        setTopBarTitle("Choose Time vs Bot");
 
         pickerMinutes = findViewById(R.id.pickerMinutes);
         pickerSeconds = findViewById(R.id.pickerSeconds);
 
-        pickerMinutes.setMinValue(0);
-        pickerMinutes.setMaxValue(10);
-        pickerMinutes.setValue(2);
+        if (pickerMinutes != null) {
+            pickerMinutes.setMinValue(0);
+            pickerMinutes.setMaxValue(10);
+            pickerMinutes.setValue(2);
+        }
 
-        pickerSeconds.setMinValue(0);
-        pickerSeconds.setMaxValue(59);
-        pickerSeconds.setValue(0);
+        if (pickerSeconds != null) {
+            pickerSeconds.setMinValue(0);
+            pickerSeconds.setMaxValue(59);
+            pickerSeconds.setValue(0);
+        }
 
         findViewById(R.id.btnStartGame).setOnClickListener(v -> goNext());
     }
 
     private void goNext() {
+        if (pickerMinutes == null || pickerSeconds == null) return;
+        
         int minutes = pickerMinutes.getValue();
         int seconds = pickerSeconds.getValue();
 
@@ -46,5 +51,4 @@ public class ChooseTimeBotActivity extends AppCompatActivity {
         i.putExtra("TURN_TIME_MS", turnTimeMs);
         startActivity(i);
     }
-
 }

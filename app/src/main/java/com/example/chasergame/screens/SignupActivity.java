@@ -8,11 +8,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
-
 import com.example.chasergame.R;
 import com.example.chasergame.models.User;
 import com.example.chasergame.services.DatabaseService;
@@ -27,14 +22,10 @@ public class SignupActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_signin);
-
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.MainPage), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
+        
+        hideNavigationDrawer();
+        hideTopBar();
 
         User user = SharedPreferencesUtil.getUser(this);
 
@@ -51,26 +42,24 @@ public class SignupActivity extends BaseActivity {
             startActivity(intent);
         }
 
-
         etUserName = findViewById(R.id.EnterUserName);
         etPassword = findViewById(R.id.EnterPassword);
         etEmail = findViewById(R.id.EnterEmail);
         etPhoneNumber = findViewById(R.id.EnterPhoneNumber);
 
         btnSubmit = findViewById(R.id.btn_signup_submit);
-        btnSubmit.setOnClickListener(this::onSubmit);
+        if (btnSubmit != null) btnSubmit.setOnClickListener(this::onSubmit);
 
         Button goback = findViewById(R.id.btn_signup_goback);
-        goback.setOnClickListener(view -> {
-            Intent intentreg = new Intent(SignupActivity.this, LandingActivity.class);
-            startActivity(intentreg);
-        });
-
-
+        if (goback != null) {
+            goback.setOnClickListener(view -> {
+                Intent intentreg = new Intent(SignupActivity.this, LandingActivity.class);
+                startActivity(intentreg);
+            });
+        }
     }
 
     private void onSubmit(View view) {
-
         Log.d(TAG, "Submit clicked.");
 
         String email = etEmail.getText().toString().trim();
@@ -113,8 +102,6 @@ public class SignupActivity extends BaseActivity {
     }
 
     private void registerUser(String email, String password, String fName, String phone) {
-        Log.d(TAG, "Registering user...");
-
         String uid = databaseService.generateUserId();
         User user = new User(uid, fName, password, email, false, 0, 0, 0);
 
@@ -138,13 +125,9 @@ public class SignupActivity extends BaseActivity {
 
     private void createUserInDatabase(User user) {
         databaseService.createNewUser(user, new DatabaseService.DatabaseCallback<>() {
-
             @Override
             public void onCompleted(Void object) {
-                Log.d(TAG, "User created successfully");
-
                 SharedPreferencesUtil.saveUser(SignupActivity.this, user);
-
                 Intent mainIntent = new Intent(SignupActivity.this, MainActivity.class);
                 mainIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(mainIntent);
@@ -157,10 +140,5 @@ public class SignupActivity extends BaseActivity {
                 SharedPreferencesUtil.signOutUser(SignupActivity.this);
             }
         });
-        btnSubmit.setOnClickListener(view -> {
-            Intent intenthome = new Intent(SignupActivity.this, MainActivity.class);
-            startActivity(intenthome);
-        });
-
     }
 }

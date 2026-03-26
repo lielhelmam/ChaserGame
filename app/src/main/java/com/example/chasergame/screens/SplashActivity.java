@@ -5,11 +5,9 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import com.example.chasergame.R;
 
-public class SplashActivity extends AppCompatActivity {
+public class SplashActivity extends BaseActivity {
 
     private static final int SPLASH_DELAY = 2000; // 2 seconds
 
@@ -17,6 +15,9 @@ public class SplashActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
+        
+        hideNavigationDrawer();
+        hideTopBar();
 
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
             Intent intent = new Intent(SplashActivity.this, LandingActivity.class);
