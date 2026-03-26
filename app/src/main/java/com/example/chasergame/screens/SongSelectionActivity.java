@@ -2,7 +2,6 @@ package com.example.chasergame.screens;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.Button;
 import android.widget.SearchView;
 import android.widget.Toast;
@@ -32,7 +31,7 @@ public class SongSelectionActivity extends BaseActivity {
     private RecyclerView rvSongs;
     private SongsAdapter adapter;
     private List<SongData> songList;
-    private Map<SongData, String> songKeys = new HashMap<>(); 
+    private Map<SongData, String> songKeys = new HashMap<>();
     private DatabaseReference mDatabase;
     private SearchView searchView;
 
@@ -45,13 +44,13 @@ public class SongSelectionActivity extends BaseActivity {
         rvSongs = findViewById(R.id.rv_songs);
         searchView = findViewById(R.id.sv_songs);
         rvSongs.setLayoutManager(new LinearLayoutManager(this));
-        
+
         songList = new ArrayList<>();
         adapter = new SongsAdapter(songList, this::onSongSelected);
         rvSongs.setAdapter(adapter);
 
         mDatabase = FirebaseDatabase.getInstance().getReference("rhythm_songs");
-        
+
         loadSongs();
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {

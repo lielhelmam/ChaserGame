@@ -1,7 +1,9 @@
 package com.example.chasergame.models;
 
 import android.graphics.Color;
+
 import androidx.annotation.NonNull;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,9 +19,9 @@ public class User {
     public int botWinsNormal;
     public int botWinsHard;
     public int oneDeviceWins;
-    public int points; 
-    public String equippedSkin = "default"; 
-    public List<String> ownedSkins = new ArrayList<>(); 
+    public int points;
+    public String equippedSkin = "default";
+    public List<String> ownedSkins = new ArrayList<>();
     public boolean giftClaimed = false;
     public int totalRhythmScore = 0; // Cumulative score for the leaderboard
 
@@ -52,7 +54,7 @@ public class User {
         this.ownedSkins.add("default");
         this.giftClaimed = false;
         this.totalRhythmScore = 0;
-        
+
         // Default custom settings
         this.customCircleColor = Color.WHITE;
         this.customTargetColor = Color.WHITE;
@@ -61,52 +63,166 @@ public class User {
     }
 
     // Getters and Setters
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
-    public String getUsername() { return username; }
-    public void setUsername(String username) { this.username = username; }
-    public String getPassword() { return password; }
-    public void setPassword(String password) { this.password = password; }
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
-    public boolean isAdmin() { return isAdmin; }
-    public void setAdmin(boolean admin) { isAdmin = admin; }
-    public int getOnlineWins() { return onlineWins; }
-    public void setOnlineWins(int onlineWins) { this.onlineWins = onlineWins; }
-    public int getBotWins() { return botWins; }
-    public void setBotWins(int botWins) { this.botWins = botWins; }
+    public String getId() {
+        return id;
+    }
 
-    public int getBotWinsEasy() { return botWinsEasy; }
-    public void setBotWinsEasy(int botWinsEasy) { this.botWinsEasy = botWinsEasy; }
-    public int getBotWinsNormal() { return botWinsNormal; }
-    public void setBotWinsNormal(int botWinsNormal) { this.botWinsNormal = botWinsNormal; }
-    public int getBotWinsHard() { return botWinsHard; }
-    public void setBotWinsHard(int botWinsHard) { this.botWinsHard = botWinsHard; }
+    public void setId(String id) {
+        this.id = id;
+    }
 
-    public int getOneDeviceWins() { return oneDeviceWins; }
-    public void setOneDeviceWins(int oneDeviceWins) { this.oneDeviceWins = oneDeviceWins; }
-    public int getPoints() { return points; }
-    public void setPoints(int points) { this.points = points; }
-    public String getEquippedSkin() { return equippedSkin; }
-    public void setEquippedSkin(String equippedSkin) { this.equippedSkin = equippedSkin; }
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public boolean isAdmin() {
+        return isAdmin;
+    }
+
+    public void setAdmin(boolean admin) {
+        isAdmin = admin;
+    }
+
+    public int getOnlineWins() {
+        return onlineWins;
+    }
+
+    public void setOnlineWins(int onlineWins) {
+        this.onlineWins = onlineWins;
+    }
+
+    public int getBotWins() {
+        return botWins;
+    }
+
+    public void setBotWins(int botWins) {
+        this.botWins = botWins;
+    }
+
+    public int getBotWinsEasy() {
+        return botWinsEasy;
+    }
+
+    public void setBotWinsEasy(int botWinsEasy) {
+        this.botWinsEasy = botWinsEasy;
+    }
+
+    public int getBotWinsNormal() {
+        return botWinsNormal;
+    }
+
+    public void setBotWinsNormal(int botWinsNormal) {
+        this.botWinsNormal = botWinsNormal;
+    }
+
+    public int getBotWinsHard() {
+        return botWinsHard;
+    }
+
+    public void setBotWinsHard(int botWinsHard) {
+        this.botWinsHard = botWinsHard;
+    }
+
+    public int getOneDeviceWins() {
+        return oneDeviceWins;
+    }
+
+    public void setOneDeviceWins(int oneDeviceWins) {
+        this.oneDeviceWins = oneDeviceWins;
+    }
+
+    public int getPoints() {
+        return points;
+    }
+
+    public void setPoints(int points) {
+        this.points = points;
+    }
+
+    public String getEquippedSkin() {
+        return equippedSkin;
+    }
+
+    public void setEquippedSkin(String equippedSkin) {
+        this.equippedSkin = equippedSkin;
+    }
+
     public List<String> getOwnedSkins() {
         if (ownedSkins == null) ownedSkins = new ArrayList<>();
         return ownedSkins;
     }
-    public void setOwnedSkins(List<String> ownedSkins) { this.ownedSkins = ownedSkins; }
-    public boolean isGiftClaimed() { return giftClaimed; }
-    public void setGiftClaimed(boolean giftClaimed) { this.giftClaimed = giftClaimed; }
-    public int getTotalRhythmScore() { return totalRhythmScore; }
-    public void setTotalRhythmScore(int totalRhythmScore) { this.totalRhythmScore = totalRhythmScore; }
 
-    public int getCustomCircleColor() { return customCircleColor; }
-    public void setCustomCircleColor(int customCircleColor) { this.customCircleColor = customCircleColor; }
-    public int getCustomTargetColor() { return customTargetColor; }
-    public void setCustomTargetColor(int customTargetColor) { this.customTargetColor = customTargetColor; }
-    public int getCustomBackgroundColor() { return customBackgroundColor; }
-    public void setCustomBackgroundColor(int customBackgroundColor) { this.customBackgroundColor = customBackgroundColor; }
-    public String getCustomEffectType() { return customEffectType; }
-    public void setCustomEffectType(String customEffectType) { this.customEffectType = customEffectType; }
+    public void setOwnedSkins(List<String> ownedSkins) {
+        this.ownedSkins = ownedSkins;
+    }
+
+    public boolean isGiftClaimed() {
+        return giftClaimed;
+    }
+
+    public void setGiftClaimed(boolean giftClaimed) {
+        this.giftClaimed = giftClaimed;
+    }
+
+    public int getTotalRhythmScore() {
+        return totalRhythmScore;
+    }
+
+    public void setTotalRhythmScore(int totalRhythmScore) {
+        this.totalRhythmScore = totalRhythmScore;
+    }
+
+    public int getCustomCircleColor() {
+        return customCircleColor;
+    }
+
+    public void setCustomCircleColor(int customCircleColor) {
+        this.customCircleColor = customCircleColor;
+    }
+
+    public int getCustomTargetColor() {
+        return customTargetColor;
+    }
+
+    public void setCustomTargetColor(int customTargetColor) {
+        this.customTargetColor = customTargetColor;
+    }
+
+    public int getCustomBackgroundColor() {
+        return customBackgroundColor;
+    }
+
+    public void setCustomBackgroundColor(int customBackgroundColor) {
+        this.customBackgroundColor = customBackgroundColor;
+    }
+
+    public String getCustomEffectType() {
+        return customEffectType;
+    }
+
+    public void setCustomEffectType(String customEffectType) {
+        this.customEffectType = customEffectType;
+    }
 
     @NonNull
     @Override

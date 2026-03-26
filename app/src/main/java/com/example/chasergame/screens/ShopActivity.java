@@ -26,14 +26,7 @@ import java.util.List;
 
 public class ShopActivity extends BaseActivity {
 
-    private TextView tvPoints;
-    private RecyclerView rvSkins;
-    private Button btnClaimGift;
-    private SkinsAdapter adapter;
-    private User currentUser;
-
     private static final int GIFT_AMOUNT = 100000;
-
     private static final int[] PRESET_COLORS = {
             Color.WHITE,   // White
             Color.BLACK,   // Black
@@ -48,6 +41,11 @@ public class ShopActivity extends BaseActivity {
             Color.parseColor("#FFD700"), // Gold
             Color.GRAY     // Gray
     };
+    private TextView tvPoints;
+    private RecyclerView rvSkins;
+    private Button btnClaimGift;
+    private SkinsAdapter adapter;
+    private User currentUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,7 +66,7 @@ public class ShopActivity extends BaseActivity {
         updateUI();
         setupRecyclerView();
         checkGiftStatus();
-        
+
         btnClaimGift.setOnClickListener(v -> claimGift());
     }
 
@@ -137,7 +135,7 @@ public class ShopActivity extends BaseActivity {
         spCircle.setSelection(getColorIndex(currentUser.getCustomCircleColor()));
         spTarget.setSelection(getColorIndex(currentUser.getCustomTargetColor()));
         spBg.setSelection(getColorIndex(currentUser.getCustomBackgroundColor()));
-        
+
         ArrayAdapter<CharSequence> effectAdapter = (ArrayAdapter<CharSequence>) spEffect.getAdapter();
         if (currentUser.getCustomEffectType() != null) {
             int pos = effectAdapter.getPosition(currentUser.getCustomEffectType());
@@ -151,7 +149,7 @@ public class ShopActivity extends BaseActivity {
                     currentUser.setCustomTargetColor(PRESET_COLORS[spTarget.getSelectedItemPosition()]);
                     currentUser.setCustomBackgroundColor(PRESET_COLORS[spBg.getSelectedItemPosition()]);
                     currentUser.setCustomEffectType(spEffect.getSelectedItem().toString());
-                    
+
                     saveUser();
                     adapter.notifyDataSetChanged();
                     Toast.makeText(this, "Custom skin updated!", Toast.LENGTH_SHORT).show();

@@ -82,6 +82,7 @@ public class SongsAdminAdapter extends RecyclerView.Adapter<SongsAdminAdapter.VH
 
     public interface Listener {
         void onEditClicked(String key, SongData song);
+
         void onDeleteClicked(String key);
     }
 

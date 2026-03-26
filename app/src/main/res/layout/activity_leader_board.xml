@@ -130,8 +130,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:background="#F5F5F5"
-                android:orientation="horizontal"
                 android:layoutDirection="ltr"
+                android:orientation="horizontal"
                 android:padding="8dp">
 
                 <TextView

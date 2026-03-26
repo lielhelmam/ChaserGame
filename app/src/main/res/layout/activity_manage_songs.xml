@@ -14,8 +14,8 @@
         android:textColor="#FFFFFF"
         android:textSize="24sp"
         android:textStyle="bold"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
@@ -23,8 +23,8 @@
         android:layout_marginTop="20dp"
         android:layout_marginBottom="20dp"
         app:cardCornerRadius="15dp"
-        app:layout_constraintTop_toBottomOf="@id/tv_manage_songs_title"
-        app:layout_constraintBottom_toTopOf="@id/btn_save_song">
+        app:layout_constraintBottom_toTopOf="@id/btn_save_song"
+        app:layout_constraintTop_toBottomOf="@id/tv_manage_songs_title">
 
         <ScrollView
             android:layout_width="match_parent"
@@ -40,37 +40,37 @@
                     android:id="@+id/et_song_name"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Song Name (e.g. Neon Lights)"
-                    android:layout_marginBottom="12dp"/>
+                    android:layout_marginBottom="12dp"
+                    android:hint="Song Name (e.g. Neon Lights)" />
 
                 <EditText
                     android:id="@+id/et_song_difficulty"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Difficulty (Easy/Medium/Hard)"
-                    android:layout_marginBottom="12dp"/>
+                    android:layout_marginBottom="12dp"
+                    android:hint="Difficulty (Easy/Medium/Hard)" />
 
                 <EditText
                     android:id="@+id/et_song_res_id"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Raw Resource Name (e.g. song1)"
-                    android:layout_marginBottom="12dp"/>
+                    android:layout_marginBottom="12dp"
+                    android:hint="Raw Resource Name (e.g. song1)" />
 
                 <EditText
                     android:id="@+id/et_target_score"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginBottom="12dp"
                     android:hint="Target Score to Pass"
-                    android:inputType="number"
-                    android:layout_marginBottom="12dp"/>
+                    android:inputType="number" />
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginBottom="4dp"
                     android:text="Beatmap (time,lane;time,lane...)"
-                    android:textStyle="bold"
-                    android:layout_marginBottom="4dp"/>
+                    android:textStyle="bold" />
 
                 <EditText
                     android:id="@+id/et_beatmap"
@@ -78,7 +78,7 @@
                     android:layout_height="200dp"
                     android:gravity="top"
                     android:hint="1000,0;1500,1;2000,0"
-                    android:inputType="textMultiLine"/>
+                    android:inputType="textMultiLine" />
 
             </LinearLayout>
         </ScrollView>
@@ -88,8 +88,8 @@
         android:id="@+id/btn_save_song"
         android:layout_width="match_parent"
         android:layout_height="56dp"
-        android:text="Save Song Data"
         android:backgroundTint="#333333"
+        android:text="Save Song Data"
         app:layout_constraintBottom_toBottomOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

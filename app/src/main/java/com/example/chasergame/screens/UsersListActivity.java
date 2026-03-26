@@ -120,7 +120,7 @@ public class UsersListActivity extends BaseActivity {
             if (!newPointsStr.isEmpty()) {
                 int newPoints = Integer.parseInt(newPointsStr);
                 user.setPoints(newPoints);
-                
+
                 FirebaseDatabase.getInstance().getReference("users")
                         .child(user.getId())
                         .child("points")

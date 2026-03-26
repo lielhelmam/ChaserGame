@@ -10,9 +10,9 @@ import android.graphics.drawable.GradientDrawable;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.AttributeSet;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.Gravity;
 import android.view.animation.LinearInterpolator;
 import android.widget.FrameLayout;
 import android.widget.TextView;
@@ -30,40 +30,40 @@ import java.util.Random;
 public class GameView extends ConstraintLayout {
 
     // -------------------------------------------------------------------------
-    // Callback interface — Activity implements this
-    // -------------------------------------------------------------------------
-    public interface GameEventListener {
-        void onNoteHit(int points);  // 300 (perfect) or 100 (good)
-        void onNoteMissed();
-        void onGameLoopTick();       // called every ~16ms for progress bar
-    }
-
-    // -------------------------------------------------------------------------
     // Constants
     // -------------------------------------------------------------------------
     private static final long NOTE_FALL_DURATION = 2000L;
-    private static final int  PERFECT_THRESHOLD  = 150;
-    private static final int  GOOD_THRESHOLD     = 300;
-
+    private static final int PERFECT_THRESHOLD = 150;
+    private static final int GOOD_THRESHOLD = 300;
+    private final Handler handler = new Handler(Looper.getMainLooper());
+    private final Random random = new Random();
     // -------------------------------------------------------------------------
     // Child views — found after inflation
     // -------------------------------------------------------------------------
     private FrameLayout laneLeft;
     private FrameLayout laneRight;
-    private View        targetLeft;
-    private View        targetRight;
-
+    private View targetLeft;
+    private View targetRight;
     // -------------------------------------------------------------------------
     // State
     // -------------------------------------------------------------------------
-    private Skin              equippedSkin;
-    private List<Note>        remainingNotes;
-    private boolean           isGameRunning = false;
-    private long              startTime;
+    private Skin equippedSkin;
+    private List<Note> remainingNotes;
+    private boolean isGameRunning = false;
+    private long startTime;
     private GameEventListener listener;
-
-    private final Handler handler = new Handler(Looper.getMainLooper());
-    private final Random  random  = new Random();
+    // -------------------------------------------------------------------------
+    // Game loop
+    // -------------------------------------------------------------------------
+    private final Runnable gameLoop = new Runnable() {
+        @Override
+        public void run() {
+            if (!isGameRunning) return;
+            updateGame();
+            if (listener != null) listener.onGameLoopTick();
+            handler.postDelayed(this, 16);
+        }
+    };
 
     // -------------------------------------------------------------------------
     // Constructors — all three needed for XML inflation
@@ -89,9 +89,9 @@ public class GameView extends ConstraintLayout {
     private void init(Context context) {
         LayoutInflater.from(context).inflate(R.layout.view_game, this, true);
 
-        laneLeft    = findViewById(R.id.lane_left);
-        laneRight   = findViewById(R.id.lane_right);
-        targetLeft  = findViewById(R.id.target_left);
+        laneLeft = findViewById(R.id.lane_left);
+        laneRight = findViewById(R.id.lane_right);
+        targetLeft = findViewById(R.id.target_left);
         targetRight = findViewById(R.id.target_right);
     }
 
@@ -110,10 +110,10 @@ public class GameView extends ConstraintLayout {
      * Start the game loop. Call this after MediaPlayer has started in the Activity.
      */
     public void startGame(List<Note> notes, Skin skin) {
-        this.equippedSkin   = skin;
+        this.equippedSkin = skin;
         this.remainingNotes = new ArrayList<>(notes);
-        this.startTime      = System.currentTimeMillis();
-        this.isGameRunning  = true;
+        this.startTime = System.currentTimeMillis();
+        this.isGameRunning = true;
 
         applySkin();
         setupInputListeners();
@@ -127,7 +127,7 @@ public class GameView extends ConstraintLayout {
     public void stop() {
         isGameRunning = false;
         handler.removeCallbacks(gameLoop);
-        if (laneLeft  != null) laneLeft.removeAllViews();
+        if (laneLeft != null) laneLeft.removeAllViews();
         if (laneRight != null) laneRight.removeAllViews();
     }
 
@@ -136,7 +136,7 @@ public class GameView extends ConstraintLayout {
     // -------------------------------------------------------------------------
     private void applySkin() {
         if (equippedSkin == null) return;
-        if (targetLeft  != null) targetLeft.getBackground().setTint(equippedSkin.targetColor);
+        if (targetLeft != null) targetLeft.getBackground().setTint(equippedSkin.targetColor);
         if (targetRight != null) targetRight.getBackground().setTint(equippedSkin.targetColor);
     }
 
@@ -144,22 +144,9 @@ public class GameView extends ConstraintLayout {
     // Input
     // -------------------------------------------------------------------------
     private void setupInputListeners() {
-        if (targetLeft  != null) targetLeft.setOnClickListener(v -> checkHit(0));
+        if (targetLeft != null) targetLeft.setOnClickListener(v -> checkHit(0));
         if (targetRight != null) targetRight.setOnClickListener(v -> checkHit(1));
     }
-
-    // -------------------------------------------------------------------------
-    // Game loop
-    // -------------------------------------------------------------------------
-    private final Runnable gameLoop = new Runnable() {
-        @Override
-        public void run() {
-            if (!isGameRunning) return;
-            updateGame();
-            if (listener != null) listener.onGameLoopTick();
-            handler.postDelayed(this, 16);
-        }
-    };
 
     private void updateGame() {
         if (remainingNotes == null || remainingNotes.isEmpty()) return;
@@ -251,18 +238,18 @@ public class GameView extends ConstraintLayout {
         if (!isGameRunning) return;
         long currentTime = System.currentTimeMillis() - startTime;
 
-        FrameLayout laneView   = (lane == 0) ? laneLeft  : laneRight;
-        View        targetView = (lane == 0) ? targetLeft : targetRight;
+        FrameLayout laneView = (lane == 0) ? laneLeft : laneRight;
+        View targetView = (lane == 0) ? targetLeft : targetRight;
         if (laneView == null || targetView == null) return;
 
         View bestNote = null;
-        long minDiff  = Long.MAX_VALUE;
+        long minDiff = Long.MAX_VALUE;
         for (int i = 0; i < laneView.getChildCount(); i++) {
             View v = laneView.getChildAt(i);
             if (v.getTag() instanceof Long) {
                 long diff = Math.abs(currentTime - (long) v.getTag());
                 if (diff < minDiff) {
-                    minDiff  = diff;
+                    minDiff = diff;
                     bestNote = v;
                 }
             }
@@ -347,11 +334,11 @@ public class GameView extends ConstraintLayout {
 
         // Convert target coordinates to root's coordinate space
         int[] targetPos = new int[2];
-        int[] rootPos   = new int[2];
+        int[] rootPos = new int[2];
         target.getLocationOnScreen(targetPos);
         root.getLocationOnScreen(rootPos);
 
-        float centerX = (targetPos[0] - rootPos[0]) + target.getWidth()  / 2f;
+        float centerX = (targetPos[0] - rootPos[0]) + target.getWidth() / 2f;
         float centerY = (targetPos[1] - rootPos[1]) + target.getHeight() / 2f;
 
         for (int i = 0; i < 20; i++) {
@@ -370,7 +357,7 @@ public class GameView extends ConstraintLayout {
             p.setY(centerY - pSize / 2f);
             root.addView(p);
 
-            float angle    = (float) (random.nextFloat() * 2 * Math.PI);
+            float angle = (float) (random.nextFloat() * 2 * Math.PI);
             float distance = (60 + random.nextFloat() * 140) * density;
             float tx = (float) (Math.cos(angle) * distance);
             float ty = (float) (Math.sin(angle) * distance);
@@ -413,5 +400,16 @@ public class GameView extends ConstraintLayout {
                 .setDuration(600)
                 .withEndAction(() -> parent.removeView(tv))
                 .start();
+    }
+
+    // -------------------------------------------------------------------------
+    // Callback interface — Activity implements this
+    // -------------------------------------------------------------------------
+    public interface GameEventListener {
+        void onNoteHit(int points);  // 300 (perfect) or 100 (good)
+
+        void onNoteMissed();
+
+        void onGameLoopTick();       // called every ~16ms for progress bar
     }
 }

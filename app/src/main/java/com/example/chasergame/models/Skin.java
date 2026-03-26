@@ -9,7 +9,8 @@ public class Skin {
     public int backgroundColor;
     public String effectType; // "none", "glow", "particles", etc.
 
-    public Skin() {}
+    public Skin() {
+    }
 
     public Skin(String id, String name, int price, int circleColor, int targetColor, int backgroundColor, String effectType) {
         this.id = id;

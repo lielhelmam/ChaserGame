@@ -27,8 +27,8 @@ public class OnlineMenuActivity extends BaseActivity {
             startActivity(intent);
         });
 
-        findViewById(R.id.btnJoinGame).setOnClickListener(v -> 
-            startActivity(new Intent(this, JoinGameActivity.class)));
+        findViewById(R.id.btnJoinGame).setOnClickListener(v ->
+                startActivity(new Intent(this, JoinGameActivity.class)));
 
         // Public options
         findViewById(R.id.btnCreatePublicGame).setOnClickListener(v -> {
@@ -42,7 +42,7 @@ public class OnlineMenuActivity extends BaseActivity {
 
     private void findPublicGame() {
         Toast.makeText(this, "Searching for a match...", Toast.LENGTH_SHORT).show();
-        
+
         FirebaseDatabase.getInstance().getReference("rooms")
                 .orderByChild("type").equalTo("public")
                 .addListenerForSingleValueEvent(new ValueEventListener() {
@@ -51,11 +51,11 @@ public class OnlineMenuActivity extends BaseActivity {
                         for (DataSnapshot roomSnap : snapshot.getChildren()) {
                             String status = roomSnap.child("status").getValue(String.class);
                             long playerCount = roomSnap.child("players").getChildrenCount();
-                            
+
                             if ("waiting".equals(status) && playerCount == 1) {
                                 String roomId = roomSnap.getKey();
                                 String playerId = UUID.randomUUID().toString();
-                                
+
                                 roomSnap.child("players").child(playerId).getRef().setValue(true)
                                         .addOnSuccessListener(unused -> {
                                             Intent intent = new Intent(OnlineMenuActivity.this, WaitingRoomActivity.class);

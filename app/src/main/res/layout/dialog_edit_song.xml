@@ -13,37 +13,37 @@
             android:id="@+id/et_edit_song_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Song Name"
-            android:layout_marginBottom="12dp"/>
+            android:layout_marginBottom="12dp"
+            android:hint="Song Name" />
 
         <EditText
             android:id="@+id/et_edit_song_difficulty"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Difficulty (Easy/Medium/Hard)"
-            android:layout_marginBottom="12dp"/>
+            android:layout_marginBottom="12dp"
+            android:hint="Difficulty (Easy/Medium/Hard)" />
 
         <EditText
             android:id="@+id/et_edit_song_res_id"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Raw Resource Name (e.g. song1)"
-            android:layout_marginBottom="12dp"/>
+            android:layout_marginBottom="12dp"
+            android:hint="Raw Resource Name (e.g. song1)" />
 
         <EditText
             android:id="@+id/et_edit_target_score"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
             android:hint="Target Score"
-            android:inputType="number"
-            android:layout_marginBottom="12dp"/>
+            android:inputType="number" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"
             android:text="Beatmap (time,lane;time,lane...)"
-            android:textStyle="bold"
-            android:layout_marginBottom="4dp"/>
+            android:textStyle="bold" />
 
         <EditText
             android:id="@+id/et_edit_beatmap"
@@ -51,7 +51,7 @@
             android:layout_height="150dp"
             android:gravity="top"
             android:hint="1000,0;1500,1"
-            android:inputType="textMultiLine"/>
+            android:inputType="textMultiLine" />
 
     </LinearLayout>
 </ScrollView>

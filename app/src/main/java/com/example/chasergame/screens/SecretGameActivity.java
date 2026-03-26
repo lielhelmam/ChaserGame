@@ -7,7 +7,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
-import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -39,25 +38,25 @@ public class SecretGameActivity extends BaseActivity implements GameView.GameEve
     // -------------------------------------------------------------------------
     // Views
     // -------------------------------------------------------------------------
-    private GameView        gameView;
-    private TextView        tvScore, tvSongName, tvAccuracy;
-    private ProgressBar     pbSongProgress;
+    private GameView gameView;
+    private TextView tvScore, tvSongName, tvAccuracy;
+    private ProgressBar pbSongProgress;
     private ConstraintLayout rootLayout;
 
     // -------------------------------------------------------------------------
     // Game data
     // -------------------------------------------------------------------------
     private SongData songData;
-    private Skin     equippedSkin;
+    private Skin equippedSkin;
     private MediaPlayer mediaPlayer;
-    private Vibrator    vibrator;
+    private Vibrator vibrator;
 
     // -------------------------------------------------------------------------
     // Score tracking (lives here, not in GameView)
     // -------------------------------------------------------------------------
-    private int    currentScore     = 0;
-    private int    totalNotesPassed = 0;
-    private double notesHitWeight   = 0;
+    private int currentScore = 0;
+    private int totalNotesPassed = 0;
+    private double notesHitWeight = 0;
 
     // -------------------------------------------------------------------------
     // Lifecycle
@@ -100,10 +99,10 @@ public class SecretGameActivity extends BaseActivity implements GameView.GameEve
     // Setup helpers
     // -------------------------------------------------------------------------
     private void bindViews() {
-        rootLayout     = findViewById(R.id.game_layout);
-        tvScore        = findViewById(R.id.tv_game_score);
-        tvSongName     = findViewById(R.id.tv_game_song_name);
-        tvAccuracy     = findViewById(R.id.tv_game_accuracy);
+        rootLayout = findViewById(R.id.game_layout);
+        tvScore = findViewById(R.id.tv_game_score);
+        tvSongName = findViewById(R.id.tv_game_song_name);
+        tvAccuracy = findViewById(R.id.tv_game_accuracy);
         pbSongProgress = findViewById(R.id.pb_song_progress);
 
         // GameView is declared in XML — it inflates and finds its own children
@@ -143,7 +142,10 @@ public class SecretGameActivity extends BaseActivity implements GameView.GameEve
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 try {
                     songData = snapshot.getValue(SongData.class);
-                    if (songData == null) { finish(); return; }
+                    if (songData == null) {
+                        finish();
+                        return;
+                    }
 
                     tvSongName.setText(songData.getName());
 
@@ -165,7 +167,9 @@ public class SecretGameActivity extends BaseActivity implements GameView.GameEve
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError error) { finish(); }
+            public void onCancelled(@NonNull DatabaseError error) {
+                finish();
+            }
         });
     }
 
@@ -177,11 +181,17 @@ public class SecretGameActivity extends BaseActivity implements GameView.GameEve
 
         int resId = getResources().getIdentifier(
                 songData.getResName(), "raw", getPackageName());
-        if (resId == 0) { finish(); return; }
+        if (resId == 0) {
+            finish();
+            return;
+        }
 
         try {
             mediaPlayer = MediaPlayer.create(this, resId);
-            if (mediaPlayer == null) { finish(); return; }
+            if (mediaPlayer == null) {
+                finish();
+                return;
+            }
 
             pbSongProgress.setMax(mediaPlayer.getDuration());
             mediaPlayer.setOnCompletionListener(mp -> endGame());
@@ -201,7 +211,7 @@ public class SecretGameActivity extends BaseActivity implements GameView.GameEve
     public void onNoteHit(int points) {
         totalNotesPassed++;
         notesHitWeight += (points == 300) ? 1.0 : 0.5;
-        currentScore   += points;
+        currentScore += points;
 
         tvScore.setText("Score: " + currentScore);
         updateAccuracyDisplay();
@@ -252,8 +262,8 @@ public class SecretGameActivity extends BaseActivity implements GameView.GameEve
                 ? (notesHitWeight / totalNotesPassed) * 100.0
                 : 0;
 
-        int targetScore  = (songData != null) ? songData.getTargetScore() : 0;
-        boolean passed   = currentScore >= targetScore;
+        int targetScore = (songData != null) ? songData.getTargetScore() : 0;
+        boolean passed = currentScore >= targetScore;
 
         int earnedPoints;
         if (passed) {

@@ -19,7 +19,7 @@ public class LandingActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_landing);
-        
+
         hideNavigationDrawer();
         hideTopBar();
 
@@ -45,7 +45,7 @@ public class LandingActivity extends BaseActivity {
                 startActivity(intentreg);
             });
         }
-        
+
         BtnLog = findViewById(R.id.btn_main_gotologin);
         if (BtnLog != null) {
             BtnLog.setOnClickListener(view -> {

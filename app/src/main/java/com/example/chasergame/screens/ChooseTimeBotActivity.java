@@ -36,7 +36,7 @@ public class ChooseTimeBotActivity extends BaseActivity {
 
     private void goNext() {
         if (pickerMinutes == null || pickerSeconds == null) return;
-        
+
         int minutes = pickerMinutes.getValue();
         int seconds = pickerSeconds.getValue();
 

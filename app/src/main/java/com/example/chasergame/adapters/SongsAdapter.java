@@ -22,10 +22,6 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsAdapter.SongViewHold
     private List<SongData> songListFull; // Original full list for filtering
     private OnSongClickListener listener;
 
-    public interface OnSongClickListener {
-        void onSongClick(SongData song);
-    }
-
     public SongsAdapter(List<SongData> songList, OnSongClickListener listener) {
         this.songList = songList;
         this.songListFull = new ArrayList<>(songList);
@@ -46,7 +42,7 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsAdapter.SongViewHold
             String filterPattern = query.toLowerCase().trim();
             for (SongData song : songListFull) {
                 if (song.getName().toLowerCase().contains(filterPattern) ||
-                    song.getDifficulty().toLowerCase().contains(filterPattern)) {
+                        song.getDifficulty().toLowerCase().contains(filterPattern)) {
                     filteredList.add(song);
                 }
             }
@@ -80,6 +76,10 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsAdapter.SongViewHold
     @Override
     public int getItemCount() {
         return songList.size();
+    }
+
+    public interface OnSongClickListener {
+        void onSongClick(SongData song);
     }
 
     static class SongViewHolder extends RecyclerView.ViewHolder {

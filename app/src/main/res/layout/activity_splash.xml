@@ -32,8 +32,8 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_chainStyle="packed"
-        app:layout_constraintVertical_bias="0.45" />
+        app:layout_constraintVertical_bias="0.45"
+        app:layout_constraintVertical_chainStyle="packed" />
 
     <!-- App name -->
     <TextView
@@ -41,11 +41,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
+        android:letterSpacing="0.05"
         android:text="ChaserGame"
         android:textColor="#FFFFFF"
         android:textSize="36sp"
         android:textStyle="bold"
-        android:letterSpacing="0.05"
         app:layout_constraintBottom_toTopOf="@id/tv_tagline"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -57,10 +57,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
+        android:letterSpacing="0.08"
         android:text="Play. Compete. Win."
         android:textColor="#CCFFFFFF"
         android:textSize="15sp"
-        android:letterSpacing="0.08"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

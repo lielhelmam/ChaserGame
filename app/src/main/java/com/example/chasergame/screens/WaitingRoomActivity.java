@@ -7,6 +7,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -58,6 +59,13 @@ public class WaitingRoomActivity extends BaseActivity {
         btnCancel.setOnClickListener(v -> leaveRoomAndGoBack());
 
         startListening();
+
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                leaveRoomAndGoBack();
+            }
+        });
     }
 
     private void startListening() {
@@ -119,7 +127,7 @@ public class WaitingRoomActivity extends BaseActivity {
         if (roomRef != null) {
             // Remove the listener first to prevent the "Room closed" toast
             if (roomListener != null) roomRef.removeEventListener(roomListener);
-            
+
             roomRef.removeValue().addOnCompleteListener(task -> finish());
         } else {
             finish();
@@ -138,10 +146,5 @@ public class WaitingRoomActivity extends BaseActivity {
         if (!navigatedToGame && roomRef != null) {
             roomRef.removeValue();
         }
-    }
-
-    @Override
-    public void onBackPressed() {
-        leaveRoomAndGoBack();
     }
 }

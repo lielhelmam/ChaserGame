@@ -21,12 +21,6 @@ public class SkinsAdapter extends RecyclerView.Adapter<SkinsAdapter.ViewHolder> 
     private final User currentUser;
     private final OnSkinActionListener listener;
 
-    public interface OnSkinActionListener {
-        void onBuy(Skin skin);
-        void onEquip(Skin skin);
-        void onEditCustom();
-    }
-
     public SkinsAdapter(List<Skin> skins, User user, OnSkinActionListener listener) {
         this.skins = skins;
         this.currentUser = user;
@@ -44,7 +38,7 @@ public class SkinsAdapter extends RecyclerView.Adapter<SkinsAdapter.ViewHolder> 
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Skin skin = skins.get(position);
         holder.tvName.setText(skin.name);
-        
+
         // Handle preview and info for custom skin
         if ("custom".equals(skin.id)) {
             holder.tvEffect.setText("Effect: " + currentUser.getCustomEffectType());
@@ -77,7 +71,7 @@ public class SkinsAdapter extends RecyclerView.Adapter<SkinsAdapter.ViewHolder> 
             holder.btnAction.setText(skin.price + " pts");
             boolean canAfford = currentUser.getPoints() >= skin.price;
             holder.btnAction.setEnabled(canAfford);
-            
+
             // Set color based on affordability: Blue if can buy, Red if cannot
             int color = canAfford ? 0xFF2196F3 : 0xFFB71C1C;
             holder.btnAction.setBackgroundTintList(android.content.res.ColorStateList.valueOf(color));
@@ -89,6 +83,14 @@ public class SkinsAdapter extends RecyclerView.Adapter<SkinsAdapter.ViewHolder> 
     @Override
     public int getItemCount() {
         return skins.size();
+    }
+
+    public interface OnSkinActionListener {
+        void onBuy(Skin skin);
+
+        void onEquip(Skin skin);
+
+        void onEditCustom();
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {

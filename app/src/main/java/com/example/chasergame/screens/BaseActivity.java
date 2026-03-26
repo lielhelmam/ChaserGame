@@ -6,6 +6,7 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.LayoutRes;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
@@ -23,6 +24,14 @@ public class BaseActivity extends AppCompatActivity {
 
     protected DatabaseService databaseService;
     protected DrawerLayout drawerLayout;
+    private final OnBackPressedCallback drawerBackCallback = new OnBackPressedCallback(false) {
+        @Override
+        public void handleOnBackPressed() {
+            if (drawerLayout != null && drawerLayout.isDrawerOpen(GravityCompat.START)) {
+                drawerLayout.closeDrawer(GravityCompat.START);
+            }
+        }
+    };
     protected NavigationView navigationView;
     private FrameLayout contentFrame;
     private TextView topBarTitle;
@@ -32,6 +41,7 @@ public class BaseActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         databaseService = DatabaseService.getInstance();
+        getOnBackPressedDispatcher().addCallback(this, drawerBackCallback);
     }
 
     @Override
@@ -44,6 +54,18 @@ public class BaseActivity extends AppCompatActivity {
 
         getLayoutInflater().inflate(layoutResID, contentFrame, true);
         super.setContentView(drawerLayout);
+
+        drawerLayout.addDrawerListener(new DrawerLayout.SimpleDrawerListener() {
+            @Override
+            public void onDrawerOpened(View drawerView) {
+                drawerBackCallback.setEnabled(true);
+            }
+
+            @Override
+            public void onDrawerClosed(View drawerView) {
+                drawerBackCallback.setEnabled(false);
+            }
+        });
 
         setupBaseNavigation();
     }
@@ -98,7 +120,7 @@ public class BaseActivity extends AppCompatActivity {
                 if (navUsername != null) navUsername.setText(user.getUsername());
                 if (navEmail != null) navEmail.setText(user.getEmail());
             }
-            
+
             if (topBarTitle != null) {
                 topBarTitle.setText("Hi, " + user.getUsername());
             }
@@ -149,14 +171,5 @@ public class BaseActivity extends AppCompatActivity {
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (drawerLayout != null && drawerLayout.isDrawerOpen(GravityCompat.START)) {
-            drawerLayout.closeDrawer(GravityCompat.START);
-        } else {
-            super.onBackPressed();
-        }
     }
 }

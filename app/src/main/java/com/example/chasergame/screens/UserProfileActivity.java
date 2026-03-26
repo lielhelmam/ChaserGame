@@ -46,7 +46,7 @@ public class UserProfileActivity extends BaseActivity {
         tvPassword = findViewById(R.id.tv_profile_password);
         tvAdmin = findViewById(R.id.tv_profile_admin);
         progressBar = findViewById(R.id.profile_progress);
-        
+
         tvOnlineWins = findViewById(R.id.tv_online_wins);
         tvBotWinsEasy = findViewById(R.id.tv_bot_wins_easy);
         tvBotWinsNormal = findViewById(R.id.tv_bot_wins_normal);
@@ -133,13 +133,23 @@ public class UserProfileActivity extends BaseActivity {
 
     private void updateWins(String field, int newWins) {
         if (currentUser == null) return;
-        
+
         switch (field) {
-            case "onlineWins": currentUser.setOnlineWins(newWins); break;
-            case "botWinsEasy": currentUser.setBotWinsEasy(newWins); break;
-            case "botWinsNormal": currentUser.setBotWinsNormal(newWins); break;
-            case "botWinsHard": currentUser.setBotWinsHard(newWins); break;
-            case "oneDeviceWins": currentUser.setOneDeviceWins(newWins); break;
+            case "onlineWins":
+                currentUser.setOnlineWins(newWins);
+                break;
+            case "botWinsEasy":
+                currentUser.setBotWinsEasy(newWins);
+                break;
+            case "botWinsNormal":
+                currentUser.setBotWinsNormal(newWins);
+                break;
+            case "botWinsHard":
+                currentUser.setBotWinsHard(newWins);
+                break;
+            case "oneDeviceWins":
+                currentUser.setOneDeviceWins(newWins);
+                break;
         }
 
         databaseService.updateUser(currentUser, new DatabaseService.DatabaseCallback<>() {

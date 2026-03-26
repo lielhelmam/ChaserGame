@@ -44,15 +44,15 @@ public class ManageSongsActivity extends BaseActivity {
         String scoreStr = etTargetScore.getText().toString().trim();
         String beatmapStr = etBeatmap.getText().toString().trim();
 
-        if (TextUtils.isEmpty(name) || TextUtils.isEmpty(difficulty) || TextUtils.isEmpty(resName) || 
-            TextUtils.isEmpty(scoreStr) || TextUtils.isEmpty(beatmapStr)) {
+        if (TextUtils.isEmpty(name) || TextUtils.isEmpty(difficulty) || TextUtils.isEmpty(resName) ||
+                TextUtils.isEmpty(scoreStr) || TextUtils.isEmpty(beatmapStr)) {
             Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show();
             return;
         }
 
         int targetScore = Integer.parseInt(scoreStr);
         List<Note> notes = parseBeatmap(beatmapStr);
-        
+
         if (notes.isEmpty()) {
             Toast.makeText(this, "Invalid beatmap format", Toast.LENGTH_SHORT).show();
             return;
@@ -66,11 +66,11 @@ public class ManageSongsActivity extends BaseActivity {
         song.setResName(resName); // FIX: Setting the resource name for Firebase
 
         mDatabase.child(songId).setValue(song)
-            .addOnSuccessListener(aVoid -> {
-                Toast.makeText(ManageSongsActivity.this, "Song saved successfully!", Toast.LENGTH_SHORT).show();
-                finish();
-            })
-            .addOnFailureListener(e -> Toast.makeText(ManageSongsActivity.this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                .addOnSuccessListener(aVoid -> {
+                    Toast.makeText(ManageSongsActivity.this, "Song saved successfully!", Toast.LENGTH_SHORT).show();
+                    finish();
+                })
+                .addOnFailureListener(e -> Toast.makeText(ManageSongsActivity.this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
 
     private List<Note> parseBeatmap(String beatmapStr) {

@@ -12,57 +12,61 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
             android:text="Edit Custom Skin"
             android:textSize="20sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="16dp"/>
+            android:textStyle="bold" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Circle Color"/>
+            android:text="Circle Color" />
+
         <Spinner
             android:id="@+id/sp_custom_circle_color"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:entries="@array/skin_colors"/>
+            android:entries="@array/skin_colors" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:text="Target Color"/>
+            android:text="Target Color" />
+
         <Spinner
             android:id="@+id/sp_custom_target_color"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:entries="@array/skin_colors"/>
+            android:entries="@array/skin_colors" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:text="Background Color"/>
+            android:text="Background Color" />
+
         <Spinner
             android:id="@+id/sp_custom_bg_color"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:entries="@array/skin_colors"/>
+            android:entries="@array/skin_colors" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:text="Effect Type"/>
+            android:text="Effect Type" />
+
         <Spinner
             android:id="@+id/sp_custom_effect"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:entries="@array/skin_effects"/>
+            android:entries="@array/skin_effects" />
 
     </LinearLayout>
 </ScrollView>

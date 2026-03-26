@@ -1,8 +1,10 @@
 package com.example.chasergame.utils;
 
 import android.graphics.Color;
+
 import com.example.chasergame.models.Skin;
 import com.example.chasergame.models.User;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,25 +16,25 @@ public class SkinManager {
             skins = new ArrayList<>();
             // Default Skin
             skins.add(new Skin("default", "Classic Red", 0, Color.parseColor("#FFFFFF"), Color.parseColor("#bd5757"), Color.parseColor("#1A1A1A"), "none"));
-            
+
             // Neon Skin
             skins.add(new Skin("neon", "Neon Night", 100000, Color.parseColor("#00FBFF"), Color.parseColor("#00FBFF"), Color.parseColor("#000000"), "glow"));
-            
+
             // Fire Skin
             skins.add(new Skin("fire", "Hellfire", 100000, Color.parseColor("#FF5722"), Color.parseColor("#FFC107"), Color.parseColor("#210000"), "particles"));
-            
+
             // Ocean Skin
             skins.add(new Skin("ocean", "Deep Ocean", 100000, Color.parseColor("#00BCD4"), Color.parseColor("#03A9F4"), Color.parseColor("#001219"), "bubbles"));
-            
+
             // Golden Skin
             skins.add(new Skin("gold", "Midas Touch", 100000, Color.parseColor("#FFD700"), Color.parseColor("#DAA520"), Color.parseColor("#1C1C1C"), "sparkle"));
 
             // Cyberpunk Skin
             skins.add(new Skin("cyberpunk", "Cyberpunk", 150000, Color.parseColor("#FF00FF"), Color.parseColor("#9D00FF"), Color.parseColor("#0D0221"), "glow"));
-            
+
             // Emerald Skin
             skins.add(new Skin("emerald", "Emerald Forest", 150000, Color.parseColor("#2ECC71"), Color.parseColor("#F1C40F"), Color.parseColor("#0B2010"), "particles"));
-            
+
             // Abyssal Void
             skins.add(new Skin("void", "Abyssal Void", 200000, Color.parseColor("#00E5FF"), Color.parseColor("#311B92"), Color.parseColor("#000000"), "glow"));
 
@@ -77,13 +79,13 @@ public class SkinManager {
         }
         return getSkins().get(0);
     }
-    
+
     public static Skin getCustomSkinForUser(User user) {
         if (user == null) return getSkinById("default");
-        return new Skin("custom", "Custom Creation", 300000, 
-                user.getCustomCircleColor(), 
-                user.getCustomTargetColor(), 
-                user.getCustomBackgroundColor(), 
+        return new Skin("custom", "Custom Creation", 300000,
+                user.getCustomCircleColor(),
+                user.getCustomTargetColor(),
+                user.getCustomBackgroundColor(),
                 user.getCustomEffectType());
     }
 }

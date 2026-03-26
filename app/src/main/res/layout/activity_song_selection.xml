@@ -29,9 +29,9 @@
         android:text="🛒 Shop"
         android:textColor="#333333"
         android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@id/tv_select_song_title"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/tv_select_song_title"
-        app:layout_constraintBottom_toBottomOf="@id/tv_select_song_title" />
+        app:layout_constraintTop_toTopOf="@id/tv_select_song_title" />
 
     <!-- ===== SEARCH BAR ===== -->
     <SearchView
@@ -40,11 +40,11 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:background="@drawable/target_cube_bg"
-        android:queryHint="Search by name or difficulty..."
         android:iconifiedByDefault="false"
-        app:layout_constraintTop_toBottomOf="@id/tv_select_song_title"
+        android:queryHint="Search by name or difficulty..."
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/tv_select_song_title" />
 
     <!-- ===== SONGS CARD ===== -->
     <androidx.cardview.widget.CardView
@@ -64,10 +64,10 @@
             android:id="@+id/rv_songs"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:padding="12dp"
-            android:scrollbars="vertical"
             android:clickable="true"
-            android:focusable="true"/>
+            android:focusable="true"
+            android:padding="12dp"
+            android:scrollbars="vertical" />
 
     </androidx.cardview.widget.CardView>
 

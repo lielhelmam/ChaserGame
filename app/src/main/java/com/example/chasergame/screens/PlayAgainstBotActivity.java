@@ -396,7 +396,7 @@ public class PlayAgainstBotActivity extends BaseActivity {
                 String winField = "botWinsNormal"; // default
                 if (botAccuracy == 35) winField = "botWinsEasy";
                 else if (botAccuracy == 75) winField = "botWinsHard";
-                
+
                 databaseService.updateUserWins(user.getId(), winField, null);
             }
         }
