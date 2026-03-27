@@ -20,6 +20,7 @@ import com.example.chasergame.models.Skin;
 import com.example.chasergame.models.SongData;
 import com.example.chasergame.models.User;
 import com.example.chasergame.services.AudioService;
+import com.example.chasergame.services.DatabaseService;
 import com.example.chasergame.services.RhythmGameManager;
 import com.example.chasergame.utils.SkinManager;
 import com.example.chasergame.views.GameView;
@@ -158,8 +159,7 @@ public class SecretGameActivity extends BaseActivity implements GameView.GameEve
         boolean passed = gameManager.isLevelPassed();
         int earned = gameManager.calculateEarnedPoints();
 
-        if (passed) updateScores(gameManager.getCurrentScore(), earned);
-        else updateScores(0, earned);
+        updateScores(passed ? gameManager.getCurrentScore() : 0, earned);
 
         new AlertDialog.Builder(this)
                 .setTitle(passed ? "Level Passed!" : "Level Failed!")
@@ -177,7 +177,16 @@ public class SecretGameActivity extends BaseActivity implements GameView.GameEve
         if (user != null) {
             if (score > 0) user.setTotalRhythmScore(user.getTotalRhythmScore() + score);
             user.setPoints(user.getPoints() + points);
-            databaseService.updateUser(user, null);
+            databaseService.updateUser(user, new DatabaseService.DatabaseCallback<Void>() {
+                @Override
+                public void onCompleted(Void unused) {
+                    authService.syncUser(user);
+                }
+
+                @Override
+                public void onFailed(Exception e) {
+                }
+            });
         }
     }
 

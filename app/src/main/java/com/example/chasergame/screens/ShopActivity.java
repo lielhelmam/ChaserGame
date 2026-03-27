@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -34,7 +33,7 @@ public class ShopActivity extends BaseActivity {
 
     private TextView tvPoints;
     private RecyclerView rvSkins;
-    private Button btnClaimGift;
+    private View btnClaimGift;
     private SkinsAdapter adapter;
     private User currentUser;
 
@@ -69,6 +68,7 @@ public class ShopActivity extends BaseActivity {
         shopService.claimGift(currentUser, new DatabaseService.DatabaseCallback<Void>() {
             @Override
             public void onCompleted(Void unused) {
+                authService.syncUser(currentUser);
                 updateUI();
                 checkGiftStatus();
                 Toast.makeText(ShopActivity.this, "Gift claimed!", Toast.LENGTH_SHORT).show();
@@ -93,6 +93,7 @@ public class ShopActivity extends BaseActivity {
                 shopService.buySkin(currentUser, skin, new DatabaseService.DatabaseCallback<Void>() {
                     @Override
                     public void onCompleted(Void unused) {
+                        authService.syncUser(currentUser);
                         updateUI();
                         adapter.notifyDataSetChanged();
                         Toast.makeText(ShopActivity.this, "Purchased " + skin.name, Toast.LENGTH_SHORT).show();
@@ -110,6 +111,7 @@ public class ShopActivity extends BaseActivity {
                 shopService.equipSkin(currentUser, skin.id, new DatabaseService.DatabaseCallback<Void>() {
                     @Override
                     public void onCompleted(Void unused) {
+                        authService.syncUser(currentUser);
                         adapter.notifyDataSetChanged();
                         Toast.makeText(ShopActivity.this, "Equipped " + skin.name, Toast.LENGTH_SHORT).show();
                     }
@@ -157,6 +159,7 @@ public class ShopActivity extends BaseActivity {
                     shopService.updateCustomSkin(currentUser, circle, target, bg, effect, new DatabaseService.DatabaseCallback<Void>() {
                         @Override
                         public void onCompleted(Void unused) {
+                            authService.syncUser(currentUser);
                             adapter.notifyDataSetChanged();
                             Toast.makeText(ShopActivity.this, "Custom skin updated!", Toast.LENGTH_SHORT).show();
                         }

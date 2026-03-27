@@ -27,12 +27,18 @@ public class AuthService {
         return SharedPreferencesUtil.getUser(context);
     }
 
+    public void syncUser(User user) {
+        if (user != null) {
+            SharedPreferencesUtil.saveUser(context, user);
+        }
+    }
+
     public void login(@NotNull String username, @NotNull String password, @NotNull DatabaseService.DatabaseCallback<User> callback) {
         userRepository.getUserByUsernameAndPassword(username, password, new DatabaseService.DatabaseCallback<User>() {
             @Override
             public void onCompleted(User user) {
                 if (user != null) {
-                    SharedPreferencesUtil.saveUser(context, user);
+                    syncUser(user);
                 }
                 callback.onCompleted(user);
             }
@@ -73,7 +79,7 @@ public class AuthService {
         userRepository.updateUser(user, new DatabaseService.DatabaseCallback<Void>() {
             @Override
             public void onCompleted(Void unused) {
-                SharedPreferencesUtil.saveUser(context, user);
+                syncUser(user);
                 callback.onCompleted(unused);
             }
 
