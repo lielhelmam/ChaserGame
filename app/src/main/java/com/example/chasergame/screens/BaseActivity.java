@@ -1,11 +1,15 @@
 package com.example.chasergame.screens;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.util.Base64;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.activity.OnBackPressedCallback;
@@ -24,6 +28,7 @@ import com.example.chasergame.services.LeaderboardService;
 import com.example.chasergame.services.QuestionService;
 import com.example.chasergame.services.ShopService;
 import com.example.chasergame.services.SongService;
+import com.example.chasergame.utils.ImageUtils;
 import com.google.android.material.navigation.NavigationView;
 
 public abstract class BaseActivity extends AppCompatActivity {
@@ -136,9 +141,13 @@ public abstract class BaseActivity extends AppCompatActivity {
             if (headerView != null) {
                 TextView navUsername = headerView.findViewById(R.id.nav_header_username);
                 TextView navEmail = headerView.findViewById(R.id.nav_header_email);
+                ImageView navImage = headerView.findViewById(R.id.nav_header_image);
 
                 if (navUsername != null) navUsername.setText(user.getUsername());
                 if (navEmail != null) navEmail.setText(user.getEmail());
+                if (navImage != null && user.getProfileImage() != null && !user.getProfileImage().isEmpty()) {
+                    navImage.setImageBitmap(ImageUtils.decodeImage(user.getProfileImage()));
+                }
             }
 
             Menu menu = navigationView.getMenu();

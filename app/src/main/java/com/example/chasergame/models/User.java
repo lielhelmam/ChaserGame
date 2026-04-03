@@ -24,6 +24,7 @@ public class User {
     public List<String> ownedSkins = new ArrayList<>();
     public boolean giftClaimed = false;
     public int totalRhythmScore = 0; // Cumulative score for the leaderboard
+    public String profileImage; // Base64 or URL
 
     // Custom Skin Settings
     public int customCircleColor = Color.WHITE;
@@ -190,6 +191,14 @@ public class User {
 
     public void setTotalRhythmScore(int totalRhythmScore) {
         this.totalRhythmScore = totalRhythmScore;
+    }
+
+    public String getProfileImage() {
+        return profileImage;
+    }
+
+    public void setProfileImage(String profileImage) {
+        this.profileImage = profileImage;
     }
 
     public int getCustomCircleColor() {
