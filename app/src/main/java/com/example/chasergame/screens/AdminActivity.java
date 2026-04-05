@@ -42,6 +42,5 @@ public class AdminActivity extends BaseActivity {
         findViewById(R.id.btn_admin_songs_list).setOnClickListener(v ->
                 navigateTo(SongsListActivity.class, false));
 
-        findViewById(R.id.btn_admin_logout).setOnClickListener(v -> signOut());
     }
 }

@@ -18,20 +18,9 @@
         android:textColor="#FFFFFF"
         android:textSize="22sp"
         android:textStyle="bold"
-        app:layout_constraintEnd_toStartOf="@id/btn_admin_logout"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <Button
-        android:id="@+id/btn_admin_logout"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:backgroundTint="#66000000"
-        android:text="⎋"
-        android:textColor="#FFFFFF"
-        android:textSize="14sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
 
     <!-- ===== ACTIONS CARD ===== -->
 
@@ -40,8 +29,8 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="40dp"
-        app:cardCornerRadius="20dp"
-        app:cardElevation="10dp"
+        app:cardCornerRadius="28dp"
+        app:cardElevation="12dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/text_admin_edituser">
@@ -60,18 +49,21 @@
                 android:backgroundTint="@color/background_red"
                 android:text="👥 User List"
                 android:textColor="#FFFFFF"
-                android:textSize="16sp" />
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:cornerRadius="16dp" />
 
             <Button
                 android:id="@+id/btnAddQuestion"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
                 android:layout_marginBottom="12dp"
-                android:backgroundTint="#333333"
+                android:backgroundTint="#444444"
                 android:text="➕ Add New Question"
                 android:textColor="#FFFFFF"
                 android:textSize="16sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                app:cornerRadius="16dp" />
 
             <Button
                 android:id="@+id/btn_admin_questions_list"
@@ -82,7 +74,14 @@
                 android:text="📋 Questions List"
                 android:textColor="#FFFFFF"
                 android:textSize="16sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                app:cornerRadius="16dp" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginBottom="12dp"
+                android:background="#EEEEEE" />
 
             <!-- New Button for Rhythm Songs -->
             <Button
@@ -90,21 +89,23 @@
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
                 android:layout_marginBottom="12dp"
-                android:backgroundTint="#333333"
+                android:backgroundTint="#444444"
                 android:text="➕ Add Rhythm Song"
                 android:textColor="#FFFFFF"
                 android:textSize="16sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                app:cornerRadius="16dp" />
 
             <Button
                 android:id="@+id/btn_admin_songs_list"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
                 android:backgroundTint="@color/background_red"
-                android:text="🎵 Songs List (Edit/Delete)"
+                android:text="🎵 Songs List"
                 android:textColor="#FFFFFF"
                 android:textSize="16sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                app:cornerRadius="16dp" />
 
         </LinearLayout>
     </androidx.cardview.widget.CardView>

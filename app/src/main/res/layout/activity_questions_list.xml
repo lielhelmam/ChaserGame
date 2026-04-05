@@ -5,7 +5,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/background"
+    android:background="@color/background_red"
     tools:context=".screens.QuestionsListActivity">
 
     <com.google.android.material.appbar.AppBarLayout
@@ -37,37 +37,25 @@
     </com.google.android.material.appbar.AppBarLayout>
 
     <TextView
-        android:id="@+id/textViewHint"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="10dp"
-        android:text="Questions will appear here"
-        android:textColor="?android:attr/detailsElementBackground"
-        android:textSize="14sp"
-        app:layout_constraintBottom_toTopOf="@+id/titleQuestions"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/appBarLayout" />
-
-    <TextView
         android:id="@+id/titleQuestions"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
         android:text="Questions Management"
-        android:textColor="?attr/colorSecondaryContainer"
-        android:textSize="24sp"
+        android:textColor="#FFFFFF"
+        android:textSize="22sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@+id/rv_questions_list"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textViewHint" />
+        app:layout_constraintTop_toBottomOf="@+id/appBarLayout" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_questions_list"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:layout_marginTop="8dp"
         android:clipToPadding="false"
-        android:padding="8dp"
+        android:padding="12dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

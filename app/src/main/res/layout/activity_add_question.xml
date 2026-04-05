@@ -40,8 +40,8 @@
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="20dp"
-                app:cardElevation="10dp">
+                app:cardCornerRadius="28dp"
+                app:cardElevation="12dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -136,11 +136,12 @@
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
                 android:layout_marginTop="32dp"
-                android:backgroundTint="#333333"
+                android:backgroundTint="#444444"
                 android:text="Save Question"
                 android:textColor="#FFFFFF"
                 android:textSize="16sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                app:cornerRadius="18dp" />
 
         </LinearLayout>
     </ScrollView>
