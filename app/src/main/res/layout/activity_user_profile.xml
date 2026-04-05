@@ -41,7 +41,7 @@
                         android:id="@+id/tv_profile_title"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="User Profile"
+                        android:text="@string/profile_title"
                         android:textColor="#333333"
                         android:textSize="22sp"
                         android:textStyle="bold" />
@@ -57,12 +57,12 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Account Details"
+                        android:letterSpacing="0.1"
+                        android:text="@string/profile_account_details"
+                        android:textAllCaps="true"
                         android:textColor="@color/background_red"
                         android:textSize="12sp"
-                        android:textAllCaps="true"
-                        android:textStyle="bold"
-                        android:letterSpacing="0.1" />
+                        android:textStyle="bold" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -73,15 +73,16 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Username"
+                            android:text="@string/profile_username_label"
                             android:textColor="#888888"
                             android:textSize="12sp" />
+
                         <TextView
                             android:id="@+id/tv_profile_name"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="16dp"
-                            android:text="—"
+                            android:text="@string/profile_placeholder"
                             android:textColor="#333333"
                             android:textSize="18sp"
                             android:textStyle="bold" />
@@ -89,30 +90,32 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Email Address"
+                            android:text="@string/profile_email_label"
                             android:textColor="#888888"
                             android:textSize="12sp" />
+
                         <TextView
                             android:id="@+id/tv_profile_email"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="16dp"
-                            android:text="—"
+                            android:text="@string/profile_placeholder"
                             android:textColor="#333333"
                             android:textSize="16sp" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Account Type"
+                            android:text="@string/profile_account_type_label"
                             android:textColor="#888888"
                             android:textSize="12sp" />
+
                         <TextView
                             android:id="@+id/tv_profile_admin"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="16dp"
-                            android:text="—"
+                            android:text="@string/profile_placeholder"
                             android:textColor="#333333"
                             android:textSize="16sp"
                             android:textStyle="bold" />
@@ -120,15 +123,16 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Security"
+                            android:text="@string/profile_security_label"
                             android:textColor="#888888"
                             android:textSize="12sp" />
+
                         <TextView
                             android:id="@+id/tv_profile_password"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="24dp"
-                            android:text="••••••••"
+                            android:text="@string/profile_password_placeholder"
                             android:textColor="#333333"
                             android:textSize="16sp" />
                     </LinearLayout>
@@ -143,12 +147,12 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Game Statistics"
+                        android:letterSpacing="0.1"
+                        android:text="@string/profile_stats_title"
+                        android:textAllCaps="true"
                         android:textColor="@color/background_red"
                         android:textSize="12sp"
-                        android:textAllCaps="true"
-                        android:textStyle="bold"
-                        android:letterSpacing="0.1" />
+                        android:textStyle="bold" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -161,35 +165,44 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="12dp">
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="🌐 Online Victories"
-                                android:textColor="#333333"
-                                android:textStyle="bold"
-                                android:layout_centerVertical="true"/>
+
                             <LinearLayout
+                                android:id="@+id/container_online_wins"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_alignParentEnd="true"
                                 android:gravity="center_vertical">
+
                                 <TextView
                                     android:id="@+id/tv_online_wins"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="0"
+                                    android:layout_marginEnd="8dp"
+                                    android:text="@string/profile_default_zero"
                                     android:textColor="@color/background_red"
                                     android:textSize="18sp"
-                                    android:textStyle="bold"
-                                    android:layout_marginEnd="8dp"/>
+                                    android:textStyle="bold" />
+
                                 <ImageButton
                                     android:id="@+id/btn_edit_online_wins"
                                     android:layout_width="32dp"
                                     android:layout_height="32dp"
-                                    android:src="@android:drawable/ic_menu_edit"
                                     android:background="?attr/selectableItemBackgroundBorderless"
-                                    app:tint="#888888"/>
+                                    android:contentDescription="@string/profile_edit_online_wins_desc"
+                                    android:src="@android:drawable/ic_menu_edit"
+                                    app:tint="#888888" />
                             </LinearLayout>
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentStart="true"
+                                android:layout_centerVertical="true"
+                                android:layout_marginEnd="8dp"
+                                android:layout_toStartOf="@id/container_online_wins"
+                                android:text="@string/profile_online_victories"
+                                android:textColor="#333333"
+                                android:textStyle="bold" />
                         </RelativeLayout>
 
                         <!-- Bot Easy -->
@@ -197,33 +210,42 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="12dp">
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="🤖 Bot Wins (Easy)"
-                                android:textColor="#333333"
-                                android:layout_centerVertical="true"/>
+
                             <LinearLayout
+                                android:id="@+id/container_bot_wins_easy"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_alignParentEnd="true"
                                 android:gravity="center_vertical">
+
                                 <TextView
                                     android:id="@+id/tv_bot_wins_easy"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="0"
+                                    android:layout_marginEnd="8dp"
+                                    android:text="@string/profile_default_zero"
                                     android:textColor="#333333"
-                                    android:textSize="16sp"
-                                    android:layout_marginEnd="8dp"/>
+                                    android:textSize="16sp" />
+
                                 <ImageButton
                                     android:id="@+id/btn_edit_bot_wins_easy"
                                     android:layout_width="32dp"
                                     android:layout_height="32dp"
-                                    android:src="@android:drawable/ic_menu_edit"
                                     android:background="?attr/selectableItemBackgroundBorderless"
-                                    app:tint="#888888"/>
+                                    android:contentDescription="@string/profile_edit_bot_wins_easy_desc"
+                                    android:src="@android:drawable/ic_menu_edit"
+                                    app:tint="#888888" />
                             </LinearLayout>
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentStart="true"
+                                android:layout_centerVertical="true"
+                                android:layout_marginEnd="8dp"
+                                android:layout_toStartOf="@id/container_bot_wins_easy"
+                                android:text="@string/profile_bot_wins_easy"
+                                android:textColor="#333333" />
                         </RelativeLayout>
 
                         <!-- Bot Normal -->
@@ -231,33 +253,42 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="12dp">
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="🤖 Bot Wins (Normal)"
-                                android:textColor="#333333"
-                                android:layout_centerVertical="true"/>
+
                             <LinearLayout
+                                android:id="@+id/container_bot_wins_normal"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_alignParentEnd="true"
                                 android:gravity="center_vertical">
+
                                 <TextView
                                     android:id="@+id/tv_bot_wins_normal"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="0"
+                                    android:layout_marginEnd="8dp"
+                                    android:text="@string/profile_default_zero"
                                     android:textColor="#333333"
-                                    android:textSize="16sp"
-                                    android:layout_marginEnd="8dp"/>
+                                    android:textSize="16sp" />
+
                                 <ImageButton
                                     android:id="@+id/btn_edit_bot_wins_normal"
                                     android:layout_width="32dp"
                                     android:layout_height="32dp"
-                                    android:src="@android:drawable/ic_menu_edit"
                                     android:background="?attr/selectableItemBackgroundBorderless"
-                                    app:tint="#888888"/>
+                                    android:contentDescription="@string/profile_edit_bot_wins_normal_desc"
+                                    android:src="@android:drawable/ic_menu_edit"
+                                    app:tint="#888888" />
                             </LinearLayout>
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentStart="true"
+                                android:layout_centerVertical="true"
+                                android:layout_marginEnd="8dp"
+                                android:layout_toStartOf="@id/container_bot_wins_normal"
+                                android:text="@string/profile_bot_wins_normal"
+                                android:textColor="#333333" />
                         </RelativeLayout>
 
                         <!-- Bot Hard -->
@@ -265,33 +296,42 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="12dp">
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="🤖 Bot Wins (Hard)"
-                                android:textColor="#333333"
-                                android:layout_centerVertical="true"/>
+
                             <LinearLayout
+                                android:id="@+id/container_bot_wins_hard"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_alignParentEnd="true"
                                 android:gravity="center_vertical">
+
                                 <TextView
                                     android:id="@+id/tv_bot_wins_hard"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="0"
+                                    android:layout_marginEnd="8dp"
+                                    android:text="@string/profile_default_zero"
                                     android:textColor="#333333"
-                                    android:textSize="16sp"
-                                    android:layout_marginEnd="8dp"/>
+                                    android:textSize="16sp" />
+
                                 <ImageButton
                                     android:id="@+id/btn_edit_bot_wins_hard"
                                     android:layout_width="32dp"
                                     android:layout_height="32dp"
-                                    android:src="@android:drawable/ic_menu_edit"
                                     android:background="?attr/selectableItemBackgroundBorderless"
-                                    app:tint="#888888"/>
+                                    android:contentDescription="@string/profile_edit_bot_wins_hard_desc"
+                                    android:src="@android:drawable/ic_menu_edit"
+                                    app:tint="#888888" />
                             </LinearLayout>
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentStart="true"
+                                android:layout_centerVertical="true"
+                                android:layout_marginEnd="8dp"
+                                android:layout_toStartOf="@id/container_bot_wins_hard"
+                                android:text="@string/profile_bot_wins_hard"
+                                android:textColor="#333333" />
                         </RelativeLayout>
 
                         <!-- Local 1v1 -->
@@ -299,33 +339,42 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="12dp">
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="📱 Local 1v1 Wins"
-                                android:textColor="#333333"
-                                android:layout_centerVertical="true"/>
+
                             <LinearLayout
+                                android:id="@+id/container_one_device_wins"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_alignParentEnd="true"
                                 android:gravity="center_vertical">
+
                                 <TextView
                                     android:id="@+id/tv_one_device_wins"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="0"
+                                    android:layout_marginEnd="8dp"
+                                    android:text="@string/profile_default_zero"
                                     android:textColor="#333333"
-                                    android:textSize="16sp"
-                                    android:layout_marginEnd="8dp"/>
+                                    android:textSize="16sp" />
+
                                 <ImageButton
                                     android:id="@+id/btn_edit_one_device_wins"
                                     android:layout_width="32dp"
                                     android:layout_height="32dp"
-                                    android:src="@android:drawable/ic_menu_edit"
                                     android:background="?attr/selectableItemBackgroundBorderless"
-                                    app:tint="#888888"/>
+                                    android:contentDescription="@string/profile_edit_local_wins_desc"
+                                    android:src="@android:drawable/ic_menu_edit"
+                                    app:tint="#888888" />
                             </LinearLayout>
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentStart="true"
+                                android:layout_centerVertical="true"
+                                android:layout_marginEnd="8dp"
+                                android:layout_toStartOf="@id/container_one_device_wins"
+                                android:text="@string/profile_local_1v1_wins"
+                                android:textColor="#333333" />
                         </RelativeLayout>
 
                     </LinearLayout>

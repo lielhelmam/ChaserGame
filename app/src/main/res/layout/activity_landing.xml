@@ -14,6 +14,7 @@
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:backgroundTint="#66000000"
+        android:contentDescription="@string/landing_exit_desc"
         android:text="✕"
         android:textColor="#FFFFFF"
         android:textSize="16sp"
@@ -28,7 +29,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="64dp"
         android:gravity="center"
-        android:text="Welcome to Chaser"
+        android:text="@string/landing_welcome_title"
         android:textColor="#FFFFFF"
         android:textSize="36sp"
         android:textStyle="bold"
@@ -42,7 +43,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
         android:gravity="center"
-        android:text="Fast-paced online trivia challenge"
+        android:text="@string/landing_subtitle"
         android:textColor="#FFCDD2"
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -72,7 +73,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
-                android:text="New player?"
+                android:text="@string/landing_new_player_prompt"
                 android:textColor="#000000"
                 android:textSize="18sp"
                 android:textStyle="bold" />
@@ -83,7 +84,7 @@
                 android:layout_height="56dp"
                 android:layout_marginBottom="24dp"
                 android:backgroundTint="@color/background_red"
-                android:text="Sign Up"
+                android:text="@string/landing_signup_btn"
                 android:textColor="#FFFFFF"
                 android:textSize="16sp" />
 
@@ -91,7 +92,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
-                android:text="Already have an account?"
+                android:text="@string/landing_already_account_prompt"
                 android:textColor="#000000"
                 android:textSize="18sp"
                 android:textStyle="bold" />
@@ -101,7 +102,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
                 android:backgroundTint="#333333"
-                android:text="Log In"
+                android:text="@string/landing_login_btn"
                 android:textColor="#FFFFFF"
                 android:textSize="16sp" />
 

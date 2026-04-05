@@ -21,4 +21,91 @@
         <item>Gold</item>
         <item>Gray</item>
     </string-array>
+
+    <string name="profile_title">User Profile</string>
+    <string name="profile_account_details">Account Details</string>
+    <string name="profile_username_label">Username</string>
+    <string name="profile_placeholder">—</string>
+    <string name="profile_email_label">Email Address</string>
+    <string name="profile_account_type_label">Account Type</string>
+    <string name="profile_security_label">Security</string>
+    <string name="profile_password_placeholder">••••••••</string>
+    <string name="profile_stats_title">Game Statistics</string>
+    <string name="profile_online_victories">🌐 Online Victories</string>
+    <string name="profile_default_zero">0</string>
+    <string name="profile_bot_wins_easy">🤖 Bot Wins (Easy)</string>
+    <string name="profile_bot_wins_normal">🤖 Bot Wins (Normal)</string>
+    <string name="profile_bot_wins_hard">🤖 Bot Wins (Hard)</string>
+    <string name="profile_local_1v1_wins">📱 Local 1v1 Wins</string>
+    <string name="profile_edit_online_wins_desc">Edit online wins</string>
+    <string name="profile_edit_bot_wins_easy_desc">Edit easy bot wins</string>
+    <string name="profile_edit_bot_wins_normal_desc">Edit normal bot wins</string>
+    <string name="profile_edit_bot_wins_hard_desc">Edit hard bot wins</string>
+    <string name="profile_edit_local_wins_desc">Edit local wins</string>
+
+    <string name="main_choose_game_title">Choose Your Game</string>
+    <string name="main_rhythm_game_btn">🎶 Rhythm Game</string>
+    <string name="main_trivia_vs_bot_btn">🤖 Trivia vs Bot</string>
+    <string name="main_trivia_online_btn">🌐 Trivia Online</string>
+    <string name="main_trivia_local_btn">📱 Trivia 1v1 Local</string>
+    <string name="main_rankings_btn">🏆 Rankings</string>
+    <string name="main_profile_btn">⚙️ Profile</string>
+
+    <string name="login_title">log in to the game</string>
+    <string name="login_username_hint">Enter UserName</string>
+    <string name="login_password_hint">Enter Password</string>
+    <string name="login_check_btn">check</string>
+    <string name="login_register_prompt">dont have an account? register!</string>
+    <string name="login_go_back_btn">go back</string>
+
+    <string name="signup_title">Sign up to the game</string>
+    <string name="signup_username_label">Enter UserName</string>
+    <string name="signup_password_label">Enter Password</string>
+    <string name="signup_email_label">Enter Email</string>
+    <string name="signup_phone_label">Enter PhoneNumber</string>
+    <string name="signup_go_back_btn">go back</string>
+    <string name="signup_submit_btn">Submit</string>
+
+    <string name="landing_exit_desc">Exit application</string>
+    <string name="landing_welcome_title">Welcome to Chaser</string>
+    <string name="landing_subtitle">Fast-paced online trivia challenge</string>
+    <string name="landing_new_player_prompt">New player?</string>
+    <string name="landing_signup_btn">Sign Up</string>
+    <string name="landing_already_account_prompt">Already have an account?</string>
+    <string name="landing_login_btn">Log In</string>
+
+    <string name="shop_title">Skin Shop</string>
+    <string name="shop_points_label">Points: %1$d</string>
+    <string name="shop_gift_btn">🎁 Claim 100k Gift</string>
+    <string name="shop_back_btn">Back</string>
+
+    <string name="edit_profile_title">Edit Profile</string>
+    <string name="edit_profile_pic_desc">Profile picture</string>
+    <string name="edit_profile_change_pic_desc">Change profile picture</string>
+    <string name="edit_profile_username_label">Username</string>
+    <string name="edit_profile_email_label">Email</string>
+    <string name="edit_profile_password_label">New Password (optional)</string>
+    <string name="edit_profile_save_btn">Save Changes</string>
+    <string name="edit_profile_cancel_btn">Cancel</string>
+
+    <string name="bot_diff_title">Bot Difficulty</string>
+    <string name="bot_diff_subtitle">Choose how smart the bot will be</string>
+    <string name="bot_diff_easy">🐣 Easy</string>
+    <string name="bot_diff_normal">🤖 Normal</string>
+    <string name="bot_diff_hard">💀 Hard</string>
+    <string name="bot_diff_hint">Harder bot means more points for winning!</string>
+
+    <string name="users_list_toolbar_title">All Users</string>
+    <string name="users_list_search_hint">Search by username&#8230;</string>
+    <string name="users_list_management_title">User Management</string>
+
+    <string name="splash_logo_desc">App Logo</string>
+    <string name="splash_tagline">Play. Compete. Win.</string>
+
+    <string name="admin_panel_title">Admin Panel</string>
+    <string name="admin_user_list_btn">👥 User List</string>
+    <string name="admin_add_question_btn">➕ Add New Question</string>
+    <string name="admin_questions_list_btn">📋 Questions List</string>
+    <string name="admin_add_rhythm_song_btn">➕ Add Rhythm Song</string>
+    <string name="admin_songs_list_btn">🎵 Songs List</string>
 </resources>

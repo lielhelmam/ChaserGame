@@ -43,7 +43,8 @@ public class OnlineGameService {
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError e) {}
+            public void onCancelled(@NonNull DatabaseError e) {
+            }
         };
         FirebaseDatabase.getInstance().getReference(".info/serverTimeOffset").addValueEventListener(timeOffsetListener);
     }

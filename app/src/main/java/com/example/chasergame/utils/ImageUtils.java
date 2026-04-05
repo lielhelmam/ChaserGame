@@ -14,11 +14,11 @@ public class ImageUtils {
      */
     public static String encodeImage(Bitmap bitmap) {
         if (bitmap == null) return null;
-        
+
         int previewWidth = 150;
         int previewHeight = bitmap.getHeight() * previewWidth / bitmap.getWidth();
         Bitmap previewBitmap = Bitmap.createScaledBitmap(bitmap, previewWidth, previewHeight, false);
-        
+
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         previewBitmap.compress(Bitmap.CompressFormat.JPEG, 50, byteArrayOutputStream);
         byte[] bytes = byteArrayOutputStream.toByteArray();

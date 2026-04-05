@@ -11,7 +11,7 @@
         android:id="@+id/tv_shop_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Skin Shop"
+        android:text="@string/shop_title"
         android:textColor="#FFFFFF"
         android:textSize="28sp"
         android:textStyle="bold"
@@ -22,12 +22,13 @@
         android:id="@+id/tv_user_points_shop"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Points: 0"
+        android:text="@string/shop_points_label"
         android:textColor="#FFEB3B"
         android:textSize="20sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Points: 0" />
 
     <Button
         android:id="@+id/btn_claim_gift"
@@ -35,7 +36,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:backgroundTint="#4CAF50"
-        android:text="🎁 Claim 100k Gift"
+        android:text="@string/shop_gift_btn"
         android:textColor="#FFFFFF"
         android:textStyle="bold"
         android:visibility="gone"
@@ -58,7 +59,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:backgroundTint="#333333"
-        android:text="Back"
+        android:text="@string/shop_back_btn"
         app:layout_constraintBottom_toBottomOf="parent"
         tools:layout_editor_absoluteX="16dp" />
 

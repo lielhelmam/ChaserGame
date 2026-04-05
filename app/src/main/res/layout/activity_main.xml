@@ -36,7 +36,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="20dp"
                     android:letterSpacing="0.1"
-                    android:text="Choose Your Game"
+                    android:text="@string/main_choose_game_title"
                     android:textAllCaps="true"
                     android:textColor="#333333"
                     android:textSize="14sp"
@@ -48,7 +48,7 @@
                     android:layout_height="68dp"
                     android:layout_marginBottom="20dp"
                     android:backgroundTint="@color/background_red"
-                    android:text="🎶 Rhythm Game"
+                    android:text="@string/main_rhythm_game_btn"
                     android:textColor="#FFFFFF"
                     android:textSize="18sp"
                     android:textStyle="bold"
@@ -66,7 +66,7 @@
                     android:layout_height="56dp"
                     android:layout_marginBottom="12dp"
                     android:backgroundTint="#444444"
-                    android:text="🤖 Trivia vs Bot"
+                    android:text="@string/main_trivia_vs_bot_btn"
                     android:textColor="#FFFFFF"
                     app:cornerRadius="16dp" />
 
@@ -76,7 +76,7 @@
                     android:layout_height="56dp"
                     android:layout_marginBottom="12dp"
                     android:backgroundTint="@color/background_red"
-                    android:text="🌐 Trivia Online"
+                    android:text="@string/main_trivia_online_btn"
                     android:textColor="#FFFFFF"
                     app:cornerRadius="16dp" />
 
@@ -85,7 +85,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="56dp"
                     android:backgroundTint="#444444"
-                    android:text="📱 Trivia 1v1 Local"
+                    android:text="@string/main_trivia_local_btn"
                     android:textColor="#FFFFFF"
                     app:cornerRadius="16dp" />
 
@@ -94,18 +94,20 @@
 
         <!-- QUICK ACTIONS -->
         <LinearLayout
+            style="?android:attr/buttonBarStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
             <Button
                 android:id="@+id/btn_main_leaderboards"
+                style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="0dp"
                 android:layout_height="60dp"
                 android:layout_marginEnd="8dp"
                 android:layout_weight="1"
                 android:backgroundTint="#FFFFFF"
-                android:text="🏆 Rankings"
+                android:text="@string/main_rankings_btn"
                 android:textColor="@color/background_red"
                 android:textStyle="bold"
                 app:cornerRadius="18dp"
@@ -114,12 +116,13 @@
 
             <Button
                 android:id="@+id/btn_main_edit_profile"
+                style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="0dp"
                 android:layout_height="60dp"
                 android:layout_marginStart="8dp"
                 android:layout_weight="1"
                 android:backgroundTint="#444444"
-                android:text="⚙️ Profile"
+                android:text="@string/main_profile_btn"
                 android:textColor="#FFFFFF"
                 android:textStyle="bold"
                 app:cornerRadius="18dp" />

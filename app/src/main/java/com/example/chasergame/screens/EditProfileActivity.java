@@ -6,10 +6,8 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.util.Base64;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -51,7 +49,16 @@ public class EditProfileActivity extends BaseActivity {
                 }
             }
     );
-
+    private final ActivityResultLauncher<String> requestPermissionLauncher = registerForActivityResult(
+            new ActivityResultContracts.RequestPermission(),
+            isGranted -> {
+                if (isGranted) {
+                    openCamera();
+                } else {
+                    Toast.makeText(this, "Camera permission denied", Toast.LENGTH_SHORT).show();
+                }
+            }
+    );
     private final ActivityResultLauncher<Intent> galleryLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             result -> {
@@ -65,17 +72,6 @@ public class EditProfileActivity extends BaseActivity {
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-                }
-            }
-    );
-
-    private final ActivityResultLauncher<String> requestPermissionLauncher = registerForActivityResult(
-            new ActivityResultContracts.RequestPermission(),
-            isGranted -> {
-                if (isGranted) {
-                    openCamera();
-                } else {
-                    Toast.makeText(this, "Camera permission denied", Toast.LENGTH_SHORT).show();
                 }
             }
     );

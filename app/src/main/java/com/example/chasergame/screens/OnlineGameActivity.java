@@ -139,7 +139,7 @@ public class OnlineGameActivity extends BaseActivity {
 
         long serverNow = gameService.getServerTime();
         Long startAt = snap.child("turnStartedAt").getValue(Long.class);
-        
+
         // תיקון: אם זמן תחילת התור עדיין לא סונכרן מהשרת, לא מפעילים את הטיימר
         // זה מונע סיום תור מיידי בגלל ערך null
         if (startAt != null) {

@@ -31,7 +31,7 @@
                 android:id="@+id/MainPage"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="log in to the game"
+                android:text="@string/login_title"
                 android:textColor="#FFFFFF"
                 android:textSize="20sp"
                 android:textStyle="bold" />
@@ -41,7 +41,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="Enter UserName"
+                android:text="@string/login_username_hint"
                 android:textColor="#FFCDD2" />
 
             <EditText
@@ -49,6 +49,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:backgroundTint="#333333"
+                android:importantForAutofill="no"
                 android:inputType="text"
                 android:textColor="#FFFFFF" />
 
@@ -57,7 +58,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
-                android:text="Enter Password"
+                android:text="@string/login_password_hint"
                 android:textColor="#FFCDD2" />
 
             <EditText
@@ -65,6 +66,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:backgroundTint="#333333"
+                android:importantForAutofill="no"
                 android:inputType="textPassword"
                 android:textColor="#FFFFFF" />
 
@@ -74,7 +76,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:backgroundTint="@color/background_red"
-                android:text="check"
+                android:text="@string/login_check_btn"
                 android:textColor="#FFFFFF" />
 
             <TextView
@@ -82,7 +84,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
-                android:text="dont have an account? register!"
+                android:text="@string/login_register_prompt"
                 android:textColor="#FFFFFF" />
 
             <Button
@@ -91,7 +93,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
                 android:backgroundTint="#333333"
-                android:text="go back"
+                android:text="@string/login_go_back_btn"
                 android:textColor="#FFFFFF" />
 
         </LinearLayout>

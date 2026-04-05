@@ -14,7 +14,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-        app:layout_constraintBottom_toTopOf="@+id/textView2"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -26,7 +25,7 @@
             android:background="@color/black"
             app:navigationIcon="?attr/homeAsUpIndicator"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-            app:title="All Users" />
+            app:title="@string/users_list_toolbar_title" />
 
         <SearchView
             android:id="@+id/searchView"
@@ -34,7 +33,7 @@
             android:layout_height="wrap_content"
             android:background="@android:drawable/alert_light_frame"
             android:backgroundTint="@color/black"
-            android:queryHint="Search by username..." />
+            android:queryHint="@string/users_list_search_hint" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -44,7 +43,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="User Management"
+        android:text="@string/users_list_management_title"
         android:textColor="#FFFFFF"
         android:textSize="22sp"
         android:textStyle="bold"

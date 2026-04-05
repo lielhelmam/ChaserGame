@@ -33,7 +33,8 @@ public class OnlineMenuActivity extends BaseActivity {
         String userId = authService.getCurrentUser().getId();
         new com.example.chasergame.services.RoomService().findAndJoinPublicRoom(userId, new com.example.chasergame.services.RoomService.RoomCallback() {
             @Override
-            public void onRoomCreated(String roomId) {}
+            public void onRoomCreated(String roomId) {
+            }
 
             @Override
             public void onJoined(String roomId) {

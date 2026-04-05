@@ -202,7 +202,8 @@ public class PlayAgainstBotActivity extends BaseActivity {
                 String winField = botAccuracy < 50 ? "botWinsEasy" : (botAccuracy < 75 ? "botWinsNormal" : "botWinsHard");
 
                 if ("botWinsEasy".equals(winField)) user.setBotWinsEasy(user.getBotWinsEasy() + 1);
-                else if ("botWinsNormal".equals(winField)) user.setBotWinsNormal(user.getBotWinsNormal() + 1);
+                else if ("botWinsNormal".equals(winField))
+                    user.setBotWinsNormal(user.getBotWinsNormal() + 1);
                 else user.setBotWinsHard(user.getBotWinsHard() + 1);
 
                 databaseService.updateUserWins(user.getId(), winField, new DatabaseService.DatabaseCallback<Void>() {
