@@ -25,7 +25,7 @@ import java.util.List;
 public class LeaderBoardActivity extends BaseActivity {
 
     private RecyclerView recyclerView;
-    private List<LeaderboardEntry> rhythmList, onlineList, botEasyList, botNormalList, botHardList, oneDeviceList;
+    private List<LeaderboardEntry> rhythmList, onlineList, botEasyList, botNormalList, botHardList;
 
     private LinearLayout botFilters;
     private Button btnEasy, btnNormal, btnHard;
@@ -65,35 +65,27 @@ public class LeaderBoardActivity extends BaseActivity {
         Button btnRhythm = findViewById(R.id.btn_leaderboard_rhythm);
         Button btnOnline = findViewById(R.id.btn_leaderboard_online);
         Button btnBot = findViewById(R.id.btn_leaderboard_bot);
-        Button btnOneDevice = findViewById(R.id.btn_leaderboard_one_device);
 
         btnRhythm.setOnClickListener(v -> {
             botFilters.setVisibility(View.GONE);
             tvHeaderStat.setText("Score");
-            updateButtonColors(btnRhythm, btnOnline, btnBot, btnOneDevice);
+            updateButtonColors(btnRhythm, btnOnline, btnBot);
             showLeaderboard(rhythmList);
         });
 
         btnOnline.setOnClickListener(v -> {
             botFilters.setVisibility(View.GONE);
             tvHeaderStat.setText("Wins");
-            updateButtonColors(btnOnline, btnRhythm, btnBot, btnOneDevice);
+            updateButtonColors(btnOnline, btnRhythm, btnBot);
             showLeaderboard(onlineList);
         });
 
         btnBot.setOnClickListener(v -> {
             botFilters.setVisibility(View.VISIBLE);
             tvHeaderStat.setText("Wins");
-            updateButtonColors(btnBot, btnRhythm, btnOnline, btnOneDevice);
+            updateButtonColors(btnBot, btnRhythm, btnOnline);
             updateDifficultyColors(btnNormal, btnEasy, btnHard);
             showLeaderboard(botNormalList);
-        });
-
-        btnOneDevice.setOnClickListener(v -> {
-            botFilters.setVisibility(View.GONE);
-            tvHeaderStat.setText("Wins");
-            updateButtonColors(btnOneDevice, btnRhythm, btnOnline, btnBot);
-            showLeaderboard(oneDeviceList);
         });
     }
 
@@ -123,7 +115,6 @@ public class LeaderBoardActivity extends BaseActivity {
                 botEasyList = botEasy;
                 botNormalList = botNormal;
                 botHardList = botHard;
-                oneDeviceList = oneDevice;
 
                 showLeaderboard(rhythmList); // Default
             }

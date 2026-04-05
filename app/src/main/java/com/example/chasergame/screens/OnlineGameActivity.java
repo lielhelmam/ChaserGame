@@ -32,7 +32,6 @@ public class OnlineGameActivity extends BaseActivity {
     private long defaultTurnMs = 60_000L;
     private Long lastQuestionNonceSeen = null;
     private boolean inCooldown = false;
-    private long serverTimeOffsetMs = 0L;
 
     private TextView tvTurnInfo, tvTimer, tvScore, tvQuestion;
     private Button btnA, btnB, btnC;
@@ -55,7 +54,6 @@ public class OnlineGameActivity extends BaseActivity {
 
         initUI();
         initGame(roomId);
-        listenToServerTime();
     }
 
     private void initUI() {
@@ -87,6 +85,10 @@ public class OnlineGameActivity extends BaseActivity {
                         Long t = snap.child("timeMs").getValue(Long.class);
                         if (t != null) defaultTurnMs = t;
 
+                        if (isPlayer1 && !snap.hasChild("game")) {
+                            gameService.initializeGame(defaultTurnMs, questionService);
+                        }
+
                         gameService.startListening(new OnlineGameService.GameStateListener() {
                             @Override
                             public void onGameStateChanged(DataSnapshot snapshot) {
@@ -100,7 +102,7 @@ public class OnlineGameActivity extends BaseActivity {
 
                             @Override
                             public void onError(Exception e) {
-                                Toast.makeText(OnlineGameActivity.this, "Error", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(OnlineGameActivity.this, "Connection Error", Toast.LENGTH_SHORT).show();
                             }
                         });
                     }
@@ -135,13 +137,22 @@ public class OnlineGameActivity extends BaseActivity {
             }
         }
 
-        long serverNow = System.currentTimeMillis() + serverTimeOffsetMs;
+        long serverNow = gameService.getServerTime();
         Long startAt = snap.child("turnStartedAt").getValue(Long.class);
-        long duration = getLong(snap.child("turnDurationMs"));
-        long remaining = Math.max(0, (startAt == null ? 0 : startAt) + (duration == 0 ? defaultTurnMs : duration) - serverNow);
+        
+        // תיקון: אם זמן תחילת התור עדיין לא סונכרן מהשרת, לא מפעילים את הטיימר
+        // זה מונע סיום תור מיידי בגלל ערך null
+        if (startAt != null) {
+            long duration = getLong(snap.child("turnDurationMs"));
+            long remaining = Math.max(0, startAt + (duration == 0 ? defaultTurnMs : duration) - serverNow);
 
-        startLocalTimer(remaining);
-        setButtonsEnabled(isMyTurn && !answerLocked && !inCooldown);
+            startLocalTimer(remaining);
+            setButtonsEnabled(isMyTurn && !answerLocked && !inCooldown);
+        } else {
+            // בזמן שמחכים לסנכרון, אפשר להציג את זמן ברירת המחדל או להמתין
+            tvTimer.setText("--:--");
+            setButtonsEnabled(false);
+        }
     }
 
     private void onAnswerClicked(String key, Button clickedBtn) {
@@ -149,32 +160,24 @@ public class OnlineGameActivity extends BaseActivity {
         answerLocked = true;
         setButtonsEnabled(false);
 
-        FirebaseDatabase.getInstance().getReference("rooms").child(getIntent().getStringExtra("ROOM_ID")).child("game/question/correct")
-                .addListenerForSingleValueEvent(new ValueEventListener() {
+        gameService.validateAnswer(key, (isCorrect, correct) -> {
+            showAnswerColors(key, correct, clickedBtn);
+            if (isCorrect) {
+                gameService.submitAnswer(isPlayer1 ? "p1" : "p2", questionService, new DatabaseService.DatabaseCallback<Void>() {
                     @Override
-                    public void onDataChange(@NonNull DataSnapshot s) {
-                        String correct = s.getValue(String.class);
-                        boolean ok = key.equals(correct);
-                        showAnswerColors(key, correct, clickedBtn);
-                        if (ok)
-                            gameService.submitAnswer(isPlayer1 ? "p1" : "p2", true, questionService, new DatabaseService.DatabaseCallback<Void>() {
-                                @Override
-                                public void onCompleted(Void unused) {
-                                }
-
-                                @Override
-                                public void onFailed(Exception e) {
-                                    answerLocked = false;
-                                }
-                            });
-                        else startWrongCooldown();
+                    public void onCompleted(Void unused) {
                     }
 
                     @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
+                    public void onFailed(Exception e) {
                         answerLocked = false;
+                        setButtonsEnabled(true);
                     }
                 });
+            } else {
+                startWrongCooldown();
+            }
+        });
     }
 
     private void startWrongCooldown() {
@@ -223,23 +226,10 @@ public class OnlineGameActivity extends BaseActivity {
                 .setMessage(win ? "🏆 You Win!" : "DRAW".equals(w) ? "🤝 Draw" : "😢 You Lose")
                 .setCancelable(false)
                 .setPositiveButton("OK", (d, i) -> {
-                    gameService.deleteRoom();
+                    if (isPlayer1) gameService.deleteRoom();
                     goHome();
                 })
                 .show();
-    }
-
-    private void listenToServerTime() {
-        FirebaseDatabase.getInstance().getReference(".info/serverTimeOffset").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot s) {
-                serverTimeOffsetMs = s.getValue(Long.class);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError e) {
-            }
-        });
     }
 
     private void setButtonsEnabled(boolean e) {
@@ -267,7 +257,7 @@ public class OnlineGameActivity extends BaseActivity {
 
     private void deleteAndExit() {
         finishing = true;
-        gameService.deleteRoom();
+        if (isPlayer1) gameService.deleteRoom();
         goHome();
     }
 

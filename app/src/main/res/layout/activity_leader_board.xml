@@ -53,38 +53,29 @@
 
                     <Button
                         android:id="@+id/btn_leaderboard_rhythm"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="8dp"
-                        android:backgroundTint="@color/background_red"
                         android:text="🎶 Rhythm"
-                        android:textColor="#FFFFFF" />
+                        android:textSize="12sp" />
 
                     <Button
                         android:id="@+id/btn_leaderboard_online"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="8dp"
-                        android:backgroundTint="#333333"
                         android:text="Online"
-                        android:textColor="#FFFFFF" />
+                        android:textSize="12sp" />
 
                     <Button
                         android:id="@+id/btn_leaderboard_bot"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginEnd="8dp"
-                        android:backgroundTint="#333333"
                         android:text="Bot"
-                        android:textColor="#FFFFFF" />
-
-                    <Button
-                        android:id="@+id/btn_leaderboard_one_device"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:backgroundTint="#333333"
-                        android:text="1v1"
-                        android:textColor="#FFFFFF" />
+                        android:textSize="12sp" />
                 </LinearLayout>
             </HorizontalScrollView>
 

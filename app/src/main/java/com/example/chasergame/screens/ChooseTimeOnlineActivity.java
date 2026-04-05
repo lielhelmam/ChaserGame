@@ -48,7 +48,7 @@ public class ChooseTimeOnlineActivity extends BaseActivity {
                 return;
             }
 
-            roomService.createRoom(user.getId(), user.getUsername(), timeMs, new RoomService.RoomCallback() {
+            roomService.createRoom(user.getId(), user.getUsername(), timeMs, isPublic, new RoomService.RoomCallback() {
                 @Override
                 public void onRoomCreated(String roomId) {
                     Intent i = new Intent(ChooseTimeOnlineActivity.this, WaitingRoomActivity.class);
@@ -59,7 +59,7 @@ public class ChooseTimeOnlineActivity extends BaseActivity {
                 }
 
                 @Override
-                public void onJoined() {
+                public void onJoined(String roomId) {
                 }
 
                 @Override

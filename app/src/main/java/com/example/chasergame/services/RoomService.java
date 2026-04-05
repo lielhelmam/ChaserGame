@@ -18,13 +18,14 @@ public class RoomService {
         this.roomsRef = FirebaseDatabase.getInstance().getReference("rooms");
     }
 
-    public void createRoom(String hostId, String hostName, long timeMs, RoomCallback callback) {
+    public void createRoom(String hostId, String hostName, long timeMs, boolean isPublic, RoomCallback callback) {
         String roomId = generateRoomCode();
         Map<String, Object> room = new HashMap<>();
         room.put("hostId", hostId);
         room.put("hostName", hostName);
         room.put("timeMs", timeMs);
         room.put("status", "waiting");
+        room.put("type", isPublic ? "public" : "private");
 
         Map<String, Object> players = new HashMap<>();
         players.put(hostId, true);
@@ -33,6 +34,28 @@ public class RoomService {
         roomsRef.child(roomId).setValue(room).addOnCompleteListener(task -> {
             if (task.isSuccessful()) callback.onRoomCreated(roomId);
             else callback.onFailed("Failed to create room");
+        });
+    }
+
+    public void findAndJoinPublicRoom(String userId, RoomCallback callback) {
+        roomsRef.orderByChild("type").equalTo("public").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for (DataSnapshot roomSnap : snapshot.getChildren()) {
+                    String status = roomSnap.child("status").getValue(String.class);
+                    long count = roomSnap.child("players").getChildrenCount();
+                    if ("waiting".equals(status) && count < 2) {
+                        joinRoom(roomSnap.getKey(), userId, callback);
+                        return;
+                    }
+                }
+                callback.onFailed("No public rooms available");
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                callback.onFailed(error.getMessage());
+            }
         });
     }
 
@@ -55,7 +78,7 @@ public class RoomService {
                 if (count == 1) {
                     snapshot.getRef().child("status").setValue("ready");
                 }
-                callback.onJoined();
+                callback.onJoined(roomId);
             }
 
             @Override
@@ -100,7 +123,7 @@ public class RoomService {
     public interface RoomCallback {
         void onRoomCreated(String roomId);
 
-        void onJoined();
+        void onJoined(String roomId);
 
         void onFailed(String error);
     }

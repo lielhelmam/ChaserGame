@@ -42,7 +42,7 @@ public class JoinGameActivity extends BaseActivity {
                 }
 
                 @Override
-                public void onJoined() {
+                public void onJoined(String roomId) {
                     Intent i = new Intent(JoinGameActivity.this, WaitingRoomActivity.class);
                     i.putExtra("ROOM_ID", roomId);
                     i.putExtra("PLAYER_ID", user.getId());

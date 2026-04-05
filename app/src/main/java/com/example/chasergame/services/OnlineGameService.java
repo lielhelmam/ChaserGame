@@ -24,17 +24,39 @@ public class OnlineGameService {
     private final DatabaseReference gameRef;
     private final String playerId;
     private ValueEventListener gameListener;
+    private ValueEventListener timeOffsetListener;
+    private long serverTimeOffsetMs = 0;
 
     public OnlineGameService(String roomId, String playerId) {
         this.playerId = playerId;
         this.roomRef = FirebaseDatabase.getInstance().getReference("rooms").child(roomId);
         this.gameRef = roomRef.child("game");
+        listenToServerTime();
+    }
+
+    private void listenToServerTime() {
+        timeOffsetListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot s) {
+                Long offset = s.getValue(Long.class);
+                if (offset != null) serverTimeOffsetMs = offset;
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError e) {}
+        };
+        FirebaseDatabase.getInstance().getReference(".info/serverTimeOffset").addValueEventListener(timeOffsetListener);
+    }
+
+    public long getServerTime() {
+        return System.currentTimeMillis() + serverTimeOffsetMs;
     }
 
     public void startListening(GameStateListener listener) {
         gameListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (!snapshot.exists()) return;
                 Boolean isOver = snapshot.child("gameOver").getValue(Boolean.class);
                 if (isOver != null && isOver) {
                     listener.onGameOver(snapshot.child("winner").getValue(String.class));
@@ -55,28 +77,61 @@ public class OnlineGameService {
         if (gameListener != null) {
             gameRef.removeEventListener(gameListener);
         }
+        if (timeOffsetListener != null) {
+            FirebaseDatabase.getInstance().getReference(".info/serverTimeOffset").removeEventListener(timeOffsetListener);
+        }
     }
 
-    public void submitAnswer(String playerKey, boolean correct, QuestionService questionService, DatabaseService.DatabaseCallback<Void> callback) {
-        if (correct) {
-            gameRef.child(playerKey + "Score").runTransaction(new Transaction.Handler() {
-                @NonNull
-                @Override
-                public Transaction.Result doTransaction(@NonNull MutableData d) {
-                    Long current = d.getValue(Long.class);
-                    d.setValue((current == null ? 0 : current) + 1);
-                    return Transaction.success(d);
-                }
+    public void initializeGame(long defaultTurnMs, QuestionService questionService) {
+        Map<String, Object> initial = new HashMap<>();
+        initial.put("currentTurn", "p1");
+        initial.put("p1Score", 0);
+        initial.put("p2Score", 0);
+        initial.put("turnStartedAt", ServerValue.TIMESTAMP);
+        initial.put("turnDurationMs", defaultTurnMs);
+        initial.put("gameOver", false);
 
-                @Override
-                public void onComplete(DatabaseError e, boolean c, DataSnapshot s) {
-                    if (e == null) {
-                        setNewQuestion(questionService);
-                        callback.onCompleted(null);
-                    } else callback.onFailed(e.toException());
+        gameRef.setValue(initial).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                setNewQuestion(questionService);
+            }
+        });
+    }
+
+    public void validateAnswer(String key, AnswerCallback callback) {
+        gameRef.child("question/correct").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                String correct = snapshot.getValue(String.class);
+                callback.onResult(key.equals(correct), correct);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+            }
+        });
+    }
+
+    public void submitAnswer(String playerKey, QuestionService questionService, DatabaseService.DatabaseCallback<Void> callback) {
+        gameRef.child(playerKey + "Score").runTransaction(new Transaction.Handler() {
+            @NonNull
+            @Override
+            public Transaction.Result doTransaction(@NonNull MutableData d) {
+                Long current = d.getValue(Long.class);
+                d.setValue((current == null ? 0 : current) + 1);
+                return Transaction.success(d);
+            }
+
+            @Override
+            public void onComplete(DatabaseError e, boolean c, DataSnapshot s) {
+                if (e == null) {
+                    setNewQuestion(questionService);
+                    if (callback != null) callback.onCompleted(null);
+                } else {
+                    if (callback != null) callback.onFailed(e.toException());
                 }
-            });
-        }
+            }
+        });
     }
 
     public void endTurn(long defaultTurnMs) {
@@ -147,5 +202,9 @@ public class OnlineGameService {
         void onGameOver(String winner);
 
         void onError(Exception e);
+    }
+
+    public interface AnswerCallback {
+        void onResult(boolean isCorrect, String correctAnswer);
     }
 }
