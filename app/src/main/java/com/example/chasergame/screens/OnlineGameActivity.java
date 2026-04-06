@@ -140,16 +140,16 @@ public class OnlineGameActivity extends BaseActivity {
         long serverNow = gameService.getServerTime();
         Long startAt = snap.child("turnStartedAt").getValue(Long.class);
 
-        // תיקון: אם זמן תחילת התור עדיין לא סונכרן מהשרת, לא מפעילים את הטיימר
-        // זה מונע סיום תור מיידי בגלל ערך null
-        if (startAt != null) {
+        // בדיקה כפולה: גם שהערך קיים ב-DB וגם שהאפליקציה הספיקה לסנכרן זמן מול השרת
+        if (startAt != null && OnlineGameService.isTimeSynced()) {
             long duration = getLong(snap.child("turnDurationMs"));
             long remaining = Math.max(0, startAt + (duration == 0 ? defaultTurnMs : duration) - serverNow);
 
+            // אם נשאר זמן, מתחילים טיימר. אם הזמן באמת נגמר (והסנכרון תקין), הטיימר יסיים את התור
             startLocalTimer(remaining);
             setButtonsEnabled(isMyTurn && !answerLocked && !inCooldown);
         } else {
-            // בזמן שמחכים לסנכרון, אפשר להציג את זמן ברירת המחדל או להמתין
+            // בזמן שמחכים לסנכרון או לנתונים, מציגים מצב המתנה
             tvTimer.setText("--:--");
             setButtonsEnabled(false);
         }

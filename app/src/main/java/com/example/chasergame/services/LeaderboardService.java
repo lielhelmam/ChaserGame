@@ -27,7 +27,6 @@ public class LeaderboardService {
                 List<LeaderboardEntry> botEasy = new ArrayList<>();
                 List<LeaderboardEntry> botNormal = new ArrayList<>();
                 List<LeaderboardEntry> botHard = new ArrayList<>();
-                List<LeaderboardEntry> oneDevice = new ArrayList<>();
 
                 for (User user : users) {
                     addIfGreater(rhythm, user.getUsername(), user.getTotalRhythmScore());
@@ -35,7 +34,6 @@ public class LeaderboardService {
                     addIfGreater(botEasy, user.getUsername(), user.getBotWinsEasy());
                     addIfGreater(botNormal, user.getUsername(), user.getBotWinsNormal());
                     addIfGreater(botHard, user.getUsername(), user.getBotWinsHard());
-                    addIfGreater(oneDevice, user.getUsername(), user.getOneDeviceWins());
                 }
 
                 sortAndRank(rhythm);
@@ -43,9 +41,8 @@ public class LeaderboardService {
                 sortAndRank(botEasy);
                 sortAndRank(botNormal);
                 sortAndRank(botHard);
-                sortAndRank(oneDevice);
 
-                callback.onDataReady(rhythm, online, botEasy, botNormal, botHard, oneDevice);
+                callback.onDataReady(rhythm, online, botEasy, botNormal, botHard);
             }
 
             @Override
@@ -71,7 +68,7 @@ public class LeaderboardService {
     public interface LeaderboardCallback {
         void onDataReady(List<LeaderboardEntry> rhythm, List<LeaderboardEntry> online,
                          List<LeaderboardEntry> botEasy, List<LeaderboardEntry> botNormal,
-                         List<LeaderboardEntry> botHard, List<LeaderboardEntry> oneDevice);
+                         List<LeaderboardEntry> botHard);
 
         void onFailed(Exception e);
     }

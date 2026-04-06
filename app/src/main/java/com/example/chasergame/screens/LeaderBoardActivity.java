@@ -109,7 +109,7 @@ public class LeaderBoardActivity extends BaseActivity {
             @Override
             public void onDataReady(List<LeaderboardEntry> rhythm, List<LeaderboardEntry> online,
                                     List<LeaderboardEntry> botEasy, List<LeaderboardEntry> botNormal,
-                                    List<LeaderboardEntry> botHard, List<LeaderboardEntry> oneDevice) {
+                                    List<LeaderboardEntry> botHard) {
                 rhythmList = rhythm;
                 onlineList = online;
                 botEasyList = botEasy;

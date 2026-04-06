@@ -188,10 +188,7 @@ public class PlayOnOneDeviceActivity extends BaseActivity {
 
     private void endGame(String msg, boolean p1Won) {
         gameTimer.cancel();
-        if (p1Won) {
-            User user = authService.getCurrentUser();
-            databaseService.updateUserWins(user.getId(), "oneDeviceWins", null);
-        }
+        // Removed win counting for one device games
 
         new AlertDialog.Builder(this)
                 .setTitle("Game Over")

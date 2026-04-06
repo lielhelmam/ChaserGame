@@ -78,7 +78,7 @@ public class SignupActivity extends BaseActivity {
 
     private void registerUser(String email, String password, String fName) {
         String uid = databaseService.generateUserId();
-        User user = new User(uid, fName, password, email, false, 0, 0, 0);
+        User user = new User(uid, fName, password, email, false, 0, 0);
 
         authService.register(user, new DatabaseService.DatabaseCallback<Void>() {
             @Override

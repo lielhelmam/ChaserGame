@@ -36,4 +36,5 @@ public class MainActivity extends BaseActivity {
         findViewById(R.id.btn_main_edit_profile).setOnClickListener(v ->
                 startActivity(new Intent(this, EditProfileActivity.class)));
     }
+
 }

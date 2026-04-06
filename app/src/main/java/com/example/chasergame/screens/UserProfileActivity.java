@@ -19,9 +19,7 @@ import com.example.chasergame.models.User;
 import com.example.chasergame.services.DatabaseService;
 
 public class UserProfileActivity extends BaseActivity {
-    private static final String TAG = "UserProfileActivity";
-
-    private TextView tvName, tvEmail, tvPassword, tvAdmin, tvOnlineWins, tvBotWinsEasy, tvBotWinsNormal, tvBotWinsHard, tvOneDeviceWins;
+    private TextView tvName, tvEmail, tvPassword, tvAdmin, tvOnlineWins, tvBotWinsEasy, tvBotWinsNormal, tvBotWinsHard, tvRhythmScore;
     private ProgressBar progressBar;
 
     private String userId;
@@ -62,18 +60,18 @@ public class UserProfileActivity extends BaseActivity {
         tvBotWinsEasy = findViewById(R.id.tv_bot_wins_easy);
         tvBotWinsNormal = findViewById(R.id.tv_bot_wins_normal);
         tvBotWinsHard = findViewById(R.id.tv_bot_wins_hard);
-        tvOneDeviceWins = findViewById(R.id.tv_one_device_wins);
+        tvRhythmScore = findViewById(R.id.tv_rhythm_score);
 
-        findViewById(R.id.btn_edit_online_wins).setOnClickListener(v -> showEditWinsDialog("onlineWins", currentUser.getOnlineWins()));
-        findViewById(R.id.btn_edit_bot_wins_easy).setOnClickListener(v -> showEditWinsDialog("botWinsEasy", currentUser.getBotWinsEasy()));
-        findViewById(R.id.btn_edit_bot_wins_normal).setOnClickListener(v -> showEditWinsDialog("botWinsNormal", currentUser.getBotWinsNormal()));
-        findViewById(R.id.btn_edit_bot_wins_hard).setOnClickListener(v -> showEditWinsDialog("botWinsHard", currentUser.getBotWinsHard()));
-        findViewById(R.id.btn_edit_one_device_wins).setOnClickListener(v -> showEditWinsDialog("oneDeviceWins", currentUser.getOneDeviceWins()));
+        findViewById(R.id.btn_edit_online_wins).setOnClickListener(v -> showEditValueDialog("onlineWins", currentUser.getOnlineWins()));
+        findViewById(R.id.btn_edit_bot_wins_easy).setOnClickListener(v -> showEditValueDialog("botWinsEasy", currentUser.getBotWinsEasy()));
+        findViewById(R.id.btn_edit_bot_wins_normal).setOnClickListener(v -> showEditValueDialog("botWinsNormal", currentUser.getBotWinsNormal()));
+        findViewById(R.id.btn_edit_bot_wins_hard).setOnClickListener(v -> showEditValueDialog("botWinsHard", currentUser.getBotWinsHard()));
+        findViewById(R.id.btn_edit_rhythm_score).setOnClickListener(v -> showEditValueDialog("totalRhythmScore", currentUser.getTotalRhythmScore()));
     }
 
     private void loadUser() {
         progressBar.setVisibility(View.VISIBLE);
-        databaseService.getUser(userId, new DatabaseService.DatabaseCallback<User>() {
+        databaseService.getUser(userId, new DatabaseService.DatabaseCallback<>() {
             @Override
             public void onCompleted(User user) {
                 progressBar.setVisibility(View.GONE);
@@ -103,10 +101,10 @@ public class UserProfileActivity extends BaseActivity {
         tvBotWinsEasy.setText(String.valueOf(user.getBotWinsEasy()));
         tvBotWinsNormal.setText(String.valueOf(user.getBotWinsNormal()));
         tvBotWinsHard.setText(String.valueOf(user.getBotWinsHard()));
-        tvOneDeviceWins.setText(String.valueOf(user.getOneDeviceWins()));
+        tvRhythmScore.setText(String.valueOf(user.getTotalRhythmScore()));
     }
 
-    private void showEditWinsDialog(String field, int currentVal) {
+    private void showEditValueDialog(String field, int currentVal) {
         final EditText input = new EditText(this);
         input.setInputType(InputType.TYPE_CLASS_NUMBER);
         input.setText(String.valueOf(currentVal));
@@ -116,34 +114,34 @@ public class UserProfileActivity extends BaseActivity {
                 .setView(input)
                 .setPositiveButton("Save", (dialog, which) -> {
                     String value = input.getText().toString();
-                    if (!value.isEmpty()) updateWins(field, Integer.parseInt(value));
+                    if (!value.isEmpty()) updateValue(field, Integer.parseInt(value));
                 })
                 .setNegativeButton("Cancel", null)
                 .show();
     }
 
-    private void updateWins(String field, int newWins) {
+    private void updateValue(String field, int newValue) {
         if (currentUser == null) return;
 
         switch (field) {
             case "onlineWins":
-                currentUser.setOnlineWins(newWins);
+                currentUser.setOnlineWins(newValue);
                 break;
             case "botWinsEasy":
-                currentUser.setBotWinsEasy(newWins);
+                currentUser.setBotWinsEasy(newValue);
                 break;
             case "botWinsNormal":
-                currentUser.setBotWinsNormal(newWins);
+                currentUser.setBotWinsNormal(newValue);
                 break;
             case "botWinsHard":
-                currentUser.setBotWinsHard(newWins);
+                currentUser.setBotWinsHard(newValue);
                 break;
-            case "oneDeviceWins":
-                currentUser.setOneDeviceWins(newWins);
+            case "totalRhythmScore":
+                currentUser.setTotalRhythmScore(newValue);
                 break;
         }
 
-        databaseService.updateUser(currentUser, new DatabaseService.DatabaseCallback<Void>() {
+        databaseService.updateUser(currentUser, new DatabaseService.DatabaseCallback<>() {
             @Override
             public void onCompleted(Void unused) {
                 Toast.makeText(UserProfileActivity.this, "Updated", Toast.LENGTH_SHORT).show();

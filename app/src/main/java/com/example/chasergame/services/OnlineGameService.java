@@ -25,7 +25,8 @@ public class OnlineGameService {
     private final String playerId;
     private ValueEventListener gameListener;
     private ValueEventListener timeOffsetListener;
-    private long serverTimeOffsetMs = 0;
+    private static long serverTimeOffsetMs = 0;
+    private static boolean isTimeSynced = false;
 
     public OnlineGameService(String roomId, String playerId) {
         this.playerId = playerId;
@@ -35,11 +36,15 @@ public class OnlineGameService {
     }
 
     private void listenToServerTime() {
+        if (isTimeSynced) return; // Already listening or synced
         timeOffsetListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot s) {
                 Long offset = s.getValue(Long.class);
-                if (offset != null) serverTimeOffsetMs = offset;
+                if (offset != null) {
+                    serverTimeOffsetMs = offset;
+                    isTimeSynced = true;
+                }
             }
 
             @Override
@@ -47,6 +52,10 @@ public class OnlineGameService {
             }
         };
         FirebaseDatabase.getInstance().getReference(".info/serverTimeOffset").addValueEventListener(timeOffsetListener);
+    }
+
+    public static boolean isTimeSynced() {
+        return isTimeSynced;
     }
 
     public long getServerTime() {

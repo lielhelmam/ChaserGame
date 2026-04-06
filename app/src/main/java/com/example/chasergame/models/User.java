@@ -18,7 +18,6 @@ public class User {
     public int botWinsEasy;
     public int botWinsNormal;
     public int botWinsHard;
-    public int oneDeviceWins;
     public int points;
     public String equippedSkin = "default";
     public List<String> ownedSkins = new ArrayList<>();
@@ -37,7 +36,7 @@ public class User {
         if (!ownedSkins.contains("default")) ownedSkins.add("default");
     }
 
-    public User(String id, String username, String password, String email, boolean isAdmin, int onlineWins, int botWins, int oneDeviceWins) {
+    public User(String id, String username, String password, String email, boolean isAdmin, int onlineWins, int botWins) {
         this.id = id;
         this.username = username;
         this.password = password;
@@ -48,7 +47,6 @@ public class User {
         this.botWinsEasy = 0;
         this.botWinsNormal = 0;
         this.botWinsHard = 0;
-        this.oneDeviceWins = oneDeviceWins;
         this.points = 0;
         this.equippedSkin = "default";
         this.ownedSkins = new ArrayList<>();
@@ -142,14 +140,6 @@ public class User {
 
     public void setBotWinsHard(int botWinsHard) {
         this.botWinsHard = botWinsHard;
-    }
-
-    public int getOneDeviceWins() {
-        return oneDeviceWins;
-    }
-
-    public void setOneDeviceWins(int oneDeviceWins) {
-        this.oneDeviceWins = oneDeviceWins;
     }
 
     public int getPoints() {

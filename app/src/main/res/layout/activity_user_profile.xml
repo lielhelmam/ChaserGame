@@ -334,21 +334,21 @@
                                 android:textColor="#333333" />
                         </RelativeLayout>
 
-                        <!-- Local 1v1 -->
+                        <!-- Rhythm Score -->
                         <RelativeLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="12dp">
 
                             <LinearLayout
-                                android:id="@+id/container_one_device_wins"
+                                android:id="@+id/container_rhythm_score"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_alignParentEnd="true"
                                 android:gravity="center_vertical">
 
                                 <TextView
-                                    android:id="@+id/tv_one_device_wins"
+                                    android:id="@+id/tv_rhythm_score"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:layout_marginEnd="8dp"
@@ -357,11 +357,11 @@
                                     android:textSize="16sp" />
 
                                 <ImageButton
-                                    android:id="@+id/btn_edit_one_device_wins"
+                                    android:id="@+id/btn_edit_rhythm_score"
                                     android:layout_width="32dp"
                                     android:layout_height="32dp"
                                     android:background="?attr/selectableItemBackgroundBorderless"
-                                    android:contentDescription="@string/profile_edit_local_wins_desc"
+                                    android:contentDescription="Edit rhythm score"
                                     android:src="@android:drawable/ic_menu_edit"
                                     app:tint="#888888" />
                             </LinearLayout>
@@ -372,10 +372,11 @@
                                 android:layout_alignParentStart="true"
                                 android:layout_centerVertical="true"
                                 android:layout_marginEnd="8dp"
-                                android:layout_toStartOf="@id/container_one_device_wins"
-                                android:text="@string/profile_local_1v1_wins"
+                                android:layout_toStartOf="@id/container_rhythm_score"
+                                android:text="Rhythm Score"
                                 android:textColor="#333333" />
                         </RelativeLayout>
+
 
                     </LinearLayout>
 
