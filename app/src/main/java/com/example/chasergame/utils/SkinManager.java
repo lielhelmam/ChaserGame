@@ -11,6 +11,11 @@ import java.util.List;
 public class SkinManager {
     private static List<Skin> skins;
 
+    /**
+     * Retrieves the list of all available skins in the game.
+     * Initializes the list with a default set of skins if it hasn't been created yet.
+     * @return A list of Skin objects.
+     */
     public static List<Skin> getSkins() {
         if (skins == null) {
             skins = new ArrayList<>();
@@ -73,6 +78,11 @@ public class SkinManager {
         return skins;
     }
 
+    /**
+     * Finds and returns a skin by its unique identifier.
+     * @param id The ID of the skin to find.
+     * @return The Skin object matching the ID, or the default skin if not found.
+     */
     public static Skin getSkinById(String id) {
         for (Skin skin : getSkins()) {
             if (skin.id.equals(id)) return skin;
@@ -80,6 +90,11 @@ public class SkinManager {
         return getSkins().get(0);
     }
 
+    /**
+     * Creates a custom skin based on the user's stored custom color preferences.
+     * @param user The User object containing custom skin data.
+     * @return A Skin object with the user's custom settings.
+     */
     public static Skin getCustomSkinForUser(User user) {
         if (user == null) return getSkinById("default");
         return new Skin("custom", "Custom Creation", 500000,

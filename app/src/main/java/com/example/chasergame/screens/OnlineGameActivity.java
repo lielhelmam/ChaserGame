@@ -39,6 +39,11 @@ public class OnlineGameActivity extends BaseActivity {
     private OnlineGameService gameService;
     private CountDownTimer turnTimer, cooldownTimer;
 
+    /**
+     * Called when the activity is first created.
+     * Initializes the player ID, room ID, and sets up the UI and game service.
+     * @param savedInstanceState If the activity is being re-initialized after previously being shut down then this Bundle contains the data it most recently supplied in onSaveInstanceState(Bundle).
+     */
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,6 +61,9 @@ public class OnlineGameActivity extends BaseActivity {
         initGame(roomId);
     }
 
+    /**
+     * Initializes the UI components and sets up click listeners for answer buttons and game exit.
+     */
     private void initUI() {
         tvTurnInfo = findViewById(R.id.tvTurnInfo);
         tvTimer = findViewById(R.id.tvTimer);
@@ -71,6 +79,11 @@ public class OnlineGameActivity extends BaseActivity {
         findViewById(R.id.btnEndGame).setOnClickListener(v -> deleteAndExit());
     }
 
+    /**
+     * Initializes the game service, determines if the player is the host (Player 1),
+     * and starts listening for game state updates.
+     * @param roomId The ID of the room to join.
+     */
     private void initGame(String roomId) {
         gameService = new OnlineGameService(roomId, playerId);
         FirebaseDatabase.getInstance().getReference("rooms").child(roomId)
@@ -113,6 +126,11 @@ public class OnlineGameActivity extends BaseActivity {
                 });
     }
 
+    /**
+     * Handles updates to the game state received from the database.
+     * Updates scores, turn information, question text, and synchronizes the turn timer.
+     * @param snap The data snapshot of the current game state.
+     */
     private void handleStateChange(DataSnapshot snap) {
         long p1 = getLong(snap.child("p1Score"));
         long p2 = getLong(snap.child("p2Score"));
@@ -155,6 +173,11 @@ public class OnlineGameActivity extends BaseActivity {
         }
     }
 
+    /**
+     * Called when an answer button is clicked. Validates the answer and updates the game.
+     * @param key The key of the selected answer ("A", "B", or "C").
+     * @param clickedBtn The button that was clicked.
+     */
     private void onAnswerClicked(String key, Button clickedBtn) {
         if (!isMyTurn || answerLocked || inCooldown) return;
         answerLocked = true;
@@ -180,6 +203,9 @@ public class OnlineGameActivity extends BaseActivity {
         });
     }
 
+    /**
+     * Starts a cooldown period after a wrong answer, during which the player cannot answer.
+     */
     private void startWrongCooldown() {
         inCooldown = true;
         tvTurnInfo.setText("⏳ Cooldown...");
@@ -198,6 +224,10 @@ public class OnlineGameActivity extends BaseActivity {
         }.start();
     }
 
+    /**
+     * Starts the local countdown timer for the current turn.
+     * @param ms The remaining time for the turn in milliseconds.
+     */
     private void startLocalTimer(long ms) {
         if (turnTimer != null) turnTimer.cancel();
         turnTimer = new CountDownTimer(ms, 1000) {
@@ -214,6 +244,10 @@ public class OnlineGameActivity extends BaseActivity {
         }.start();
     }
 
+    /**
+     * Displays a dialog when the game is over, showing the result and providing an exit option.
+     * @param w The winner of the game.
+     */
     private void showGameOverDialog(String w) {
         if (finishing) return;
         finishing = true;
@@ -232,12 +266,19 @@ public class OnlineGameActivity extends BaseActivity {
                 .show();
     }
 
+    /**
+     * Enables or disables all answer buttons.
+     * @param e True to enable, false to disable.
+     */
     private void setButtonsEnabled(boolean e) {
         btnA.setEnabled(e);
         btnB.setEnabled(e);
         btnC.setEnabled(e);
     }
 
+    /**
+     * Resets the background color of all answer buttons to the default.
+     */
     private void resetButtonColors() {
         ColorStateList n = ColorStateList.valueOf(Color.parseColor("#333333"));
         btnA.setBackgroundTintList(n);
@@ -245,26 +286,46 @@ public class OnlineGameActivity extends BaseActivity {
         btnC.setBackgroundTintList(n);
     }
 
+    /**
+     * Highlights the clicked button based on whether the answer was correct or wrong.
+     * @param ch The chosen answer key.
+     * @param co The correct answer key.
+     * @param b The button that was clicked.
+     */
     private void showAnswerColors(String ch, String co, Button b) {
         resetButtonColors();
         b.setBackgroundTintList(ColorStateList.valueOf(ch.equals(co) ? Color.GREEN : Color.RED));
     }
 
+    /**
+     * Safely retrieves a long value from a DataSnapshot.
+     * @param s The DataSnapshot containing the value.
+     * @return The long value or 0 if invalid.
+     */
     private long getLong(DataSnapshot s) {
         Object v = s.getValue();
         return v instanceof Number ? ((Number) v).longValue() : 0L;
     }
 
+    /**
+     * Deletes the room if the user is the host and navigates back to the home screen.
+     */
     private void deleteAndExit() {
         finishing = true;
         if (isPlayer1) gameService.deleteRoom();
         goHome();
     }
 
+    /**
+     * Navigates the user back to the MainActivity.
+     */
     private void goHome() {
         navigateTo(MainActivity.class, true);
     }
 
+    /**
+     * Cleans up listeners and timers when the activity is destroyed.
+     */
     @Override
     protected void onDestroy() {
         super.onDestroy();

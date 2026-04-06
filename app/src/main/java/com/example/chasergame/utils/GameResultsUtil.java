@@ -16,6 +16,12 @@ public class GameResultsUtil {
     private static final String PREF_NAME = "com.example.chasergame.GAME_RESULTS_PREF";
     private static final String KEY_GAME_RESULTS = "game_results";
 
+    /**
+     * Saves a single game result to SharedPreferences.
+     * Converts the list of results to a JSON string using Gson.
+     * @param context The application context.
+     * @param gameResult The GameResult object to be saved.
+     */
     public static void saveGameResult(Context context, GameResult gameResult) {
         List<GameResult> gameResults = getGameResults(context);
         if (gameResults == null) {
@@ -31,6 +37,11 @@ public class GameResultsUtil {
         editor.apply();
     }
 
+    /**
+     * Retrieves the list of all saved game results from SharedPreferences.
+     * @param context The application context.
+     * @return A list of GameResult objects, or an empty list if none are found.
+     */
     public static List<GameResult> getGameResults(Context context) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
         String json = sharedPreferences.getString(KEY_GAME_RESULTS, null);

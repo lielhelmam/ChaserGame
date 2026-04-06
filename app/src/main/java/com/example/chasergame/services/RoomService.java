@@ -14,10 +14,23 @@ import java.util.Map;
 public class RoomService {
     private final DatabaseReference roomsRef;
 
+    /**
+     * Constructor for RoomService.
+     * Initializes the database reference for the 'rooms' node.
+     */
     public RoomService() {
         this.roomsRef = FirebaseDatabase.getInstance().getReference("rooms");
     }
 
+    /**
+     * Creates a new game room in the database.
+     * Generates a unique room code and sets the initial room properties.
+     * @param hostId The ID of the user creating the room.
+     * @param hostName The name of the host.
+     * @param timeMs The turn duration in milliseconds.
+     * @param isPublic Whether the room is public or private.
+     * @param callback Callback to return the result of the room creation.
+     */
     public void createRoom(String hostId, String hostName, long timeMs, boolean isPublic, RoomCallback callback) {
         String roomId = generateRoomCode();
         Map<String, Object> room = new HashMap<>();
@@ -37,6 +50,12 @@ public class RoomService {
         });
     }
 
+    /**
+     * Searches for an available public room with 'waiting' status and less than 2 players.
+     * Joins the first matching room found.
+     * @param userId The ID of the user searching for a room.
+     * @param callback Callback to return the result of the search and join attempt.
+     */
     public void findAndJoinPublicRoom(String userId, RoomCallback callback) {
         roomsRef.orderByChild("type").equalTo("public").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -59,6 +78,13 @@ public class RoomService {
         });
     }
 
+    /**
+     * Joins a specific game room by its ID.
+     * Checks if the room exists and if it has space for another player.
+     * @param roomId The ID of the room to join.
+     * @param userId The ID of the user joining the room.
+     * @param callback Callback to return the result of the join attempt.
+     */
     public void joinRoom(String roomId, String userId, RoomCallback callback) {
         roomsRef.child(roomId).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -88,6 +114,11 @@ public class RoomService {
         });
     }
 
+    /**
+     * Attaches a listener to a specific room to monitor status changes or room closure.
+     * @param roomId The ID of the room to listen to.
+     * @param listener The listener to handle status updates.
+     */
     public void listenToRoom(String roomId, RoomStatusListener listener) {
         roomsRef.child(roomId).addValueEventListener(new ValueEventListener() {
             @Override
@@ -106,10 +137,18 @@ public class RoomService {
         });
     }
 
+    /**
+     * Removes the room from the database.
+     * @param roomId The ID of the room to be removed.
+     */
     public void leaveRoom(String roomId) {
         roomsRef.child(roomId).removeValue();
     }
 
+    /**
+     * Generates a random 6-character alphanumeric room code.
+     * @return A unique-ish string for room identification.
+     */
     private String generateRoomCode() {
         String chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
         java.util.Random r = new java.util.Random();
