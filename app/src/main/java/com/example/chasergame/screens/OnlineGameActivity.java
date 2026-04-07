@@ -42,6 +42,7 @@ public class OnlineGameActivity extends BaseActivity {
     /**
      * Called when the activity is first created.
      * Initializes the player ID, room ID, and sets up the UI and game service.
+     *
      * @param savedInstanceState If the activity is being re-initialized after previously being shut down then this Bundle contains the data it most recently supplied in onSaveInstanceState(Bundle).
      */
     @Override
@@ -82,6 +83,7 @@ public class OnlineGameActivity extends BaseActivity {
     /**
      * Initializes the game service, determines if the player is the host (Player 1),
      * and starts listening for game state updates.
+     *
      * @param roomId The ID of the room to join.
      */
     private void initGame(String roomId) {
@@ -129,6 +131,7 @@ public class OnlineGameActivity extends BaseActivity {
     /**
      * Handles updates to the game state received from the database.
      * Updates scores, turn information, question text, and synchronizes the turn timer.
+     *
      * @param snap The data snapshot of the current game state.
      */
     private void handleStateChange(DataSnapshot snap) {
@@ -175,7 +178,8 @@ public class OnlineGameActivity extends BaseActivity {
 
     /**
      * Called when an answer button is clicked. Validates the answer and updates the game.
-     * @param key The key of the selected answer ("A", "B", or "C").
+     *
+     * @param key        The key of the selected answer ("A", "B", or "C").
      * @param clickedBtn The button that was clicked.
      */
     private void onAnswerClicked(String key, Button clickedBtn) {
@@ -226,6 +230,7 @@ public class OnlineGameActivity extends BaseActivity {
 
     /**
      * Starts the local countdown timer for the current turn.
+     *
      * @param ms The remaining time for the turn in milliseconds.
      */
     private void startLocalTimer(long ms) {
@@ -246,6 +251,7 @@ public class OnlineGameActivity extends BaseActivity {
 
     /**
      * Displays a dialog when the game is over, showing the result and providing an exit option.
+     *
      * @param w The winner of the game.
      */
     private void showGameOverDialog(String w) {
@@ -268,6 +274,7 @@ public class OnlineGameActivity extends BaseActivity {
 
     /**
      * Enables or disables all answer buttons.
+     *
      * @param e True to enable, false to disable.
      */
     private void setButtonsEnabled(boolean e) {
@@ -288,9 +295,10 @@ public class OnlineGameActivity extends BaseActivity {
 
     /**
      * Highlights the clicked button based on whether the answer was correct or wrong.
+     *
      * @param ch The chosen answer key.
      * @param co The correct answer key.
-     * @param b The button that was clicked.
+     * @param b  The button that was clicked.
      */
     private void showAnswerColors(String ch, String co, Button b) {
         resetButtonColors();
@@ -299,6 +307,7 @@ public class OnlineGameActivity extends BaseActivity {
 
     /**
      * Safely retrieves a long value from a DataSnapshot.
+     *
      * @param s The DataSnapshot containing the value.
      * @return The long value or 0 if invalid.
      */

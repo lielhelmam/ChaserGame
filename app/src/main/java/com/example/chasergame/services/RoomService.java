@@ -25,9 +25,10 @@ public class RoomService {
     /**
      * Creates a new game room in the database.
      * Generates a unique room code and sets the initial room properties.
-     * @param hostId The ID of the user creating the room.
+     *
+     * @param hostId   The ID of the user creating the room.
      * @param hostName The name of the host.
-     * @param timeMs The turn duration in milliseconds.
+     * @param timeMs   The turn duration in milliseconds.
      * @param isPublic Whether the room is public or private.
      * @param callback Callback to return the result of the room creation.
      */
@@ -53,7 +54,8 @@ public class RoomService {
     /**
      * Searches for an available public room with 'waiting' status and less than 2 players.
      * Joins the first matching room found.
-     * @param userId The ID of the user searching for a room.
+     *
+     * @param userId   The ID of the user searching for a room.
      * @param callback Callback to return the result of the search and join attempt.
      */
     public void findAndJoinPublicRoom(String userId, RoomCallback callback) {
@@ -81,8 +83,9 @@ public class RoomService {
     /**
      * Joins a specific game room by its ID.
      * Checks if the room exists and if it has space for another player.
-     * @param roomId The ID of the room to join.
-     * @param userId The ID of the user joining the room.
+     *
+     * @param roomId   The ID of the room to join.
+     * @param userId   The ID of the user joining the room.
      * @param callback Callback to return the result of the join attempt.
      */
     public void joinRoom(String roomId, String userId, RoomCallback callback) {
@@ -116,7 +119,8 @@ public class RoomService {
 
     /**
      * Attaches a listener to a specific room to monitor status changes or room closure.
-     * @param roomId The ID of the room to listen to.
+     *
+     * @param roomId   The ID of the room to listen to.
      * @param listener The listener to handle status updates.
      */
     public void listenToRoom(String roomId, RoomStatusListener listener) {
@@ -139,6 +143,7 @@ public class RoomService {
 
     /**
      * Removes the room from the database.
+     *
      * @param roomId The ID of the room to be removed.
      */
     public void leaveRoom(String roomId) {
@@ -147,6 +152,7 @@ public class RoomService {
 
     /**
      * Generates a random 6-character alphanumeric room code.
+     *
      * @return A unique-ish string for room identification.
      */
     private String generateRoomCode() {

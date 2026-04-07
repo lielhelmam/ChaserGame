@@ -35,10 +35,10 @@
             android:name=".screens.SongSelectionActivity"
             android:exported="false" />
         <activity
-            android:name=".screens.SecretGameRulesActivity"
+            android:name=".screens.RhythmGameRulesActivity"
             android:exported="false" />
         <activity
-            android:name=".screens.SecretGameActivity"
+            android:name=".screens.RhythmGameActivity"
             android:exported="false" />
         <activity
             android:name=".screens.LeaderBoardActivity"

@@ -19,7 +19,8 @@ public class GameResultsUtil {
     /**
      * Saves a single game result to SharedPreferences.
      * Converts the list of results to a JSON string using Gson.
-     * @param context The application context.
+     *
+     * @param context    The application context.
      * @param gameResult The GameResult object to be saved.
      */
     public static void saveGameResult(Context context, GameResult gameResult) {
@@ -39,6 +40,7 @@ public class GameResultsUtil {
 
     /**
      * Retrieves the list of all saved game results from SharedPreferences.
+     *
      * @param context The application context.
      * @return A list of GameResult objects, or an empty list if none are found.
      */

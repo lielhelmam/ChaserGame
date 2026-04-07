@@ -6,17 +6,17 @@ import android.widget.Button;
 
 import com.example.chasergame.R;
 
-public class SecretGameRulesActivity extends BaseActivity {
+public class RhythmGameRulesActivity extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_secret_game_rules);
+        setContentView(R.layout.activity_rhythm_game_rules);
         setTopBarTitle("Rhythm Game Rules");
 
         Button btnStartGame = findViewById(R.id.btn_start_secret_game);
         btnStartGame.setOnClickListener(v -> {
-            Intent intent = new Intent(SecretGameRulesActivity.this, SongSelectionActivity.class);
+            Intent intent = new Intent(RhythmGameRulesActivity.this, SongSelectionActivity.class);
             startActivity(intent);
             finish();
         });

@@ -36,7 +36,7 @@ public class SongSelectionActivity extends BaseActivity {
             // Find the key for the selected song
             for (SongsAdminAdapter.Item item : songItems) {
                 if (item.value.equals(song)) {
-                    Intent intent = new Intent(this, SecretGameActivity.class);
+                    Intent intent = new Intent(this, RhythmGameActivity.class);
                     intent.putExtra("SONG_ID", item.key);
                     startActivity(intent);
                     break;

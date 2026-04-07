@@ -10,6 +10,7 @@ public class MainActivity extends BaseActivity {
     /**
      * Called when the activity is first created.
      * Sets the layout and initializes the main screen's buttons.
+     *
      * @param savedInstanceState If the activity is being re-initialized after previously being shut down then this Bundle contains the data it most recently supplied in onSaveInstanceState(Bundle).
      */
     @Override
@@ -31,7 +32,7 @@ public class MainActivity extends BaseActivity {
                 startActivity(new Intent(MainActivity.this, LeaderBoardActivity.class)));
 
         findViewById(R.id.btn_main_rythmgame).setOnClickListener(v ->
-                startActivity(new Intent(this, SecretGameRulesActivity.class)));
+                startActivity(new Intent(this, RhythmGameRulesActivity.class)));
 
         findViewById(R.id.btn_main_playagainstabot).setOnClickListener(v ->
                 startActivity(new Intent(this, ChooseTimeBotActivity.class)));

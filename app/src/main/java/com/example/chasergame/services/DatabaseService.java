@@ -41,6 +41,7 @@ public class DatabaseService implements IUserRepository, IQuestionRepository, IS
 
     /**
      * Singleton accessor for DatabaseService.
+     *
      * @return The single instance of DatabaseService.
      */
     public static DatabaseService getInstance() {
@@ -52,8 +53,9 @@ public class DatabaseService implements IUserRepository, IQuestionRepository, IS
 
     /**
      * Writes data to a specific path in the Firebase Database.
-     * @param path The database path to write to.
-     * @param data The data object to be stored.
+     *
+     * @param path     The database path to write to.
+     * @param data     The data object to be stored.
      * @param callback Optional callback for completion or failure.
      */
     private void writeData(@NotNull final String path, @NotNull final Object data, final @Nullable DatabaseCallback<Void> callback) {
@@ -70,7 +72,8 @@ public class DatabaseService implements IUserRepository, IQuestionRepository, IS
 
     /**
      * Deletes data from a specific path in the Firebase Database.
-     * @param path The database path to delete from.
+     *
+     * @param path     The database path to delete from.
      * @param callback Optional callback for completion or failure.
      */
     private void deleteData(@NotNull final String path, @Nullable final DatabaseCallback<Void> callback) {
@@ -87,6 +90,7 @@ public class DatabaseService implements IUserRepository, IQuestionRepository, IS
 
     /**
      * Returns a DatabaseReference for the given path.
+     *
      * @param path The database path.
      * @return A DatabaseReference pointing to the path.
      */
@@ -96,8 +100,9 @@ public class DatabaseService implements IUserRepository, IQuestionRepository, IS
 
     /**
      * Retrieves a list of objects of a specific class from a database path.
-     * @param path The database path to fetch from.
-     * @param clazz The class type of the objects.
+     *
+     * @param path     The database path to fetch from.
+     * @param clazz    The class type of the objects.
      * @param callback Callback to return the list of objects.
      */
     private <T> void getDataList(@NotNull final String path, @NotNull final Class<T> clazz, @NotNull final DatabaseCallback<List<T>> callback) {
@@ -117,6 +122,7 @@ public class DatabaseService implements IUserRepository, IQuestionRepository, IS
 
     /**
      * Generates a new unique push key for the given database path.
+     *
      * @param path The database path.
      * @return A unique key string.
      */
@@ -126,6 +132,7 @@ public class DatabaseService implements IUserRepository, IQuestionRepository, IS
 
     /**
      * Generates a new unique user ID.
+     *
      * @return A unique user ID string.
      */
     @Override
@@ -134,9 +141,11 @@ public class DatabaseService implements IUserRepository, IQuestionRepository, IS
     }
 
     // region User Section
+
     /**
      * Creates a new user entry in the database.
-     * @param user The User object to be stored.
+     *
+     * @param user     The User object to be stored.
      * @param callback Optional callback for the operation result.
      */
     @Override
@@ -146,7 +155,8 @@ public class DatabaseService implements IUserRepository, IQuestionRepository, IS
 
     /**
      * Retrieves a user's data by their unique ID.
-     * @param uid The user's unique ID.
+     *
+     * @param uid      The user's unique ID.
      * @param callback Callback to return the User object.
      */
     @Override
@@ -163,6 +173,7 @@ public class DatabaseService implements IUserRepository, IQuestionRepository, IS
 
     /**
      * Retrieves a list of all users from the database.
+     *
      * @param callback Callback to return the list of users.
      */
     @Override
@@ -172,7 +183,8 @@ public class DatabaseService implements IUserRepository, IQuestionRepository, IS
 
     /**
      * Deletes a user from the database by their ID.
-     * @param uid The ID of the user to delete.
+     *
+     * @param uid      The ID of the user to delete.
      * @param callback Optional callback for the operation result.
      */
     @Override
@@ -182,6 +194,7 @@ public class DatabaseService implements IUserRepository, IQuestionRepository, IS
 
     /**
      * Attempts to find a user with a matching username and password.
+     *
      * @param username The username to check.
      * @param password The password to check.
      * @param callback Callback to return the User object if found, or null otherwise.
@@ -209,7 +222,8 @@ public class DatabaseService implements IUserRepository, IQuestionRepository, IS
 
     /**
      * Checks if a specific email address is already registered in the database.
-     * @param email The email address to check.
+     *
+     * @param email    The email address to check.
      * @param callback Callback to return true if the email exists, false otherwise.
      */
     @Override
@@ -235,7 +249,8 @@ public class DatabaseService implements IUserRepository, IQuestionRepository, IS
 
     /**
      * Updates an existing user's information in the database.
-     * @param user The User object with updated data.
+     *
+     * @param user     The User object with updated data.
      * @param callback Optional callback for the operation result.
      */
     @Override
@@ -245,8 +260,9 @@ public class DatabaseService implements IUserRepository, IQuestionRepository, IS
 
     /**
      * Increments the win count for a user using a database transaction.
-     * @param userId The ID of the user.
-     * @param winType The type of win to increment (e.g., "onlineWins").
+     *
+     * @param userId   The ID of the user.
+     * @param winType  The type of win to increment (e.g., "onlineWins").
      * @param callback Optional callback for the operation result.
      */
     @Override
@@ -273,8 +289,10 @@ public class DatabaseService implements IUserRepository, IQuestionRepository, IS
     //endregion
 
     //region Question Section
+
     /**
      * Retrieves all questions from the database.
+     *
      * @param callback Callback to return a list of question items.
      */
     @Override
@@ -300,7 +318,8 @@ public class DatabaseService implements IUserRepository, IQuestionRepository, IS
 
     /**
      * Deletes a question from the database by its key.
-     * @param key The key of the question to delete.
+     *
+     * @param key      The key of the question to delete.
      * @param callback Optional callback for the operation result.
      */
     @Override
@@ -310,7 +329,8 @@ public class DatabaseService implements IUserRepository, IQuestionRepository, IS
 
     /**
      * Updates a question in the database.
-     * @param key The key of the question.
+     *
+     * @param key      The key of the question.
      * @param question The updated Question object.
      * @param callback Optional callback for the operation result.
      */
@@ -321,6 +341,7 @@ public class DatabaseService implements IUserRepository, IQuestionRepository, IS
 
     /**
      * Adds a new question to the database with a generated ID.
+     *
      * @param question The Question object to add.
      * @param callback Optional callback for the operation result.
      */
@@ -363,8 +384,10 @@ public class DatabaseService implements IUserRepository, IQuestionRepository, IS
     //endregion
 
     // region Song Section
+
     /**
      * Retrieves a list of all songs available in the rhythm game.
+     *
      * @param callback Callback to return the list of songs.
      */
     @Override

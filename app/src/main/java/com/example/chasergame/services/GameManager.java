@@ -11,6 +11,7 @@ public class GameManager {
     /**
      * Creates a new game instance in the database.
      * Initializes the game status to 'waiting' and sets the creator as player 1.
+     *
      * @param userId The ID of the user creating the game.
      * @return A DatabaseReference pointing to the newly created game.
      */
@@ -27,6 +28,7 @@ public class GameManager {
     /**
      * Joins an existing game as player 2.
      * Updates the game status to 'playing'.
+     *
      * @param gameId The ID of the game to join.
      * @param userId The ID of the user joining the game.
      */
@@ -39,6 +41,7 @@ public class GameManager {
 
     /**
      * Deletes a game instance from the database using its ID.
+     *
      * @param gameId The ID of the game to be deleted.
      */
     public static void deleteGame(String gameId) {

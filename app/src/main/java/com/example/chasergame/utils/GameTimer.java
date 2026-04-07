@@ -8,6 +8,7 @@ public class GameTimer {
 
     /**
      * Constructor for GameTimer.
+     *
      * @param listener The listener to be notified of timer events.
      */
     public GameTimer(TimerListener listener) {
@@ -17,6 +18,7 @@ public class GameTimer {
     /**
      * Starts the countdown timer.
      * If a timer is already running, it will be cancelled before starting the new one.
+     *
      * @param durationMillis The duration of the timer in milliseconds.
      */
     public void start(long durationMillis) {

@@ -20,18 +20,19 @@ import java.util.Map;
 import java.util.Random;
 
 public class OnlineGameService {
+    private static long serverTimeOffsetMs = 0;
+    private static boolean isTimeSynced = false;
     private final DatabaseReference roomRef;
     private final DatabaseReference gameRef;
     private final String playerId;
     private ValueEventListener gameListener;
     private ValueEventListener timeOffsetListener;
-    private static long serverTimeOffsetMs = 0;
-    private static boolean isTimeSynced = false;
 
     /**
      * Constructor for OnlineGameService.
      * Initializes database references and starts syncing with server time.
-     * @param roomId The ID of the game room.
+     *
+     * @param roomId   The ID of the game room.
      * @param playerId The ID of the current player.
      */
     public OnlineGameService(String roomId, String playerId) {
@@ -39,6 +40,15 @@ public class OnlineGameService {
         this.roomRef = FirebaseDatabase.getInstance().getReference("rooms").child(roomId);
         this.gameRef = roomRef.child("game");
         listenToServerTime();
+    }
+
+    /**
+     * Checks if the server time offset has been successfully synced.
+     *
+     * @return true if time is synced, false otherwise.
+     */
+    public static boolean isTimeSynced() {
+        return isTimeSynced;
     }
 
     /**
@@ -64,15 +74,8 @@ public class OnlineGameService {
     }
 
     /**
-     * Checks if the server time offset has been successfully synced.
-     * @return true if time is synced, false otherwise.
-     */
-    public static boolean isTimeSynced() {
-        return isTimeSynced;
-    }
-
-    /**
      * Calculates the current server time based on the local time and synced offset.
+     *
      * @return Current server time in milliseconds.
      */
     public long getServerTime() {
@@ -82,6 +85,7 @@ public class OnlineGameService {
     /**
      * Attaches a listener to the game state in the database.
      * Notifies the listener about game state changes or game over events.
+     *
      * @param listener The callback listener for game state events.
      */
     public void startListening(GameStateListener listener) {
@@ -120,7 +124,8 @@ public class OnlineGameService {
     /**
      * Initializes the game state in the database with default values.
      * Sets the first turn, initial scores, and prepares the first question.
-     * @param defaultTurnMs Default duration for a turn in milliseconds.
+     *
+     * @param defaultTurnMs   Default duration for a turn in milliseconds.
      * @param questionService Service used to fetch questions.
      */
     public void initializeGame(long defaultTurnMs, QuestionService questionService) {
@@ -141,7 +146,8 @@ public class OnlineGameService {
 
     /**
      * Validates a player's answer against the correct answer stored in the database.
-     * @param key The answer key selected by the player.
+     *
+     * @param key      The answer key selected by the player.
      * @param callback Callback to return the result of the validation.
      */
     public void validateAnswer(String key, AnswerCallback callback) {
@@ -161,9 +167,10 @@ public class OnlineGameService {
     /**
      * Increments the player's score in the database and triggers a new question.
      * Uses a transaction to ensure atomic score updates.
-     * @param playerKey The key identifying the player (e.g., "p1" or "p2").
+     *
+     * @param playerKey       The key identifying the player (e.g., "p1" or "p2").
      * @param questionService Service to fetch a new question.
-     * @param callback Optional callback for completion or failure.
+     * @param callback        Optional callback for completion or failure.
      */
     public void submitAnswer(String playerKey, QuestionService questionService, DatabaseService.DatabaseCallback<Void> callback) {
         gameRef.child(playerKey + "Score").runTransaction(new Transaction.Handler() {
@@ -190,6 +197,7 @@ public class OnlineGameService {
     /**
      * Handles the end of a turn, switching to the next player or ending the game.
      * Calculates the winner if the game is finished.
+     *
      * @param defaultTurnMs Duration for the next turn.
      */
     public void endTurn(long defaultTurnMs) {
@@ -219,6 +227,7 @@ public class OnlineGameService {
 
     /**
      * Safely retrieves a long value from MutableData.
+     *
      * @param d The MutableData containing the potential number.
      * @return The long value, or 0L if invalid.
      */
@@ -230,6 +239,7 @@ public class OnlineGameService {
     /**
      * Fetches a new random question and updates the game state in the database.
      * Shuffles the answers before uploading.
+     *
      * @param questionService Service used to retrieve questions.
      */
     public void setNewQuestion(QuestionService questionService) {

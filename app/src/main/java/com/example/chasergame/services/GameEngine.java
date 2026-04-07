@@ -10,6 +10,7 @@ public class GameEngine {
 
     /**
      * Constructor for GameEngine.
+     *
      * @param visibleSteps The number of visible steps on the game track.
      */
     public GameEngine(int visibleSteps) {
@@ -31,6 +32,7 @@ public class GameEngine {
 
     /**
      * Checks if the second player (the chaser) has caught the first player.
+     *
      * @return True if player 2's position is greater than or equal to player 1's, false otherwise.
      */
     public boolean isCaught() {
@@ -46,6 +48,7 @@ public class GameEngine {
 
     /**
      * Gets the current position of player 1.
+     *
      * @return Player 1's position.
      */
     public int getP1Pos() {
@@ -54,6 +57,7 @@ public class GameEngine {
 
     /**
      * Gets the current position of player 2.
+     *
      * @return Player 2's position.
      */
     public int getP2Pos() {
@@ -62,6 +66,7 @@ public class GameEngine {
 
     /**
      * Gets the current score of player 1.
+     *
      * @return Player 1's score.
      */
     public int getP1Score() {
@@ -70,6 +75,7 @@ public class GameEngine {
 
     /**
      * Gets the current score of player 2.
+     *
      * @return Player 2's score.
      */
     public int getP2Score() {
@@ -78,6 +84,7 @@ public class GameEngine {
 
     /**
      * Gets the ID of the current active player (1 or 2).
+     *
      * @return The current player ID.
      */
     public int getCurrentPlayer() {
@@ -86,6 +93,7 @@ public class GameEngine {
 
     /**
      * Gets the number of visible steps in the game.
+     *
      * @return The number of visible steps.
      */
     public int getVisibleSteps() {

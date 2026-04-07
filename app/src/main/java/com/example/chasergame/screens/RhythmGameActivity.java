@@ -33,7 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-public class SecretGameActivity extends BaseActivity implements GameView.GameEventListener {
+public class RhythmGameActivity extends BaseActivity implements GameView.GameEventListener {
 
     private GameView gameView;
     private TextView tvScore, tvSongName, tvAccuracy;
@@ -50,7 +50,7 @@ public class SecretGameActivity extends BaseActivity implements GameView.GameEve
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_secret_game);
+        setContentView(R.layout.activity_rhythm_game);
 
         initViews();
         resolveSkin();

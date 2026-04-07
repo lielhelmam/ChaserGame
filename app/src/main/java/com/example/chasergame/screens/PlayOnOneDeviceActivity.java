@@ -16,7 +16,6 @@ import androidx.appcompat.app.AlertDialog;
 import com.example.chasergame.R;
 import com.example.chasergame.adapters.QuestionsAdapter;
 import com.example.chasergame.models.Question;
-import com.example.chasergame.models.User;
 import com.example.chasergame.services.DatabaseService;
 import com.example.chasergame.services.GameEngine;
 import com.example.chasergame.utils.GameTimer;
