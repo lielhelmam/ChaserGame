@@ -271,10 +271,11 @@ public class OnlineGameService {
     }
 
     /**
-     * Removes the entire game room from the database.
+     * Updates the room status to 'finished' instead of removing it from the database.
+     * This keeps the room as a record.
      */
     public void deleteRoom() {
-        roomRef.removeValue();
+        roomRef.child("status").setValue("finished");
     }
 
     public interface GameStateListener {

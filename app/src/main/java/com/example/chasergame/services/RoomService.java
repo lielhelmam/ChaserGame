@@ -97,6 +97,12 @@ public class RoomService {
                     return;
                 }
 
+                String status = snapshot.child("status").getValue(String.class);
+                if (!"waiting".equals(status)) {
+                    callback.onFailed("Room is no longer active or is already full");
+                    return;
+                }
+
                 long count = snapshot.child("players").getChildrenCount();
                 if (count >= 2) {
                     callback.onFailed("Room full");
@@ -130,7 +136,12 @@ public class RoomService {
                 if (!snapshot.exists()) {
                     listener.onRoomClosed();
                 } else {
-                    listener.onStatusChanged(snapshot);
+                    String status = snapshot.child("status").getValue(String.class);
+                    if ("cancelled".equals(status) || "finished".equals(status)) {
+                        listener.onRoomClosed();
+                    } else {
+                        listener.onStatusChanged(snapshot);
+                    }
                 }
             }
 
@@ -142,12 +153,13 @@ public class RoomService {
     }
 
     /**
-     * Removes the room from the database.
+     * Updates the room status to 'cancelled' instead of removing it from the database.
+     * This keeps the room as a record.
      *
-     * @param roomId The ID of the room to be removed.
+     * @param roomId The ID of the room to be marked as cancelled.
      */
     public void leaveRoom(String roomId) {
-        roomsRef.child(roomId).removeValue();
+        roomsRef.child(roomId).child("status").setValue("cancelled");
     }
 
     /**
