@@ -62,7 +62,7 @@ public class SongSelectionActivity extends BaseActivity {
         });
 
         findViewById(R.id.btn_go_to_shop).setOnClickListener(v -> navigateTo(ShopActivity.class, false));
-        findViewById(R.id.btn_back_to_rules).setOnClickListener(v -> finish());
+        findViewById(R.id.btn_back_to_rules).setOnClickListener(v -> navigateTo(RhythmGameRulesActivity.class, false));
     }
 
     private void loadSongs() {

@@ -23,6 +23,8 @@ public class RhythmGameRulesActivity extends BaseActivity {
 
         Button btnBackToMain = findViewById(R.id.btn_back_to_main);
         btnBackToMain.setOnClickListener(v -> {
+            Intent intent = new Intent(RhythmGameRulesActivity.this, MainActivity.class);
+            startActivity(intent);
             finish();
         });
     }
