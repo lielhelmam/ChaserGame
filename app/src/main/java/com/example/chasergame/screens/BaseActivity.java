@@ -60,7 +60,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         questionService = new QuestionService(databaseService);
         songService = new SongService(databaseService);
         leaderboardService = new LeaderboardService(databaseService);
-        shopService = new ShopService(databaseService);
+        shopService = new ShopService(authService);
         getOnBackPressedDispatcher().addCallback(this, drawerBackCallback);
     }
 

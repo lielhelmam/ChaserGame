@@ -17,14 +17,19 @@ import java.util.List;
 
 public class SkinsAdapter extends RecyclerView.Adapter<SkinsAdapter.ViewHolder> {
 
-    private final List<Skin> skins;
-    private final User currentUser;
+    private List<Skin> skins;
+    private User currentUser;
     private final OnSkinActionListener listener;
 
     public SkinsAdapter(List<Skin> skins, User user, OnSkinActionListener listener) {
         this.skins = skins;
         this.currentUser = user;
         this.listener = listener;
+    }
+
+    public void updateUser(User user) {
+        this.currentUser = user;
+        notifyDataSetChanged();
     }
 
     @NonNull

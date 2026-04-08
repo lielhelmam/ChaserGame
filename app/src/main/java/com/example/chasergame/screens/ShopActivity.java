@@ -60,6 +60,35 @@ public class ShopActivity extends BaseActivity {
         btnClaimGift.setOnClickListener(v -> claimGift());
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        refreshUserData();
+    }
+
+    private void refreshUserData() {
+        if (currentUser != null && currentUser.getId() != null) {
+            databaseService.getUser(currentUser.getId(), new DatabaseService.DatabaseCallback<User>() {
+                @Override
+                public void onCompleted(User updatedUser) {
+                    if (updatedUser != null) {
+                        currentUser = updatedUser;
+                        authService.syncUser(currentUser);
+                        updateUI();
+                        checkGiftStatus();
+                        if (adapter != null) {
+                            adapter.updateUser(currentUser);
+                        }
+                    }
+                }
+
+                @Override
+                public void onFailed(Exception e) {
+                }
+            });
+        }
+    }
+
     private void checkGiftStatus() {
         btnClaimGift.setVisibility(currentUser.isGiftClaimed() ? View.GONE : View.VISIBLE);
     }
@@ -68,9 +97,11 @@ public class ShopActivity extends BaseActivity {
         shopService.claimGift(currentUser, new DatabaseService.DatabaseCallback<Void>() {
             @Override
             public void onCompleted(Void unused) {
-                authService.syncUser(currentUser);
                 updateUI();
                 checkGiftStatus();
+                if (adapter != null) {
+                    adapter.updateUser(currentUser);
+                }
                 Toast.makeText(ShopActivity.this, "Gift claimed!", Toast.LENGTH_SHORT).show();
             }
 
@@ -93,9 +124,8 @@ public class ShopActivity extends BaseActivity {
                 shopService.buySkin(currentUser, skin, new DatabaseService.DatabaseCallback<Void>() {
                     @Override
                     public void onCompleted(Void unused) {
-                        authService.syncUser(currentUser);
                         updateUI();
-                        adapter.notifyDataSetChanged();
+                        adapter.updateUser(currentUser);
                         Toast.makeText(ShopActivity.this, "Purchased " + skin.name, Toast.LENGTH_SHORT).show();
                     }
 
@@ -111,8 +141,7 @@ public class ShopActivity extends BaseActivity {
                 shopService.equipSkin(currentUser, skin.id, new DatabaseService.DatabaseCallback<Void>() {
                     @Override
                     public void onCompleted(Void unused) {
-                        authService.syncUser(currentUser);
-                        adapter.notifyDataSetChanged();
+                        adapter.updateUser(currentUser);
                         Toast.makeText(ShopActivity.this, "Equipped " + skin.name, Toast.LENGTH_SHORT).show();
                     }
 
@@ -159,8 +188,7 @@ public class ShopActivity extends BaseActivity {
                     shopService.updateCustomSkin(currentUser, circle, target, bg, effect, new DatabaseService.DatabaseCallback<Void>() {
                         @Override
                         public void onCompleted(Void unused) {
-                            authService.syncUser(currentUser);
-                            adapter.notifyDataSetChanged();
+                            adapter.updateUser(currentUser);
                             Toast.makeText(ShopActivity.this, "Custom skin updated!", Toast.LENGTH_SHORT).show();
                         }
 

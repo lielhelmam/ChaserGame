@@ -55,6 +55,35 @@ public class AuthService {
     }
 
     /**
+     * Updates the user in the database and automatically syncs the local data if the updated user
+     * is the currently logged-in user.
+     *
+     * @param user     The User object to update.
+     * @param callback Callback for the database operation.
+     */
+    public void updateUserAndSync(User user, DatabaseService.DatabaseCallback<Void> callback) {
+        userRepository.updateUser(user, new DatabaseService.DatabaseCallback<Void>() {
+            @Override
+            public void onCompleted(Void result) {
+                User current = getCurrentUser();
+                if (current != null && current.getId().equals(user.getId())) {
+                    syncUser(user);
+                }
+                if (callback != null) {
+                    callback.onCompleted(result);
+                }
+            }
+
+            @Override
+            public void onFailed(Exception e) {
+                if (callback != null) {
+                    callback.onFailed(e);
+                }
+            }
+        });
+    }
+
+    /**
      * Attempts to log in a user with the provided username and password.
      * Updates local storage with the user data upon successful login.
      *

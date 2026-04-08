@@ -121,7 +121,7 @@ public class UsersListActivity extends BaseActivity {
                     String newPointsStr = input.getText().toString();
                     if (!newPointsStr.isEmpty()) {
                         user.setPoints(Integer.parseInt(newPointsStr));
-                        databaseService.updateUser(user, new DatabaseService.DatabaseCallback<Void>() {
+                        authService.updateUserAndSync(user, new DatabaseService.DatabaseCallback<Void>() {
                             @Override
                             public void onCompleted(Void unused) {
                                 userAdapter.updateUser(user);

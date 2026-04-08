@@ -7,15 +7,15 @@ import org.jetbrains.annotations.NotNull;
 
 public class ShopService {
     private static final int GIFT_AMOUNT = 100000;
-    private final IUserRepository userRepository;
+    private final AuthService authService;
 
     /**
      * Constructor for ShopService.
      *
-     * @param userRepository The repository to handle user data updates.
+     * @param authService The auth service to handle user data updates and sync.
      */
-    public ShopService(IUserRepository userRepository) {
-        this.userRepository = userRepository;
+    public ShopService(AuthService authService) {
+        this.authService = authService;
     }
 
     /**
@@ -29,7 +29,7 @@ public class ShopService {
         if (!user.isGiftClaimed()) {
             user.setPoints(user.getPoints() + GIFT_AMOUNT);
             user.setGiftClaimed(true);
-            userRepository.updateUser(user, callback);
+            authService.updateUserAndSync(user, callback);
         } else {
             callback.onFailed(new Exception("Gift already claimed"));
         }
@@ -47,7 +47,7 @@ public class ShopService {
         if (user.getPoints() >= skin.price) {
             user.setPoints(user.getPoints() - skin.price);
             user.getOwnedSkins().add(skin.id);
-            userRepository.updateUser(user, callback);
+            authService.updateUserAndSync(user, callback);
         } else {
             callback.onFailed(new Exception("Not enough points"));
         }
@@ -62,7 +62,7 @@ public class ShopService {
      */
     public void equipSkin(@NotNull User user, @NotNull String skinId, @NotNull DatabaseService.DatabaseCallback<Void> callback) {
         user.setEquippedSkin(skinId);
-        userRepository.updateUser(user, callback);
+        authService.updateUserAndSync(user, callback);
     }
 
     /**
@@ -80,6 +80,6 @@ public class ShopService {
         user.setCustomTargetColor(target);
         user.setCustomBackgroundColor(bg);
         user.setCustomEffectType(effect);
-        userRepository.updateUser(user, callback);
+        authService.updateUserAndSync(user, callback);
     }
 }
