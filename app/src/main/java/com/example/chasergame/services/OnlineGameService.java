@@ -278,6 +278,27 @@ public class OnlineGameService {
         roomRef.child("status").setValue("finished");
     }
 
+    /**
+     * Ends the game and declares a winner when a player forfeits (quits).
+     *
+     * @param quitterKey The key identifying the player who quit ("p1" or "p2").
+     * @param callback   Callback to handle the operation's completion.
+     */
+    public void forfeitGame(String quitterKey, DatabaseService.DatabaseCallback<Void> callback) {
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("gameOver", true);
+        updates.put("winner", "p1".equals(quitterKey) ? "P2" : "P1");
+        updates.put("forfeit", true);
+
+        gameRef.updateChildren(updates).addOnCompleteListener(task -> {
+            if (task.isSuccessful() && callback != null) {
+                callback.onCompleted(null);
+            } else if (!task.isSuccessful() && callback != null) {
+                callback.onFailed(task.getException());
+            }
+        });
+    }
+
     public interface GameStateListener {
         void onGameStateChanged(DataSnapshot snapshot);
 

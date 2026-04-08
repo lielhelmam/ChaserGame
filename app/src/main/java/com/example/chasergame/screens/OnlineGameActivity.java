@@ -1,5 +1,6 @@
 package com.example.chasergame.screens;
 
+import android.app.AlertDialog;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -77,7 +78,8 @@ public class OnlineGameActivity extends BaseActivity {
         btnA.setOnClickListener(v -> onAnswerClicked("A", btnA));
         btnB.setOnClickListener(v -> onAnswerClicked("B", btnB));
         btnC.setOnClickListener(v -> onAnswerClicked("C", btnC));
-        findViewById(R.id.btnEndGame).setOnClickListener(v -> deleteAndExit());
+
+        findViewById(R.id.btnExitGame).setOnClickListener(v -> deleteAndExit());
     }
 
     /**
@@ -135,6 +137,16 @@ public class OnlineGameActivity extends BaseActivity {
      * @param snap The data snapshot of the current game state.
      */
     private void handleStateChange(DataSnapshot snap) {
+        if (finishing) return;
+
+        // Check if game is over (forfeit or natural end)
+        Boolean isOver = snap.child("gameOver").getValue(Boolean.class);
+        if (isOver != null && isOver) {
+            String winner = snap.child("winner").getValue(String.class);
+            showGameOverDialog(winner);
+            return;
+        }
+
         long p1 = getLong(snap.child("p1Score"));
         long p2 = getLong(snap.child("p2Score"));
         tvScore.setText("P1: " + p1 + " | P2: " + p2);
@@ -320,9 +332,28 @@ public class OnlineGameActivity extends BaseActivity {
      * Deletes the room if the user is the host and navigates back to the home screen.
      */
     private void deleteAndExit() {
-        finishing = true;
-        if (isPlayer1) gameService.deleteRoom();
-        goHome();
+        if (finishing) return;
+        
+        new AlertDialog.Builder(this)
+                .setTitle("Exit Game")
+                .setMessage("Are you sure you want to quit? This will be counted as a loss.")
+                .setPositiveButton("Exit", (dialog, which) -> {
+                    finishing = true;
+                    gameService.forfeitGame(isPlayer1 ? "p1" : "p2", new DatabaseService.DatabaseCallback<Void>() {
+                        @Override
+                        public void onCompleted(Void unused) {
+                            gameService.stopListening();
+                            goHome();
+                        }
+
+                        @Override
+                        public void onFailed(Exception e) {
+                            goHome();
+                        }
+                    });
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
     }
 
     /**
