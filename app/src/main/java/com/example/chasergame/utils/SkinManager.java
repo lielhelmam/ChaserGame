@@ -39,7 +39,7 @@ public class SkinManager {
             skins.add(new Skin("cyberpunk", "Cyberpunk", 100000, Color.parseColor("#FF00FF"), Color.parseColor("#9D00FF"), Color.parseColor("#0D0221"), "glow"));
 
             // Emerald Skin
-            skins.add(new Skin("emerald", "Emerald Forest", 100000, Color.parseColor("#2ECC71"), Color.parseColor("#F1C40F"), Color.parseColor("#0B2010"), "particles"));
+            skins.add(new Skin("emerald", "Emerald Forest", 100000, Color.parseColor("#2ECC71"), Color.parseColor("#F1C40F"), Color.parseColor("#0B2010"), "emerald"));
 
             // Abyssal Void
             skins.add(new Skin("void", "Abyssal Void", 100000, Color.parseColor("#00E5FF"), Color.parseColor("#311B92"), Color.parseColor("#000000"), "glow"));
@@ -51,7 +51,7 @@ public class SkinManager {
             skins.add(new Skin("forest", "Forest Spirit", 100000, Color.parseColor("#8BC34A"), Color.parseColor("#689F38"), Color.parseColor("#1B1B0E"), "particles"));
 
             // Frozen Glaze
-            skins.add(new Skin("frozen", "Frozen Glaze", 100000, Color.parseColor("#B3E5FC"), Color.parseColor("#FFFFFF"), Color.parseColor("#01579B"), "bubbles"));
+            skins.add(new Skin("frozen", "Frozen Glaze", 100000, Color.parseColor("#B3E5FC"), Color.parseColor("#FFFFFF"), Color.parseColor("#01579B"), "frozen"));
 
             // Toxic Waste
             skins.add(new Skin("toxic", "Toxic Waste", 100000, Color.parseColor("#CCFF00"), Color.parseColor("#CCFF00"), Color.parseColor("#1A1A1A"), "glow"));
@@ -65,13 +65,13 @@ public class SkinManager {
             skins.add(new Skin("ghost", "Ghostly Whisper", 100000, Color.parseColor("#CFD8DC"), Color.parseColor("#80DEEA"), Color.parseColor("#263238"), "particles"));
 
             // Retro Wave
-            skins.add(new Skin("retro", "Retro Wave", 100000, Color.parseColor("#FF007F"), Color.parseColor("#00FFFF"), Color.parseColor("#000022"), "glow"));
+            skins.add(new Skin("retro", "Retro Wave", 100000, Color.parseColor("#FF007F"), Color.parseColor("#00FFFF"), Color.parseColor("#000022"), "retro"));
 
             // Blood Moon
             skins.add(new Skin("bloodmoon", "Blood Moon", 100000, Color.parseColor("#D50000"), Color.parseColor("#212121"), Color.parseColor("#000000"), "particles"));
 
             // Electric Storm
-            skins.add(new Skin("electric", "Electric Storm", 100000, Color.parseColor("#FFFF00"), Color.parseColor("#0D47A1"), Color.parseColor("#000000"), "glow"));
+            skins.add(new Skin("electric", "Electric Storm", 100000, Color.parseColor("#FFFF00"), Color.parseColor("#0D47A1"), Color.parseColor("#000000"), "electric"));
 
             // Custom Skin Placeholder
             skins.add(new Skin("custom", "Custom Creation", 500000, Color.parseColor("#FFFFFF"), Color.parseColor("#FFFFFF"), Color.parseColor("#333333"), "none"));
