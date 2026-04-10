@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.AttributeSet;
@@ -51,7 +52,6 @@ public class GameView extends ConstraintLayout {
     private long currentSongTime = 0;
     private long lastTickTime = 0;
     private GameEventListener listener;
-    private final List<View> particlePool = new ArrayList<>();
 
     private static class ActiveNote {
         Note data;
@@ -121,8 +121,33 @@ public class GameView extends ConstraintLayout {
 
     private void applySkin() {
         if (equippedSkin == null) return;
-        if (targetLeft != null) targetLeft.getBackground().setTint(equippedSkin.targetColor);
-        if (targetRight != null) targetRight.getBackground().setTint(equippedSkin.targetColor);
+        float density = getResources().getDisplayMetrics().density;
+        
+        // Background for the whole GameView
+        this.setBackgroundColor(equippedSkin.backgroundColor);
+        
+        // Targets: Outline/Stroke ONLY (Hollow)
+        int strokeWidth = (int) (4 * density);
+        if (targetLeft != null) {
+            GradientDrawable gd = new GradientDrawable();
+            gd.setShape(GradientDrawable.RECTANGLE);
+            gd.setColor(Color.TRANSPARENT); // Empty inside
+            gd.setStroke(strokeWidth, equippedSkin.targetColor);
+            gd.setCornerRadius(15 * density);
+            targetLeft.setBackground(gd);
+        }
+        if (targetRight != null) {
+            GradientDrawable gd = new GradientDrawable();
+            gd.setShape(GradientDrawable.RECTANGLE);
+            gd.setColor(Color.TRANSPARENT); // Empty inside
+            gd.setStroke(strokeWidth, equippedSkin.targetColor);
+            gd.setCornerRadius(15 * density);
+            targetRight.setBackground(gd);
+        }
+        
+        // Lanes: Transparent to avoid colored squares at the bottom
+        if (laneLeft != null) laneLeft.setBackgroundColor(Color.TRANSPARENT);
+        if (laneRight != null) laneRight.setBackgroundColor(Color.TRANSPARENT);
     }
 
     private void setupInputListeners() {
@@ -205,6 +230,14 @@ public class GameView extends ConstraintLayout {
                  }
             } else if (an.wasHit && !an.data.isSlider()) {
                 if (isGameRunning && i < activeNotes.size()) activeNotes.remove(i);
+            } else {
+                // --- TRAIL EFFECTS FOR FALLING NOTES ---
+                if (equippedSkin != null && !"none".equals(equippedSkin.effectType) && !an.wasMissed) {
+                    // Emit trail particles every few frames to save performance
+                    if (System.currentTimeMillis() % 3 == 0) {
+                        listener.onRequestTrail(an.view, equippedSkin.effectType, equippedSkin.circleColor);
+                    }
+                }
             }
         }
     }
@@ -226,7 +259,36 @@ public class GameView extends ConstraintLayout {
             v.setLayoutParams(new FrameLayout.LayoutParams(size, sliderHeight));
         } else {
             v.setBackgroundResource(R.drawable.note_circle);
-            if (equippedSkin != null) v.getBackground().setTint(equippedSkin.circleColor);
+            if (equippedSkin != null) {
+                v.getBackground().setTint(equippedSkin.circleColor);
+                
+                // --- ADDING SKIN VISUALS DURING FALL ---
+                String effect = equippedSkin.effectType;
+                if ("glow".equals(effect) || "electric".equals(effect)) {
+                    v.setElevation(10 * density);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                        v.setOutlineAmbientShadowColor(equippedSkin.circleColor);
+                        v.setOutlineSpotShadowColor(equippedSkin.circleColor);
+                    }
+                } else if ("ghost".equals(effect)) {
+                    v.setAlpha(0.6f);
+                } else if ("bubbles".equals(effect)) {
+                    GradientDrawable gd = new GradientDrawable();
+                    gd.setShape(GradientDrawable.OVAL);
+                    gd.setColor(equippedSkin.circleColor);
+                    gd.setAlpha(180);
+                    gd.setStroke(3, Color.WHITE);
+                    v.setBackground(gd);
+                }
+                
+                // Continuous Animation for some skins
+                if ("electric".equals(effect)) {
+                    v.animate().alpha(0.5f).setDuration(100).setUpdateListener(animation -> {
+                        if (v.getAlpha() < 0.6f) v.setAlpha(1f);
+                        else v.setAlpha(0.5f);
+                    }).start();
+                }
+            }
             v.setLayoutParams(new FrameLayout.LayoutParams(size, size));
         }
 
@@ -299,64 +361,9 @@ public class GameView extends ConstraintLayout {
         }).start();
     }
 
-    private int particleCounter = 0;
     private void spawnBurstParticles(View target, int color) {
-        if (equippedSkin == null) return;
-        if ("none".equals(equippedSkin.effectType)) return;
-        
-        // Effect intensity logic
-        int count = 2;
-        long duration = 200;
-        float scale = 0.1f;
-        
-        if ("particles".equals(equippedSkin.effectType) || "ghost".equals(equippedSkin.effectType) || "emerald".equals(equippedSkin.effectType)) {
-            count = 8;
-            duration = 400;
-        } else if ("glow".equals(equippedSkin.effectType) || "retro".equals(equippedSkin.effectType) || "electric".equals(equippedSkin.effectType)) {
-            count = 12; // More "glowy" burst
-            duration = 300;
-            scale = 0.5f; // Larger particles for glow
-        } else if ("bubbles".equals(equippedSkin.effectType) || "frozen".equals(equippedSkin.effectType)) {
-            count = 5;
-            duration = 600; // Slower bubbles
-        } else if ("sparkle".equals(equippedSkin.effectType) || "gold".equals(equippedSkin.effectType)) {
-            count = 15;
-            duration = 150; // Quick sparkles
-        }
-
-        if (count == 2 && ++particleCounter % 4 != 0) return;
-
-        ViewGroup root = (ViewGroup) getRootView();
-        if (root == null) return;
-        float density = getResources().getDisplayMetrics().density;
-        int[] tPos = new int[2], rPos = new int[2];
-        target.getLocationOnScreen(tPos); root.getLocationOnScreen(rPos);
-        float cx = (tPos[0] - rPos[0]) + target.getWidth() / 2f;
-        float cy = (tPos[1] - rPos[1]) + target.getHeight() / 2f;
-
-        for (int i = 0; i < count; i++) {
-            final View p = particlePool.isEmpty() ? new View(getContext()) : particlePool.remove(particlePool.size() - 1);
-            int pSize = (int) (12 * density);
-            p.setLayoutParams(new FrameLayout.LayoutParams(pSize, pSize));
-            GradientDrawable gd = new GradientDrawable(); gd.setShape(GradientDrawable.OVAL); gd.setColor(color); p.setBackground(gd);
-            p.setX(cx - pSize / 2f); p.setY(cy - pSize / 2f);
-            root.addView(p);
-            float ang = (float) (random.nextFloat() * 2 * Math.PI), dist = (20 + random.nextFloat() * 40) * density;
-            p.animate()
-                    .translationXBy((float)Math.cos(ang)*dist)
-                    .translationYBy((float)Math.sin(ang)*dist)
-                    .alpha(0)
-                    .scaleX(scale)
-                    .scaleY(scale)
-                    .setDuration(duration)
-                    .withEndAction(() -> {
-                        root.removeView(p);
-                        p.setAlpha(1f);
-                        p.setScaleX(1f);
-                        p.setScaleY(1f);
-                        particlePool.add(p);
-                    }).start();
-        }
+        if (equippedSkin == null || listener == null) return;
+        listener.onRequestEffect(target, equippedSkin.effectType, color);
     }
 
     private void showFeedback(String text, int color, int lane) {
@@ -374,5 +381,7 @@ public class GameView extends ConstraintLayout {
         default void onSliderStarted() {}
         void onNoteMissed(boolean wasAlreadyStarted);
         void onGameLoopTick();
+        void onRequestEffect(View anchor, String effectType, int color);
+        void onRequestTrail(View anchor, String effectType, int color);
     }
 }
