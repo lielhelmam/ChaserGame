@@ -47,7 +47,7 @@
                 android:layout_height="wrap_content"
                 android:lineSpacingExtra="6dp"
                 android:padding="20dp"
-                android:text="• Song Selection: Choose your favorite track from the list to start playing.\n\n• Gameplay: Two target cubes are located at the bottom of the screen.\n\n• Falling Notes: Circles will fall from the top in perfect rhythm with the music.\n\n• Timing is Key: Tap the cubes exactly when a circle overlaps them.\n\n• Duration: The game continues until the end of the song, with circles falling in perfect rhythm throughout.\n\n• Scoring System:\n   - Perfect Hit: +300 Points\n   - Good Hit: +100 Points (Close timing)\n   - Miss: 0 Points\n\n• Objective: Reach the target score by the end of the song to pass the level!"
+                android:text="• Song Selection: Pick your track and get ready to feel the beat!\n\n• Gameplay: Two targets are at the bottom. Tap the lane when notes hit them.\n\n• New Sliders: Hold your finger down on long fading notes to earn massive points!\n\n• Combo System: Hits build up your Combo. Higher Combo = Higher Score Multiplier!\n\n• Scoring System:\n   - Perfect (300): Perfect timing + HP Gain\n   - Good (100): Close timing + Points\n   - Miss: Reset Combo + Heavy HP Drain\n\n• Ranks: Reach the end to get your Rank (S, A, B, C, D) based on your accuracy.\n\n• Survival: Keep your HP above 0! If it hits zero, the game ends immediately."
                 android:textColor="#333333"
                 android:textSize="17sp" />
         </ScrollView>

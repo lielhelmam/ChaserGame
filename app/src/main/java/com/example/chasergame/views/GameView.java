@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.LayerDrawable;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
@@ -250,12 +251,29 @@ public class GameView extends ConstraintLayout {
         float speed = targetY / VISIBLE_DURATION;
 
         if (n.isSlider()) {
-            GradientDrawable gd = new GradientDrawable();
-            gd.setColor(equippedSkin != null ? equippedSkin.circleColor : Color.CYAN);
-            gd.setCornerRadius(size / 2f);
-            gd.setStroke(4, Color.WHITE);
-            v.setBackground(gd);
+            int mainColor = equippedSkin != null ? equippedSkin.circleColor : Color.CYAN;
             int sliderHeight = (int) (n.getDuration() * speed) + size;
+
+            // 1. The Fading Body
+            GradientDrawable body = new GradientDrawable(
+                    GradientDrawable.Orientation.BOTTOM_TOP,
+                    new int[]{mainColor, Color.TRANSPARENT}
+            );
+            body.setCornerRadius(size / 2f);
+            body.setAlpha(180); // Semi-transparent body
+
+            // 2. The Opaque Head (Circle at the bottom)
+            GradientDrawable head = new GradientDrawable();
+            head.setShape(GradientDrawable.OVAL);
+            head.setColor(mainColor);
+            head.setStroke((int)(3 * density), Color.WHITE);
+
+            // Combine into LayerDrawable
+            LayerDrawable layers = new LayerDrawable(new android.graphics.drawable.Drawable[]{body, head});
+            // Position the head at the bottom of the view
+            layers.setLayerInset(1, 0, sliderHeight - size, 0, 0);
+            
+            v.setBackground(layers);
             v.setLayoutParams(new FrameLayout.LayoutParams(size, sliderHeight));
         } else {
             v.setBackgroundResource(R.drawable.note_circle);

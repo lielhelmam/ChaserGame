@@ -380,9 +380,21 @@ public class RhythmGameActivity extends BaseActivity implements GameView.GameEve
         if (gameManager.isGameOver()) return;
         gameManager.onNoteHit(points);
         tvScore.setText("Score: " + gameManager.getCurrentScore());
+        
+        // Visual feedback for combo
+        if (tvScore != null) {
+            tvScore.animate().scaleX(1.1f).scaleY(1.1f).setDuration(50)
+                .withEndAction(() -> tvScore.animate().scaleX(1f).scaleY(1f).setDuration(50).start()).start();
+        }
+        
+        if (gameManager.getCurrentCombo() > 0) {
+            tvSongName.setText("COMBO: " + gameManager.getCurrentCombo());
+        }
+
         updateAccuracy();
         updateHpUI();
-        if (points >= 100) vibrate(30);
+        if (points >= 300) vibrate(40);
+        else if (points >= 100) vibrate(20);
     }
 
     @Override
@@ -396,6 +408,7 @@ public class RhythmGameActivity extends BaseActivity implements GameView.GameEve
     public void onNoteMissed(boolean wasAlreadyStarted) {
         if (gameManager.isGameOver()) return;
         gameManager.onNoteMissed(wasAlreadyStarted);
+        tvSongName.setText(songData != null ? songData.getName() : "");
         updateAccuracy();
         updateHpUI();
         vibrate(100);
@@ -476,9 +489,10 @@ public class RhythmGameActivity extends BaseActivity implements GameView.GameEve
 
         new AlertDialog.Builder(this)
                 .setTitle(isDead ? "Game Over!" : "Level Complete!")
-                .setMessage(String.format(Locale.US, "Score: %d\nAccuracy: %.1f%%\nPoints Earned: %d\n%s",
-                        gameManager.getCurrentScore(), gameManager.getAccuracy(), earned,
-                        isDead ? "(You failed, earned 1/3 points)" : "(Survival Bonus Included!)"))
+                .setMessage(String.format(Locale.US, "Rank: %s\nScore: %d\nAccuracy: %.1f%%\nMax Combo: %d\nPoints Earned: %d\n%s",
+                        gameManager.getRank(), gameManager.getCurrentScore(), gameManager.getAccuracy(), 
+                        gameManager.getMaxCombo(), earned,
+                        isDead ? "(You failed, earned partial points)" : "(Survival Bonus Included!)"))
                 .setCancelable(false)
                 .setPositiveButton("Main Menu", (d, i) -> finish()).show();
     }

@@ -5,11 +5,13 @@ import com.example.chasergame.models.SongData;
 public class RhythmGameManager {
     private final SongData songData;
     private int currentScore = 0;
-    private int totalNotesPassed = 0;
-    private double notesHitWeight = 0;
+    private int totalNotesPossible = 0;
+    private double currentAccuracyWeight = 0;
     
     private int currentHp = 10;
     private final int MAX_HP = 10;
+    private int currentCombo = 0;
+    private int maxCombo = 0;
     private boolean isGameOver = false;
 
     public RhythmGameManager(SongData songData) {
@@ -18,36 +20,43 @@ public class RhythmGameManager {
 
     public void onSliderStarted() {
         if (isGameOver) return;
-        totalNotesPassed++; // Count slider as 1 note at start
+        totalNotesPossible++;
     }
 
     public void onNoteHit(int points) {
         if (isGameOver) return;
         
-        if (points == 300 || points == 100) {
-            totalNotesPassed++;
-            notesHitWeight += (points == 300) ? 1.0 : 0.5;
-        } else if (points == 150) { // Slider completion
-            // totalNotesPassed was already incremented in onSliderStarted
-            notesHitWeight += 1.0; 
-        }
+        // Update Combo
+        currentCombo++;
+        if (currentCombo > maxCombo) maxCombo = currentCombo;
+
+        // Scoring with Multiplier (Every 10 combo increases multiplier by 0.1x)
+        float multiplier = 1.0f + (currentCombo / 10f) * 0.1f;
+        currentScore += (int) (points * multiplier);
+
+        // Accuracy Calculation
+        totalNotesPossible++;
+        if (points == 300) currentAccuracyWeight += 1.0;
+        else if (points == 150) currentAccuracyWeight += 0.75; // Slider partial
+        else if (points == 100) currentAccuracyWeight += 0.5;
         
-        currentScore += points;
-        
-        // HP gain logic
-        if (points == 300 || points == 150) {
-            currentHp = Math.min(MAX_HP, currentHp + (songData != null ? songData.getHpGain() : 1));
-        }
+        // HP gain logic (Perfects heal more)
+        int hpGain = (points == 300) ? 1 : 0;
+        currentHp = Math.min(MAX_HP, currentHp + hpGain);
     }
 
     public void onNoteMissed(boolean wasAlreadyStarted) {
         if (isGameOver) return;
         
+        // Combo Break!
+        currentCombo = 0;
+        
         if (!wasAlreadyStarted) {
-            totalNotesPassed++;
+            totalNotesPossible++;
         }
 
-        currentHp -= (songData != null ? songData.getHpDrain() : 1);
+        // Steeper HP loss on miss
+        currentHp -= (songData != null ? songData.getHpDrain() : 2);
         
         if (currentHp <= 0) {
             currentHp = 0;
@@ -63,30 +72,44 @@ public class RhythmGameManager {
         return currentHp;
     }
 
+    public int getCurrentCombo() {
+        return currentCombo;
+    }
+
+    public int getMaxCombo() {
+        return maxCombo;
+    }
+
     public boolean isGameOver() {
         return isGameOver;
     }
 
     public double getAccuracy() {
-        if (totalNotesPassed == 0) return 0;
-        return (notesHitWeight / totalNotesPassed) * 100.0;
+        if (totalNotesPossible == 0) return 100.0;
+        return (currentAccuracyWeight / totalNotesPossible) * 100.0;
+    }
+
+    public String getRank() {
+        double acc = getAccuracy();
+        if (acc >= 95) return "S";
+        if (acc >= 85) return "A";
+        if (acc >= 75) return "B";
+        if (acc >= 65) return "C";
+        return "D";
     }
 
     public int calculateEarnedPoints() {
-        // If lost, only 1/3 of the potential points
-        if (isGameOver) {
-            return (currentScore / 10) / 3;
-        }
+        if (isGameOver) return (currentScore / 15); // Penalty for failing
         
-        // If survived till the end
-        int points = currentScore / 10;
-        if (getAccuracy() >= 95.0) {
-            points += 500;
-        }
-        return points;
-    }
-
-    public int getTotalNotesPassed() {
-        return totalNotesPassed;
+        int basePoints = currentScore / 10;
+        // Bonus for Rank
+        String rank = getRank();
+        if (rank.equals("S")) basePoints += 1000;
+        else if (rank.equals("A")) basePoints += 500;
+        
+        // Bonus for Max Combo
+        basePoints += (maxCombo * 10);
+        
+        return basePoints;
     }
 }
