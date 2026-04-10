@@ -31,6 +31,12 @@ public class AudioService {
         return mediaPlayer != null ? mediaPlayer.getCurrentPosition() : 0;
     }
 
+    public void pause() {
+        if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+            mediaPlayer.pause();
+        }
+    }
+
     public void release() {
         if (mediaPlayer != null) {
             mediaPlayer.release();

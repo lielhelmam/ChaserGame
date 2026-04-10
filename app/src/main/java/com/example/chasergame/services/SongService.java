@@ -28,47 +28,22 @@ public class SongService {
     }
 
     /**
-     * Parses a beatmap string and adds a new song to the database.
-     *
-     * @param name        The name of the song.
-     * @param difficulty  The difficulty level.
-     * @param resName     The resource name for the audio file.
-     * @param targetScore The score required to win/pass.
-     * @param beatmapStr  The string representation of the note sequence.
-     * @param callback    Callback to handle the result of the operation.
+     * Adds a new song to the database with automatic beatmap generation parameters and HP system.
      */
-    public void addSong(String name, String difficulty, String resName, int targetScore, String beatmapStr, DatabaseService.DatabaseCallback<Void> callback) {
-        List<Note> notes = parseBeatmap(beatmapStr);
-        if (notes.isEmpty()) {
-            callback.onFailed(new Exception("Invalid beatmap format"));
-            return;
-        }
-
-        SongData song = new SongData(name, difficulty, 0, notes, targetScore);
+    public void addSong(String name, String difficulty, String resName, int bpm, int hpDrain, int hpGain, DatabaseService.DatabaseCallback<Void> callback) {
+        SongData song = new SongData(name, difficulty, 0, null, hpDrain, hpGain);
         song.setResName(resName);
+        song.setBpm(bpm);
         songRepository.addSong(song, callback);
     }
 
     /**
-     * Updates an existing song's details in the database.
-     *
-     * @param songId      The unique ID of the song to update.
-     * @param name        The updated name.
-     * @param difficulty  The updated difficulty.
-     * @param resName     The updated resource name.
-     * @param targetScore The updated target score.
-     * @param beatmapStr  The updated beatmap string.
-     * @param callback    Callback to handle the result of the update.
+     * Updates an existing song's details in the database including HP parameters.
      */
-    public void updateSong(String songId, String name, String difficulty, String resName, int targetScore, String beatmapStr, DatabaseService.DatabaseCallback<Void> callback) {
-        List<Note> notes = parseBeatmap(beatmapStr);
-        if (notes.isEmpty()) {
-            callback.onFailed(new Exception("Invalid beatmap format"));
-            return;
-        }
-
-        SongData updatedSong = new SongData(name, difficulty, 0, notes, targetScore);
+    public void updateSong(String songId, String name, String difficulty, String resName, int bpm, int hpDrain, int hpGain, DatabaseService.DatabaseCallback<Void> callback) {
+        SongData updatedSong = new SongData(name, difficulty, 0, null, hpDrain, hpGain);
         updatedSong.setResName(resName);
+        updatedSong.setBpm(bpm);
         songRepository.updateSong(songId, updatedSong, callback);
     }
 

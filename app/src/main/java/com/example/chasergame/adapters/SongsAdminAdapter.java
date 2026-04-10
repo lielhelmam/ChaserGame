@@ -64,7 +64,7 @@ public class SongsAdminAdapter extends RecyclerView.Adapter<SongsAdminAdapter.VH
         h.tvName.setText(song.getName());
         h.tvDifficulty.setText(song.getDifficulty());
         h.tvRes.setText("Resource: " + song.getResName());
-        h.tvTarget.setText("Target Score: " + song.getTargetScore());
+        h.tvBpmInfo.setText(String.format("%d BPM | Drain: %d | Gain: %d", song.getBpm(), song.getHpDrain(), song.getHpGain()));
 
         h.btnEdit.setOnClickListener(v -> {
             if (listener != null) listener.onEditClicked(item.key, song);
@@ -97,7 +97,7 @@ public class SongsAdminAdapter extends RecyclerView.Adapter<SongsAdminAdapter.VH
     }
 
     static class VH extends RecyclerView.ViewHolder {
-        final TextView tvName, tvDifficulty, tvRes, tvTarget;
+        final TextView tvName, tvDifficulty, tvRes, tvBpmInfo;
         final Button btnEdit, btnDelete;
 
         VH(@NonNull View itemView) {
@@ -105,7 +105,7 @@ public class SongsAdminAdapter extends RecyclerView.Adapter<SongsAdminAdapter.VH
             tvName = itemView.findViewById(R.id.tv_admin_song_name);
             tvDifficulty = itemView.findViewById(R.id.tv_admin_song_difficulty);
             tvRes = itemView.findViewById(R.id.tv_admin_song_res);
-            tvTarget = itemView.findViewById(R.id.tv_admin_target_score);
+            tvBpmInfo = itemView.findViewById(R.id.tv_admin_song_bpm);
             btnEdit = itemView.findViewById(R.id.btn_song_edit);
             btnDelete = itemView.findViewById(R.id.btn_song_delete);
         }

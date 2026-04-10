@@ -50,11 +50,11 @@
             android:textSize="14sp" />
 
         <TextView
-            android:id="@+id/tv_admin_target_score"
+            android:id="@+id/tv_admin_song_bpm"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
-            android:text="Target Score: 5000"
+            android:text="120 BPM | Drain: 1 | Gain: 1"
             android:textColor="#666666"
             android:textSize="14sp" />
 

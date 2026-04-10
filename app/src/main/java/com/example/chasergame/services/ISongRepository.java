@@ -13,6 +13,8 @@ public interface ISongRepository {
 
     void getSongListWithKeys(@NotNull DatabaseService.DatabaseCallback<List<SongsAdminAdapter.Item>> callback);
 
+    void getSongById(@NotNull String songId, @NotNull DatabaseService.DatabaseCallback<SongData> callback);
+
     void addSong(@NotNull SongData song, @Nullable DatabaseService.DatabaseCallback<Void> callback);
 
     void deleteSong(@NotNull String songId, @Nullable DatabaseService.DatabaseCallback<Void> callback);

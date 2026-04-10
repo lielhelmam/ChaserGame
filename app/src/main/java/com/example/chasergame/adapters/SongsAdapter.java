@@ -62,8 +62,8 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsAdapter.SongViewHold
     public void onBindViewHolder(@NonNull SongViewHolder holder, int position) {
         SongData song = songList.get(position);
         holder.tvName.setText(song.getName());
-        holder.tvDifficulty.setText("Difficulty: " + song.getDifficulty());
-        holder.tvTargetScore.setText("Target: " + song.getTargetScore());
+        holder.tvDifficulty.setText("Difficulty: " + song.getDifficulty() + " (HP Miss: -" + song.getHpDrain() + ")");
+        holder.tvBpm.setText(song.getBpm() + " BPM");
 
         holder.itemLayout.setOnClickListener(v -> {
             Log.d("SongsAdapter", "Item clicked via layout: " + song.getName());
@@ -83,14 +83,14 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsAdapter.SongViewHold
     }
 
     static class SongViewHolder extends RecyclerView.ViewHolder {
-        TextView tvName, tvDifficulty, tvTargetScore;
+        TextView tvName, tvDifficulty, tvBpm;
         LinearLayout itemLayout;
 
         public SongViewHolder(@NonNull View itemView) {
             super(itemView);
             tvName = itemView.findViewById(R.id.tv_song_name);
             tvDifficulty = itemView.findViewById(R.id.tv_song_difficulty);
-            tvTargetScore = itemView.findViewById(R.id.tv_target_score);
+            tvBpm = itemView.findViewById(R.id.tv_song_bpm);
             itemLayout = itemView.findViewById(R.id.song_item_layout);
         }
     }

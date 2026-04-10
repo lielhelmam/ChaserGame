@@ -417,6 +417,18 @@ public class DatabaseService implements IUserRepository, IQuestionRepository, IS
     }
 
     @Override
+    public void getSongById(@NotNull String songId, @NotNull DatabaseCallback<SongData> callback) {
+        readData(SONGS_PATH + "/" + songId).get().addOnCompleteListener(task -> {
+            if (!task.isSuccessful()) {
+                callback.onFailed(task.getException());
+                return;
+            }
+            SongData song = task.getResult().getValue(SongData.class);
+            callback.onCompleted(song);
+        });
+    }
+
+    @Override
     public void addSong(@NotNull SongData song, @Nullable DatabaseCallback<Void> callback) {
         String songId = generateNewId(SONGS_PATH);
         writeData(SONGS_PATH + "/" + songId, song, callback);

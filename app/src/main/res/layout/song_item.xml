@@ -42,11 +42,11 @@
         </LinearLayout>
 
         <TextView
-            android:id="@+id/tv_target_score"
+            android:id="@+id/tv_song_bpm"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="Target: 5000"
+            android:text="120 BPM"
             android:textColor="@color/background_red"
             android:textSize="14sp"
             android:textStyle="bold" />

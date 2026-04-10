@@ -16,12 +16,18 @@
             android:layout_marginBottom="12dp"
             android:hint="Song Name" />
 
-        <EditText
-            android:id="@+id/et_edit_song_difficulty"
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp"
-            android:hint="Difficulty (Easy/Medium/Hard)" />
+            android:layout_marginBottom="4dp"
+            android:text="Difficulty"
+            android:textStyle="bold" />
+
+        <Spinner
+            android:id="@+id/sp_edit_song_difficulty"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp" />
 
         <EditText
             android:id="@+id/et_edit_song_res_id"
@@ -30,28 +36,50 @@
             android:layout_marginBottom="12dp"
             android:hint="Raw Resource Name (e.g. song1)" />
 
-        <EditText
-            android:id="@+id/et_edit_target_score"
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"
+            android:text="HP Management"
+            android:textStyle="bold" />
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="12dp"
-            android:hint="Target Score"
-            android:inputType="number" />
+            android:orientation="horizontal">
+
+            <EditText
+                android:id="@+id/et_edit_hp_drain"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="8dp"
+                android:hint="HP Drain (Miss)"
+                android:inputType="number" />
+
+            <EditText
+                android:id="@+id/et_edit_hp_gain"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="HP Gain (300)"
+                android:inputType="number" />
+        </LinearLayout>
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="4dp"
-            android:text="Beatmap (time,lane;time,lane...)"
+            android:text="Song BPM"
             android:textStyle="bold" />
 
         <EditText
-            android:id="@+id/et_edit_beatmap"
+            android:id="@+id/et_edit_song_bpm"
             android:layout_width="match_parent"
-            android:layout_height="150dp"
-            android:gravity="top"
-            android:hint="1000,0;1500,1"
-            android:inputType="textMultiLine" />
+            android:layout_height="wrap_content"
+            android:hint="BPM (e.g. 120)"
+            android:inputType="number" />
 
     </LinearLayout>
 </ScrollView>

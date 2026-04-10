@@ -3,8 +3,10 @@ package com.example.chasergame.screens;
 import android.app.AlertDialog;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.SearchView;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -130,36 +132,74 @@ public class SongsListActivity extends BaseActivity {
         android.view.View v = getLayoutInflater().inflate(R.layout.dialog_edit_song, null);
 
         EditText etName = v.findViewById(R.id.et_edit_song_name);
-        EditText etDifficulty = v.findViewById(R.id.et_edit_song_difficulty);
+        Spinner spDifficulty = v.findViewById(R.id.sp_edit_song_difficulty);
         EditText etResId = v.findViewById(R.id.et_edit_song_res_id);
-        EditText etTargetScore = v.findViewById(R.id.et_edit_target_score);
-        EditText etBeatmap = v.findViewById(R.id.et_edit_beatmap);
+        EditText etHpDrain = v.findViewById(R.id.et_edit_hp_drain);
+        EditText etHpGain = v.findViewById(R.id.et_edit_hp_gain);
+        EditText etBpm = v.findViewById(R.id.et_edit_song_bpm);
 
+        // Setup Spinner
+        String[] levels = {
+                "Beginner (40-90)",
+                "Easy (80-120)",
+                "Medium (100-150)",
+                "Hard (130-180)",
+                "Insane (160-220)",
+                "Expert (200-300)"
+        };
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, levels);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spDifficulty.setAdapter(adapter);
+
+        // Pre-fill data
         etName.setText(song.getName());
-        etDifficulty.setText(song.getDifficulty());
         etResId.setText(song.getResName());
-        etTargetScore.setText(String.valueOf(song.getTargetScore()));
-        etBeatmap.setText(songService.notesToString(song.getNotes()));
+        etHpDrain.setText(String.valueOf(song.getHpDrain()));
+        etHpGain.setText(String.valueOf(song.getHpGain()));
+        etBpm.setText(String.valueOf(song.getBpm()));
+        
+        // Set spinner selection
+        for (int i = 0; i < levels.length; i++) {
+            if (levels[i].toLowerCase().startsWith(song.getDifficulty().toLowerCase())) {
+                spDifficulty.setSelection(i);
+                break;
+            }
+        }
 
         new AlertDialog.Builder(this)
                 .setTitle("Edit Song")
                 .setView(v)
                 .setPositiveButton("Save", (d, w) -> {
                     String name = etName.getText().toString().trim();
-                    String difficulty = etDifficulty.getText().toString().trim();
-                    String resName = etResId.getText().toString().trim();
-                    String scoreStr = etTargetScore.getText().toString().trim();
-                    String beatmapStr = etBeatmap.getText().toString().trim();
+                    String selectedDifficulty = spDifficulty.getSelectedItem().toString();
+                    // Extract base difficulty name
+                    String difficulty = selectedDifficulty.split(" ")[0];
 
-                    if (TextUtils.isEmpty(name) || TextUtils.isEmpty(difficulty) || TextUtils.isEmpty(resName) ||
-                            TextUtils.isEmpty(scoreStr) || TextUtils.isEmpty(beatmapStr)) {
+                    String resName = etResId.getText().toString().trim();
+                    String drainStr = etHpDrain.getText().toString().trim();
+                    String gainStr = etHpGain.getText().toString().trim();
+                    String bpmStr = etBpm.getText().toString().trim();
+
+                    if (TextUtils.isEmpty(name) || TextUtils.isEmpty(resName) ||
+                            TextUtils.isEmpty(drainStr) || TextUtils.isEmpty(gainStr) || TextUtils.isEmpty(bpmStr)) {
                         Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show();
                         return;
                     }
 
-                    int targetScore = Integer.parseInt(scoreStr);
+                    int hpDrain, hpGain, bpm;
+                    try {
+                        hpDrain = Integer.parseInt(drainStr);
+                        hpGain = Integer.parseInt(gainStr);
+                        bpm = Integer.parseInt(bpmStr);
+                    } catch (NumberFormatException e) {
+                        Toast.makeText(this, "Invalid numbers", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
 
-                    songService.updateSong(key, name, difficulty, resName, targetScore, beatmapStr, new DatabaseService.DatabaseCallback<Void>() {
+                    // Validate BPM
+                    if (!isBpmValid(bpm, difficulty)) return;
+
+                    songService.updateSong(key, name, difficulty, resName, bpm, hpDrain, hpGain, new DatabaseService.DatabaseCallback<Void>() {
                         @Override
                         public void onCompleted(Void object) {
                             Toast.makeText(SongsListActivity.this, "Song updated.", Toast.LENGTH_SHORT).show();
@@ -174,5 +214,23 @@ public class SongsListActivity extends BaseActivity {
                 })
                 .setNegativeButton("Cancel", null)
                 .show();
+    }
+
+    private boolean isBpmValid(int bpm, String difficulty) {
+        int min, max;
+        switch (difficulty.toLowerCase()) {
+            case "beginner": min = 40; max = 90; break;
+            case "easy": min = 80; max = 120; break;
+            case "medium": min = 100; max = 150; break;
+            case "hard": min = 130; max = 180; break;
+            case "insane": min = 160; max = 220; break;
+            case "expert": min = 200; max = 300; break;
+            default: min = 40; max = 300;
+        }
+        if (bpm < min || bpm > max) {
+            Toast.makeText(this, "BPM for " + difficulty + " must be between " + min + " and " + max, Toast.LENGTH_LONG).show();
+            return false;
+        }
+        return true;
     }
 }

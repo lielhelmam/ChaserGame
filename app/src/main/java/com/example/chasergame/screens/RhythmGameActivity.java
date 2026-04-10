@@ -20,6 +20,7 @@ import com.example.chasergame.models.Skin;
 import com.example.chasergame.models.SongData;
 import com.example.chasergame.models.User;
 import com.example.chasergame.services.AudioService;
+import com.example.chasergame.services.BeatmapGenerator;
 import com.example.chasergame.services.DatabaseService;
 import com.example.chasergame.services.RhythmGameManager;
 import com.example.chasergame.utils.SkinManager;
@@ -36,8 +37,8 @@ import java.util.Locale;
 public class RhythmGameActivity extends BaseActivity implements GameView.GameEventListener {
 
     private GameView gameView;
-    private TextView tvScore, tvSongName, tvAccuracy;
-    private ProgressBar pbSongProgress;
+    private TextView tvScore, tvSongName, tvAccuracy, tvHp;
+    private ProgressBar pbSongProgress, pbHp;
     private ConstraintLayout rootLayout;
 
     private RhythmGameManager gameManager;
@@ -66,7 +67,10 @@ public class RhythmGameActivity extends BaseActivity implements GameView.GameEve
         tvScore = findViewById(R.id.tv_game_score);
         tvSongName = findViewById(R.id.tv_game_song_name);
         tvAccuracy = findViewById(R.id.tv_game_accuracy);
+        tvHp = findViewById(R.id.tv_game_hp);
         pbSongProgress = findViewById(R.id.pb_song_progress);
+        pbHp = findViewById(R.id.pb_game_hp);
+        if (pbHp != null) pbHp.setMax(10);
         gameView = findViewById(R.id.game_view);
         gameView.setGameEventListener(this);
         vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
@@ -87,59 +91,108 @@ public class RhythmGameActivity extends BaseActivity implements GameView.GameEve
     }
 
     private void loadSong(String songId) {
-        FirebaseDatabase.getInstance().getReference("rhythm_songs").child(songId)
-                .addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        songData = snapshot.getValue(SongData.class);
-                        if (songData == null) {
-                            finish();
-                            return;
-                        }
+        databaseService.getSongById(songId, new DatabaseService.DatabaseCallback<SongData>() {
+            @Override
+            public void onCompleted(SongData song) {
+                songData = song;
+                if (songData == null) {
+                    finish();
+                    return;
+                }
 
-                        gameManager = new RhythmGameManager(songData);
-                        tvSongName.setText(songData.getName());
+                gameManager = new RhythmGameManager(songData);
+                tvSongName.setText(songData.getName());
 
-                        List<Note> validNotes = new ArrayList<>();
-                        if (songData.getNotes() != null) {
-                            for (Note n : songData.getNotes()) {
-                                if (n != null && n.getTimestamp() >= 2000L) validNotes.add(n);
-                            }
-                        }
-                        startPlay(validNotes);
-                    }
+                // Bug 2 Fix Part: Generate dynamic beatmap based on BPM and duration
+                int duration = audioService.getDuration();
+                if (duration == 0) {
+                    // Fallback to average duration if MediaPlayer is not ready
+                    duration = 180000; // 3 mins
+                }
+                
+                List<Note> dynamicNotes = BeatmapGenerator.generate(
+                        songData.getBpm(), 
+                        duration, 
+                        songData.getDifficulty()
+                );
+                
+                startPlay(dynamicNotes);
+            }
 
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-                        finish();
-                    }
-                });
+            @Override
+            public void onFailed(Exception e) {
+                finish();
+            }
+        });
     }
 
     private void startPlay(List<Note> notes) {
         audioService.playSong(songData.getResName(), this::endGame);
-        pbSongProgress.setMax(audioService.getDuration());
-        gameView.startGame(notes, equippedSkin);
+        int duration = audioService.getDuration();
+        pbSongProgress.setMax(duration);
+        
+        // Re-generate if we didn't have accurate duration before
+        List<Note> finalNotes = notes;
+        if (notes.isEmpty() || notes.get(notes.size()-1).getTimestamp() < duration - 5000) {
+             finalNotes = BeatmapGenerator.generate(songData.getBpm(), duration, songData.getDifficulty());
+        }
+        
+        gameView.startGame(finalNotes, equippedSkin);
     }
 
     @Override
     public void onNoteHit(int points) {
+        if (gameManager.isGameOver()) return;
         gameManager.onNoteHit(points);
         tvScore.setText("Score: " + gameManager.getCurrentScore());
         updateAccuracy();
-        vibrate(30);
+        updateHpUI();
+        if (points >= 100) vibrate(30);
     }
 
     @Override
-    public void onNoteMissed() {
-        gameManager.onNoteMissed();
+    public void onSliderStarted() {
+        if (gameManager.isGameOver()) return;
+        gameManager.onSliderStarted();
         updateAccuracy();
+    }
+
+    @Override
+    public void onNoteMissed(boolean wasAlreadyStarted) {
+        if (gameManager.isGameOver()) return;
+        gameManager.onNoteMissed(wasAlreadyStarted);
+        updateAccuracy();
+        updateHpUI();
         vibrate(100);
+        
+        if (gameManager.isGameOver()) {
+            handleGameOver();
+        }
+    }
+
+    private void updateHpUI() {
+        int hp = gameManager.getCurrentHp();
+        if (tvHp != null) tvHp.setText("HP: " + hp);
+        if (pbHp != null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                pbHp.setProgress(hp, true);
+            } else {
+                pbHp.setProgress(hp);
+            }
+        }
+    }
+
+    private void handleGameOver() {
+        audioService.pause(); // Stop music immediately
+        gameView.stop();
+        endGame();
     }
 
     @Override
     public void onGameLoopTick() {
-        pbSongProgress.setProgress(audioService.getCurrentPosition());
+        int pos = audioService.getCurrentPosition();
+        pbSongProgress.setProgress(pos);
+        gameView.syncTime(pos);
     }
 
     private void updateAccuracy() {
@@ -155,19 +208,23 @@ public class RhythmGameActivity extends BaseActivity implements GameView.GameEve
     }
 
     private void endGame() {
+        audioService.pause();
         gameView.stop();
-        boolean passed = gameManager.isLevelPassed();
+        boolean isDead = gameManager.isGameOver();
         int earned = gameManager.calculateEarnedPoints();
 
-        updateScores(passed ? gameManager.getCurrentScore() : 0, earned);
+        // If not dead, we consider it a pass
+        updateScores(!isDead ? gameManager.getCurrentScore() : 0, earned);
 
         new AlertDialog.Builder(this)
-                .setTitle(passed ? "Level Passed!" : "Level Failed!")
-                .setMessage(String.format(Locale.US, "Score: %d\nAccuracy: %.1f%%\nPoints: %d",
-                        gameManager.getCurrentScore(), gameManager.getAccuracy(), earned))
+                .setTitle(isDead ? "Game Over!" : "Level Complete!")
+                .setMessage(String.format(Locale.US, "Score: %d\nAccuracy: %.1f%%\nPoints Earned: %d\n%s",
+                        gameManager.getCurrentScore(), 
+                        gameManager.getAccuracy(), 
+                        earned,
+                        isDead ? "(You failed, earned 1/3 points)" : "(Survival Bonus Included!)"))
                 .setCancelable(false)
-                .setPositiveButton("OK", (d, i) -> {
-                    startActivity(new Intent(this, SongSelectionActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+                .setPositiveButton("Main Menu", (d, i) -> {
                     finish();
                 }).show();
     }
