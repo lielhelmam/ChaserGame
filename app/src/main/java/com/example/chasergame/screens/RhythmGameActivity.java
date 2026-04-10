@@ -2,6 +2,12 @@ package com.example.chasergame.screens;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.LinearGradient;
+import android.graphics.Path;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.RadialGradient;
+import android.graphics.Shader;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.VibrationEffect;
@@ -49,6 +55,12 @@ public class RhythmGameActivity extends BaseActivity implements GameView.GameEve
         int color;
         long lifeTime, maxLife;
         String type;
+        float friction = 0.96f;
+        float rotation = 0f;
+        float rotationSpeed = 0f;
+        int shapeType = 0; 
+        float[] historyX = new float[5]; // For motion trails
+        float[] historyY = new float[5];
 
         Particle(float x, float y, float angle, float speed, int color, long life, String type, float size) {
             this.x = x; this.y = y;
@@ -61,14 +73,38 @@ public class RhythmGameActivity extends BaseActivity implements GameView.GameEve
             this.type = type;
             this.size = size;
             this.scale = 1f;
+            this.rotation = (float)(Math.random() * 360);
+            this.rotationSpeed = (float)(Math.random() * 30 - 15);
+
+            for(int i=0; i<5; i++) { historyX[i] = x; historyY[i] = y; }
+
+            if ("bubbles".equals(type)) friction = 0.98f;
+            else if ("electric".equals(type)) friction = 0.88f;
+            else if ("retro".equals(type)) shapeType = 1;
+            else if ("sparkle".equals(type) || "gold".equals(type)) {
+                shapeType = 2;
+                friction = 0.92f;
+            }
         }
 
         boolean update(long dt) {
+            // Update history
+            for(int i=4; i>0; i--) { historyX[i] = historyX[i-1]; historyY[i] = historyY[i-1]; }
+            historyX[0] = x; historyY[0] = y;
+
             lifeTime -= dt;
-            x += vx * (dt / 16f);
-            y += vy * (dt / 16f);
-            alpha = Math.max(0, (float) lifeTime / maxLife);
-            if ("sparkle".equals(type) || "gold".equals(type)) scale = alpha;
+            vx *= friction;
+            vy *= friction;
+            if ("gold".equals(type)) vy += 0.6f;
+            
+            x += vx;
+            y += vy;
+            rotation += rotationSpeed;
+            
+            float progress = (float) lifeTime / maxLife;
+            alpha = Math.max(0, progress);
+            scale = 0.1f + (progress * 0.9f);
+            
             return lifeTime > 0;
         }
     }
@@ -76,98 +112,95 @@ public class RhythmGameActivity extends BaseActivity implements GameView.GameEve
     private class EffectOverlayView extends android.view.View {
         private final List<Particle> particles = new ArrayList<>();
         private final android.graphics.Paint paint = new android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG);
+        private final PorterDuffXfermode addMode = new PorterDuffXfermode(PorterDuff.Mode.ADD);
+        private final Path tempPath = new Path();
         private long lastFrameTime = System.currentTimeMillis();
 
         public EffectOverlayView(Context context) { super(context); }
 
         public void spawnBurst(float cx, float cy, String type, int color) {
-            int count = 15;
-            long life = 400;
-            float baseSize = 12 * getResources().getDisplayMetrics().density;
-            float speedMult = 1.0f;
-
-            switch (type) {
-                case "glow":
-                case "electric":
-                case "retro":
-                    count = 15; life = 500; baseSize *= 1.5f; break;
-                case "particles":
-                case "ghost":
-                case "emerald":
-                    count = 25; life = 350; speedMult = 1.5f; break;
-                case "sparkle":
-                case "gold":
-                    count = 40; life = 250; baseSize *= 0.6f; speedMult = 2.0f; break;
-                case "bubbles":
-                case "frozen":
-                    count = 8; life = 800; baseSize *= 1.2f; speedMult = 0.6f; break;
-            }
-
+            int count = "sparkle".equals(type) ? 70 : 40;
+            long life = "glow".equals(type) ? 800 : 500;
+            float density = getResources().getDisplayMetrics().density;
+            
             for (int i = 0; i < count; i++) {
                 float angle = (float) (Math.random() * 2 * Math.PI);
-                float speed = (5 + (float) Math.random() * 10) * getResources().getDisplayMetrics().density * speedMult;
-                particles.add(new Particle(cx, cy, angle, speed, color, life, type, baseSize));
+                float speed = (2 + (float) Math.random() * 18) * density;
+                particles.add(new Particle(cx, cy, angle, speed, color, life, type, 22 * density));
             }
+            shakeScreen("glow".equals(type) ? 8 : 4);
             invalidate();
         }
 
         public void spawnTrail(float cx, float cy, String type, int color) {
-            float baseSize = 8 * getResources().getDisplayMetrics().density;
-            long life = 300;
-            float vx = 0, vy = 0;
-
-            // Trail particles usually float up or stay put while the note moves down
-            switch (type) {
-                case "glow":
-                case "electric":
-                    life = 400; baseSize *= 1.2f; break;
-                case "particles":
-                case "emerald":
-                    vx = (float) (Math.random() - 0.5) * 4; break;
-                case "bubbles":
-                    life = 600; baseSize *= 0.8f; vy = -2; break;
-                case "retro":
-                    life = 200; baseSize *= 2f; break;
-                case "sparkle":
-                case "gold":
-                    life = 250; baseSize *= 0.5f; vx = (float) (Math.random() - 0.5) * 6; break;
-            }
-
-            Particle p = new Particle(cx, cy, 0, 0, color, life, type, baseSize);
-            p.vx = vx; p.vy = vy;
-            particles.add(p);
+            float density = getResources().getDisplayMetrics().density;
+            float rx = (float)(Math.random() - 0.5) * 40 * density;
+            particles.add(new Particle(cx + rx, cy, (float)(Math.PI*1.5), (float)Math.random() * 3 * density, color, 400, type, 12 * density));
             invalidate();
+        }
+
+        private void shakeScreen(float intensity) {
+            float d = getResources().getDisplayMetrics().density;
+            rootLayout.animate().translationX((float)((Math.random()-0.5)*2*intensity*d))
+                .translationY((float)((Math.random()-0.5)*2*intensity*d)).setDuration(40)
+                .withEndAction(() -> rootLayout.animate().translationX(0).translationY(0).setDuration(40).start()).start();
         }
 
         @Override
         protected void onDraw(android.graphics.Canvas canvas) {
             long now = System.currentTimeMillis();
-            long dt = now - lastFrameTime;
+            long dt = Math.min(32, now - lastFrameTime); 
             lastFrameTime = now;
 
             for (int i = particles.size() - 1; i >= 0; i--) {
                 Particle p = particles.get(i);
-                if (!p.update(dt)) {
-                    particles.remove(i);
-                    continue;
-                }
-                paint.setColor(p.color);
-                paint.setAlpha((int) (p.alpha * 255));
+                if (!p.update(dt)) { particles.remove(i); continue; }
                 
-                if ("bubbles".equals(p.type) || "frozen".equals(p.type)) {
-                    paint.setStyle(android.graphics.Paint.Style.STROKE);
-                    paint.setStrokeWidth(3 * getResources().getDisplayMetrics().density);
-                } else {
-                    paint.setStyle(android.graphics.Paint.Style.FILL);
+                float r = (p.size / 2f) * p.scale;
+                
+                // Draw Motion Trail (The "Bursts" tails)
+                if (!"bubbles".equals(p.type)) {
+                    paint.setXfermode(addMode);
+                    paint.setStrokeWidth(r * 0.6f);
+                    paint.setColor(p.color);
+                    paint.setAlpha((int)(p.alpha * 100));
+                    canvas.drawLine(p.x, p.y, p.historyX[2], p.historyY[2], paint);
                 }
 
-                float r = (p.size / 2f) * p.scale;
-                canvas.drawCircle(p.x, p.y, r, paint);
-            }
+                // Core Drawing
+                paint.setXfermode(addMode);
+                paint.setColor(p.color);
+                
+                // Bloom Effect: Draw twice (Outer glow, then Inner core)
+                paint.setAlpha((int) (p.alpha * 60));
+                drawShape(canvas, p, r * 2.2f, paint);
+                
+                paint.setAlpha((int) (p.alpha * 255));
+                drawShape(canvas, p, r, paint);
 
-            if (!particles.isEmpty()) {
-                postInvalidateOnAnimation();
+                // Electric Bolts
+                if ("electric".equals(p.type) && Math.random() > 0.85 && i > 2) {
+                    Particle p2 = particles.get(i-1);
+                    paint.setColor(Color.WHITE);
+                    paint.setStrokeWidth(2 * getResources().getDisplayMetrics().density);
+                    canvas.drawLine(p.x, p.y, (p.x+p2.x)/2 + (float)(Math.random()-0.5)*20, (p.y+p2.y)/2 + (float)(Math.random()-0.5)*20, paint);
+                    canvas.drawLine((p.x+p2.x)/2 + (float)(Math.random()-0.5)*20, (p.y+p2.y)/2 + (float)(Math.random()-0.5)*20, p2.x, p2.y, paint);
+                }
             }
+            paint.setXfermode(null);
+            if (!particles.isEmpty()) postInvalidateOnAnimation();
+        }
+
+        private void drawShape(android.graphics.Canvas canvas, Particle p, float r, android.graphics.Paint paint) {
+            canvas.save();
+            canvas.translate(p.x, p.y);
+            canvas.rotate(p.rotation);
+            if (p.shapeType == 1) canvas.drawRect(-r, -r, r, r, paint);
+            else if (p.shapeType == 2) {
+                tempPath.reset(); tempPath.moveTo(0, -r*1.5f); tempPath.lineTo(r, 0); tempPath.lineTo(0, r*1.5f); tempPath.lineTo(-r, 0); tempPath.close();
+                canvas.drawPath(tempPath, paint);
+            } else canvas.drawCircle(0, 0, r, paint);
+            canvas.restore();
         }
     }
 
