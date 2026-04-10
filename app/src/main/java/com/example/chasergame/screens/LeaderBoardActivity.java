@@ -134,8 +134,10 @@ public class LeaderBoardActivity extends BaseActivity {
 
     private void updateButtonColors(Button active, Button... others) {
         active.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.background_red)));
+        active.setTextColor(ColorStateList.valueOf(getResources().getColor(R.color.white)));
         for (Button b : others) {
-            b.setBackgroundTintList(ColorStateList.valueOf(0xFF333333));
+            b.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.white)));
+            b.setTextColor(ColorStateList.valueOf(getResources().getColor(R.color.background_red)));
         }
     }
 

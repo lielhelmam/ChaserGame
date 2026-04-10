@@ -40,44 +40,54 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <HorizontalScrollView
+            <LinearLayout
+                android:id="@+id/leaderboard_buttons"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:scrollbars="none">
+                android:orientation="horizontal"
+                android:weightSum="3">
 
-                <LinearLayout
-                    android:id="@+id/leaderboard_buttons"
-                    android:layout_width="wrap_content"
+                <Button
+                    android:id="@+id/btn_leaderboard_rhythm"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:layout_marginEnd="4dp"
+                    android:layout_weight="1"
+                    android:backgroundTint="@color/white"
+                    android:padding="0dp"
+                    android:text="🎶 Rhythm"
+                    android:textColor="@color/background_red"
+                    android:textSize="11sp"
+                    app:strokeColor="@color/background_red" />
 
-                    <Button
-                        android:id="@+id/btn_leaderboard_rhythm"
-                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginEnd="8dp"
-                        android:text="🎶 Rhythm"
-                        android:textSize="12sp" />
+                <Button
+                    android:id="@+id/btn_leaderboard_online"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="4dp"
+                    android:layout_weight="1"
+                    android:backgroundTint="@color/white"
+                    android:padding="0dp"
+                    android:text="Online"
+                    android:textColor="@color/background_red"
+                    android:textSize="11sp"
+                    app:strokeColor="@color/background_red" />
 
-                    <Button
-                        android:id="@+id/btn_leaderboard_online"
-                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginEnd="8dp"
-                        android:text="Online"
-                        android:textSize="12sp" />
-
-                    <Button
-                        android:id="@+id/btn_leaderboard_bot"
-                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Bot"
-                        android:textSize="12sp" />
-                </LinearLayout>
-            </HorizontalScrollView>
+                <Button
+                    android:id="@+id/btn_leaderboard_bot"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:backgroundTint="@color/white"
+                    android:padding="0dp"
+                    android:text="Bot"
+                    android:textColor="@color/background_red"
+                    android:textSize="11sp"
+                    app:strokeColor="@color/background_red" />
+            </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/bot_difficulty_filters"
