@@ -32,7 +32,7 @@ public class SongSelectionActivity extends BaseActivity {
         SearchView searchView = findViewById(R.id.sv_songs);
         rvSongs.setLayoutManager(new LinearLayoutManager(this));
 
-        adapter = new SongsAdapter(new ArrayList<>(), song -> {
+        adapter = new SongsAdapter(new ArrayList<>(), authService, song -> {
             // Find the key for the selected song
             for (SongsAdminAdapter.Item item : songItems) {
                 if (item.value.equals(song)) {
@@ -63,6 +63,12 @@ public class SongSelectionActivity extends BaseActivity {
 
         findViewById(R.id.btn_go_to_shop).setOnClickListener(v -> navigateTo(ShopActivity.class, false));
         findViewById(R.id.btn_back_to_rules).setOnClickListener(v -> navigateTo(RhythmGameRulesActivity.class, false));
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadSongs(); // Refresh scores when returning to this screen
     }
 
     private void loadSongs() {

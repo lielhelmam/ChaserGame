@@ -12,6 +12,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.chasergame.R;
 import com.example.chasergame.models.SongData;
+import com.example.chasergame.services.AuthService;
+import com.example.chasergame.models.User;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,10 +23,12 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsAdapter.SongViewHold
     private List<SongData> songList;
     private List<SongData> songListFull; // Original full list for filtering
     private OnSongClickListener listener;
+    private AuthService authService;
 
-    public SongsAdapter(List<SongData> songList, OnSongClickListener listener) {
+    public SongsAdapter(List<SongData> songList, AuthService authService, OnSongClickListener listener) {
         this.songList = songList;
         this.songListFull = new ArrayList<>(songList);
+        this.authService = authService;
         this.listener = listener;
     }
 
@@ -62,14 +66,31 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsAdapter.SongViewHold
     public void onBindViewHolder(@NonNull SongViewHolder holder, int position) {
         SongData song = songList.get(position);
         holder.tvName.setText(song.getName());
-        holder.tvDifficulty.setText("Difficulty: " + song.getDifficulty() + " (HP Miss: -" + song.getHpDrain() + ")");
+        holder.tvDifficulty.setText(song.getDifficulty());
         holder.tvBpm.setText(song.getBpm() + " BPM");
+        
+        // World Record (Global Top)
+        String wrName = song.getTopPlayerName();
+        if (wrName == null || wrName.isEmpty()) wrName = "None";
+        holder.tvTopScore.setText("WR: " + song.getTopScore() + " (" + wrName + ")");
+
+        // Personal Best & Rank
+        if (authService != null) {
+            User currentUser = authService.getCurrentUser();
+            if (currentUser != null && currentUser.songHighScores != null && currentUser.songHighScores.containsKey(song.getName())) {
+                int pbScore = currentUser.songHighScores.get(song.getName());
+                String pbRank = currentUser.songRanks != null ? currentUser.songRanks.getOrDefault(song.getName(), "-") : "-";
+                
+                holder.tvTopRank.setText(pbRank);
+                holder.tvTopAccuracy.setText("PB: " + pbScore);
+            } else {
+                holder.tvTopRank.setText("-");
+                holder.tvTopAccuracy.setText("PB: 0");
+            }
+        }
 
         holder.itemLayout.setOnClickListener(v -> {
-            Log.d("SongsAdapter", "Item clicked via layout: " + song.getName());
-            if (listener != null) {
-                listener.onSongClick(song);
-            }
+            if (listener != null) listener.onSongClick(song);
         });
     }
 
@@ -83,7 +104,7 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsAdapter.SongViewHold
     }
 
     static class SongViewHolder extends RecyclerView.ViewHolder {
-        TextView tvName, tvDifficulty, tvBpm;
+        TextView tvName, tvDifficulty, tvBpm, tvTopScore, tvTopAccuracy, tvTopRank;
         LinearLayout itemLayout;
 
         public SongViewHolder(@NonNull View itemView) {
@@ -91,6 +112,9 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsAdapter.SongViewHold
             tvName = itemView.findViewById(R.id.tv_song_name);
             tvDifficulty = itemView.findViewById(R.id.tv_song_difficulty);
             tvBpm = itemView.findViewById(R.id.tv_song_bpm);
+            tvTopScore = itemView.findViewById(R.id.tv_top_score);
+            tvTopAccuracy = itemView.findViewById(R.id.tv_top_accuracy);
+            tvTopRank = itemView.findViewById(R.id.tv_top_rank);
             itemLayout = itemView.findViewById(R.id.song_item_layout);
         }
     }

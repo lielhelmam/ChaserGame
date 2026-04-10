@@ -20,73 +20,61 @@ public class RhythmGameManager {
 
     public void onSliderStarted() {
         if (isGameOver) return;
+        // Sliders are counted as a single perfect hit for accuracy if started
         totalNotesPossible++;
+        currentAccuracyWeight += 1.0;
     }
 
     public void onNoteHit(int points) {
         if (isGameOver) return;
         
-        // Update Combo
         currentCombo++;
         if (currentCombo > maxCombo) maxCombo = currentCombo;
 
-        // Scoring with Multiplier (Every 10 combo increases multiplier by 0.1x)
         float multiplier = 1.0f + (currentCombo / 10f) * 0.1f;
         currentScore += (int) (points * multiplier);
 
-        // Accuracy Calculation
-        totalNotesPossible++;
-        if (points == 300) currentAccuracyWeight += 1.0;
-        else if (points == 150) currentAccuracyWeight += 0.75; // Slider partial
-        else if (points == 100) currentAccuracyWeight += 0.5;
+        // Accuracy Calculation (Only for normal notes AND slider head)
+        // We skip 150 because it's used for slider continuous ticks/perfect finish
+        if (points != 150) { 
+            totalNotesPossible++;
+            if (points == 300) currentAccuracyWeight += 1.0;
+            else if (points == 100) currentAccuracyWeight += 0.5;
+        }
         
-        // HP gain logic (Perfects heal more)
         int hpGain = (points == 300) ? 1 : 0;
         currentHp = Math.min(MAX_HP, currentHp + hpGain);
     }
 
     public void onNoteMissed(boolean wasAlreadyStarted) {
         if (isGameOver) return;
-        
-        // Combo Break!
         currentCombo = 0;
         
+        // If it was a normal note or a slider that wasn't even touched
         if (!wasAlreadyStarted) {
             totalNotesPossible++;
+        } else {
+            // If they started a slider but let go, the weight was already added in onSliderStarted,
+            // so we don't need to add to totalNotesPossible, but we failed the weight.
+            // To simplify, we'll just let the HP drain handle the penalty.
         }
 
-        // Steeper HP loss on miss
         currentHp -= (songData != null ? songData.getHpDrain() : 2);
-        
         if (currentHp <= 0) {
             currentHp = 0;
             isGameOver = true;
         }
     }
 
-    public int getCurrentScore() {
-        return currentScore;
-    }
-
-    public int getCurrentHp() {
-        return currentHp;
-    }
-
-    public int getCurrentCombo() {
-        return currentCombo;
-    }
-
-    public int getMaxCombo() {
-        return maxCombo;
-    }
-
-    public boolean isGameOver() {
-        return isGameOver;
-    }
+    public int getCurrentScore() { return currentScore; }
+    public int getCurrentHp() { return currentHp; }
+    public int getCurrentCombo() { return currentCombo; }
+    public int getMaxCombo() { return maxCombo; }
+    public boolean isGameOver() { return isGameOver; }
 
     public double getAccuracy() {
         if (totalNotesPossible == 0) return 100.0;
-        return (currentAccuracyWeight / totalNotesPossible) * 100.0;
+        return Math.min(100.0, (currentAccuracyWeight / totalNotesPossible) * 100.0);
     }
 
     public String getRank() {
@@ -99,17 +87,12 @@ public class RhythmGameManager {
     }
 
     public int calculateEarnedPoints() {
-        if (isGameOver) return (currentScore / 15); // Penalty for failing
-        
+        if (isGameOver) return (currentScore / 15);
         int basePoints = currentScore / 10;
-        // Bonus for Rank
         String rank = getRank();
         if (rank.equals("S")) basePoints += 1000;
         else if (rank.equals("A")) basePoints += 500;
-        
-        // Bonus for Max Combo
         basePoints += (maxCombo * 10);
-        
         return basePoints;
     }
 }

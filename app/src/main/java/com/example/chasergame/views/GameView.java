@@ -222,8 +222,8 @@ public class GameView extends ConstraintLayout {
                          activeSliders.remove(an.data.getLane());
                          if (isGameRunning && i < activeNotes.size()) activeNotes.remove(i);
                      } else {
-                         if (currentSongTime - lastTickTime > 500) {
-                             if (listener != null) listener.onNoteHit(2);
+                         if (currentSongTime - lastTickTime > 250) { // Faster ticks for better feel
+                             if (listener != null) listener.onNoteHit(150); // Use 150 for slider ticks
                              lastTickTime = currentSongTime;
                          }
                          spawnBurstParticles(an.data.getLane() == 0 ? targetLeft : targetRight, equippedSkin.circleColor);

@@ -5,7 +5,9 @@ import android.graphics.Color;
 import androidx.annotation.NonNull;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class User {
     public String id;
@@ -24,6 +26,11 @@ public class User {
     public boolean giftClaimed = false;
     public int totalRhythmScore = 0; // Cumulative score for the leaderboard
     public String profileImage; // Base64 or URL
+    
+    // Per-Song High Scores (SongID -> Score)
+    public Map<String, Integer> songHighScores = new HashMap<>();
+    public Map<String, String> songRanks = new HashMap<>();
+    public Map<String, Double> songAccuracies = new HashMap<>();
 
     // Custom Skin Settings
     public int customCircleColor = Color.WHITE;

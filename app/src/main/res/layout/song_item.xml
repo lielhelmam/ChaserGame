@@ -4,8 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
-    app:cardCornerRadius="12dp"
-    app:cardElevation="4dp">
+    app:cardCornerRadius="16dp"
+    app:cardElevation="6dp">
 
     <LinearLayout
         android:id="@+id/song_item_layout"
@@ -15,7 +15,22 @@
         android:clickable="true"
         android:focusable="true"
         android:orientation="horizontal"
-        android:padding="16dp">
+        android:padding="16dp"
+        android:gravity="center_vertical">
+
+        <!-- Rank Indicator -->
+        <TextView
+            android:id="@+id/tv_top_rank"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:background="@drawable/note_circle"
+            android:backgroundTint="#22000000"
+            android:gravity="center"
+            android:text="S"
+            android:textColor="@color/background_red"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:layout_marginEnd="12dp"/>
 
         <LinearLayout
             android:layout_width="0dp"
@@ -36,20 +51,45 @@
                 android:id="@+id/tv_song_difficulty"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Difficulty: Easy"
+                android:text="Difficulty: Hard"
                 android:textColor="#666666"
-                android:textSize="14sp" />
+                android:textSize="13sp" />
         </LinearLayout>
 
-        <TextView
-            android:id="@+id/tv_song_bpm"
+        <!-- Stats Section -->
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="120 BPM"
-            android:textColor="@color/background_red"
-            android:textSize="14sp"
-            android:textStyle="bold" />
+            android:layout_marginStart="8dp"
+            android:gravity="end"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tv_top_score"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="WR: 0 (None)"
+                android:textColor="#888888"
+                android:textSize="11sp" />
+
+            <TextView
+                android:id="@+id/tv_top_accuracy"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="PB: 0"
+                android:textColor="#333333"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tv_song_bpm"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="120 BPM"
+                android:textColor="@color/background_red"
+                android:textSize="10sp"
+                android:alpha="0.7" />
+        </LinearLayout>
 
     </LinearLayout>
 </androidx.cardview.widget.CardView>

@@ -484,8 +484,42 @@ public class RhythmGameActivity extends BaseActivity implements GameView.GameEve
         audioService.pause();
         gameView.stop();
         boolean isDead = gameManager.isGameOver();
+        int score = !isDead ? gameManager.getCurrentScore() : 0;
         int earned = gameManager.calculateEarnedPoints();
-        updateScores(!isDead ? gameManager.getCurrentScore() : 0, earned);
+        updateScores(score, earned);
+
+        User currentUser = authService.getCurrentUser();
+        if (!isDead && songData != null && currentUser != null) {
+            String songId = getIntent().getStringExtra("SONG_ID");
+            boolean updated = false;
+
+            // 1. Update Personal Best (PB)
+            int currentPB = currentUser.songHighScores != null && currentUser.songHighScores.containsKey(songData.getName()) 
+                ? currentUser.songHighScores.get(songData.getName()) : 0;
+            
+            if (score > currentPB) {
+                if (currentUser.songHighScores == null) currentUser.songHighScores = new java.util.HashMap<>();
+                if (currentUser.songRanks == null) currentUser.songRanks = new java.util.HashMap<>();
+                if (currentUser.songAccuracies == null) currentUser.songAccuracies = new java.util.HashMap<>();
+                
+                currentUser.songHighScores.put(songData.getName(), score);
+                currentUser.songRanks.put(songData.getName(), gameManager.getRank());
+                currentUser.songAccuracies.put(songData.getName(), gameManager.getAccuracy());
+                
+                authService.updateUserAndSync(currentUser, null);
+            }
+
+            // 2. Update World Record (WR)
+            if (score > songData.getTopScore()) {
+                songData.setTopScore(score);
+                songData.setTopAccuracy(gameManager.getAccuracy());
+                songData.setTopRank(gameManager.getRank());
+                songData.setTopPlayerName(currentUser.username);
+                if (songId != null) {
+                    databaseService.updateSong(songId, songData, null);
+                }
+            }
+        }
 
         new AlertDialog.Builder(this)
                 .setTitle(isDead ? "Game Over!" : "Level Complete!")
@@ -500,8 +534,8 @@ public class RhythmGameActivity extends BaseActivity implements GameView.GameEve
     private void updateScores(int score, int points) {
         User user = authService.getCurrentUser();
         if (user != null) {
-            if (score > 0) user.setTotalRhythmScore(user.getTotalRhythmScore() + score);
-            user.setPoints(user.getPoints() + points);
+            if (score > 0) user.totalRhythmScore += score;
+            user.points += points;
             authService.updateUserAndSync(user, null);
         }
     }

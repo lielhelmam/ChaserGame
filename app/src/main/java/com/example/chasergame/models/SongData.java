@@ -9,8 +9,14 @@ public class SongData {
     private String resName;
     private List<Note> notes;
     private int bpm = 120;
-    private int hpDrain = 1; // Amount of HP lost on miss
-    private int hpGain = 1;  // Amount of HP gained on perfect hit (300)
+    private int hpDrain = 1; 
+    private int hpGain = 1;  
+    
+    // Leaderboard Data
+    private int topScore = 0;
+    private String topPlayerName = "None";
+    private String topRank = "-";
+    private double topAccuracy = 0.0;
 
     public SongData() {}
 
@@ -40,4 +46,13 @@ public class SongData {
     public void setHpDrain(int hpDrain) { this.hpDrain = hpDrain; }
     public int getHpGain() { return hpGain; }
     public void setHpGain(int hpGain) { this.hpGain = hpGain; }
+
+    public int getTopScore() { return topScore; }
+    public void setTopScore(int topScore) { this.topScore = topScore; }
+    public String getTopPlayerName() { return topPlayerName; }
+    public void setTopPlayerName(String topPlayerName) { this.topPlayerName = topPlayerName; }
+    public String getTopRank() { return topRank; }
+    public void setTopRank(String topRank) { this.topRank = topRank; }
+    public double getTopAccuracy() { return topAccuracy; }
+    public void setTopAccuracy(double topAccuracy) { this.topAccuracy = topAccuracy; }
 }
