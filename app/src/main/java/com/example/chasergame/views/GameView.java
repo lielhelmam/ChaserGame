@@ -33,7 +33,8 @@ import java.util.Random;
 
 public class GameView extends ConstraintLayout {
 
-    private static final long VISIBLE_DURATION = 1500L;
+    private static final long VISIBLE_DURATION_DEFAULT = 1500L;
+    private long visibleDuration = VISIBLE_DURATION_DEFAULT;
     private static final int PERFECT_WINDOW = 250;
     private static final int GOOD_WINDOW = 500;
     private static final int MISS_WINDOW = 600;
@@ -65,6 +66,12 @@ public class GameView extends ConstraintLayout {
 
     public void setActiveMods(List<String> mods) {
         this.activeMods = mods != null ? mods : new ArrayList<>();
+        // Adjust visible duration if Overclock is active to keep note density manageable
+        if (this.activeMods.contains("OVERCLOCK")) {
+            this.visibleDuration = 1000L; // Notes appear for 1s instead of 1.5s
+        } else {
+            this.visibleDuration = VISIBLE_DURATION_DEFAULT;
+        }
     }
     private final Runnable gameLoop = new Runnable() {
         @Override
@@ -257,7 +264,7 @@ public class GameView extends ConstraintLayout {
 
         for (int i = 0; i < allNotes.size(); i++) {
             Note n = allNotes.get(i);
-            if (currentSongTime >= n.getTimestamp() - VISIBLE_DURATION) {
+            if (currentSongTime >= n.getTimestamp() - visibleDuration) {
                 if (n.getType() == Note.Type.SPINNER) {
                     clearActiveNotes(); // Remove everything else for the spinner
                     isSpinnerActive = true;
@@ -272,7 +279,7 @@ public class GameView extends ConstraintLayout {
 
         float density = getResources().getDisplayMetrics().density;
         float targetY = (targetLeft != null) ? (targetLeft.getTop() - laneLeft.getTop() + (targetLeft.getHeight() - (60 * density)) / 2f) : 0;
-        float speed = targetY / VISIBLE_DURATION;
+        float speed = targetY / visibleDuration;
 
         for (int i = activeNotes.size() - 1; i >= 0; i--) {
             if (!isGameRunning) break;
@@ -280,7 +287,7 @@ public class GameView extends ConstraintLayout {
             long timeDiff = an.data.getTimestamp() - currentSongTime;
             
             // --- GRAVITY WARP LOGIC (Acceleration) ---
-            float progress = 1f - ((float)timeDiff / VISIBLE_DURATION);
+            float progress = 1f - ((float)timeDiff / visibleDuration);
             if (activeMods.contains("GRAVITY")) {
                 // Exponential movement: notes speed up as they fall
                 progress = (float) Math.pow(progress, 2.5); 
@@ -369,7 +376,7 @@ public class GameView extends ConstraintLayout {
         int size = (int) (60 * density);
         View v = new View(getContext());
         float targetY = (targetLeft != null) ? (targetLeft.getTop() - laneLeft.getTop() + (targetLeft.getHeight() - size) / 2f) : 0;
-        float speed = targetY / VISIBLE_DURATION;
+        float speed = targetY / visibleDuration;
 
         if (n.isSlider()) {
             int mainColor = equippedSkin != null ? equippedSkin.circleColor : Color.CYAN;

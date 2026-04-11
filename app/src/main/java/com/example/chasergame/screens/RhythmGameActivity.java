@@ -145,6 +145,14 @@ public class RhythmGameActivity extends BaseActivity implements GameView.GameEve
 
     private void startPlay(List<Note> notes) {
         audioService.playSong(songData.getResName(), this::endGame);
+        
+        // --- OVERCLOCK MOD: Physical Speed Increase ---
+        if (activeMods.contains("OVERCLOCK")) {
+            audioService.setPlaybackSpeed(2.0f);
+        } else {
+            audioService.setPlaybackSpeed(1.0f);
+        }
+
         int duration = audioService.getDuration();
         pbSongProgress.setMax(duration);
         
@@ -219,7 +227,10 @@ public class RhythmGameActivity extends BaseActivity implements GameView.GameEve
     public void onRequestSpinner(long duration) {
         if (spinnerView == null) return;
 
-        spinnerView.start(duration, new com.example.chasergame.views.SpinnerView.SpinnerListener() {
+        // BUG FIX: Scale spinner duration by playback speed (2x speed means 0.5x time)
+        long actualDuration = activeMods.contains("OVERCLOCK") ? duration / 2 : duration;
+
+        spinnerView.start(actualDuration, new com.example.chasergame.views.SpinnerView.SpinnerListener() {
             @Override
             public void onSpin(float progress) {
                 // Optional effect during spin

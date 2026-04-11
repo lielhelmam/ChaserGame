@@ -50,6 +50,16 @@ public class AudioService {
         }
     }
 
+    public void setPlaybackSpeed(float speed) {
+        if (mediaPlayer != null && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            try {
+                mediaPlayer.setPlaybackParams(mediaPlayer.getPlaybackParams().setSpeed(speed));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     public void release() {
         if (mediaPlayer != null) {
             mediaPlayer.release();
