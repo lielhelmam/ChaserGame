@@ -24,8 +24,8 @@ public class RhythmGameManager {
 
     public void onSliderStarted() {
         if (isGameOver) return;
-        // Increment total notes, but don't give accuracy points yet
-        totalNotesPossible++;
+        // Logic for starting a slider (e.g., sound or visual)
+        // We no longer increment totalNotesPossible here to avoid early Acc drops.
     }
 
     public void onNoteHit(int points) {
@@ -45,17 +45,11 @@ public class RhythmGameManager {
             totalNotesPossible++;
             currentAccuracyWeight += 0.5;
         } else if (points == 150) {
-            // This is a slider tick or slider end. 
-            // If we treat a slider as a single note for accuracy, 
-            // we should only give the weight once.
-            // But we already incremented totalNotesPossible in onSliderStarted.
-            // So we just add the weight here when a "tick" or "end" is successful.
-            // To prevent over-inflation, we'll only add a fraction or 
-            // handle it so a full slider equals 1.0 weight.
-            
-            // Fix: Give 1.0 weight for a perfect slider completion
-            // We'll call this from handlePerfectSlider
+            // Slider completion - counted as a full note for accuracy
+            totalNotesPossible++;
             currentAccuracyWeight += 1.0;
+        } else if (points == 20) {
+            // Slider tick - strictly for score, does not affect accuracy %
         }
 
         int hpGain = (points == 300 || points == 150) ? 1 : 0;
@@ -66,13 +60,9 @@ public class RhythmGameManager {
         if (isGameOver) return;
         currentCombo = 0;
 
-        if (!wasAlreadyStarted) {
-            // Normal note miss
-            totalNotesPossible++;
-        } 
-        // If wasAlreadyStarted is true (slider let go), totalNotesPossible was already 
-        // incremented in onSliderStarted, but currentAccuracyWeight was NOT.
-        // This naturally drops the accuracy.
+        // Any miss (normal or slider release) increments the denominator
+        totalNotesPossible++;
+        // currentAccuracyWeight does not increase, so Acc drops.
 
         currentHp -= (songData != null ? songData.getHpDrain() : 2);
         if (currentHp <= 0) {

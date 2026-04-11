@@ -117,8 +117,8 @@ public class SongSelectionActivity extends BaseActivity {
 
         androidx.appcompat.app.AlertDialog dialog = builder.create();
         if (dialog.getWindow() != null) {
-            // Making it look sleek and dark
-            dialog.getWindow().setBackgroundDrawableResource(R.drawable.target_cube_bg);
+            // Using the new more opaque cyber background
+            dialog.getWindow().setBackgroundDrawableResource(R.drawable.dialog_cyber_bg);
         }
         dialog.show();
         

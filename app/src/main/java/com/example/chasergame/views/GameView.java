@@ -323,7 +323,7 @@ public class GameView extends ConstraintLayout {
                     } else {
                         if (currentSongTime - lastTickTime > 250) { // Faster ticks for better feel
                             if (listener != null)
-                                listener.onNoteHit(150); // Use 150 for slider ticks
+                                listener.onNoteHit(20); // Use 20 for slider ticks (score only, no acc weight)
                             lastTickTime = currentSongTime;
                         }
                         spawnBurstParticles(an.data.getLane() == 0 ? targetLeft : targetRight, equippedSkin.circleColor);
