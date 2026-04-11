@@ -1,7 +1,9 @@
 package com.example.chasergame.views;
 
 import android.content.Context;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.LayerDrawable;
@@ -51,6 +53,14 @@ public class GameView extends ConstraintLayout {
     private long currentSongTime = 0;
     private long lastTickTime = 0;
     private GameEventListener listener;
+    private List<String> activeMods = new ArrayList<>();
+    private long lastGlitchTime = 0;
+    private float offsetX = 0, offsetY = 0;
+    private final Paint staticPaint = new Paint();
+
+    public void setActiveMods(List<String> mods) {
+        this.activeMods = mods != null ? mods : new ArrayList<>();
+    }
     private final Runnable gameLoop = new Runnable() {
         @Override
         public void run() {
@@ -118,6 +128,30 @@ public class GameView extends ConstraintLayout {
         activeSliders.clear();
     }
 
+    @Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+
+        // Draw Static Noise Mod (HARDER - Full Screen Flashes)
+        if (activeMods.contains("STATIC")) {
+            staticPaint.setColor(Color.WHITE);
+            // Dynamic noise
+            for (int i = 0; i < 80; i++) {
+                staticPaint.setAlpha(random.nextInt(100));
+                float x = random.nextFloat() * getWidth();
+                float y = random.nextFloat() * getHeight();
+                float size = random.nextFloat() * 300f;
+                canvas.drawRect(x, y, x + size, y + 4, staticPaint);
+            }
+            // Random full screen static "blindness"
+            if (random.nextInt(20) == 0) {
+                staticPaint.setAlpha(150);
+                canvas.drawRect(0, 0, getWidth(), getHeight(), staticPaint);
+            }
+            invalidate(); 
+        }
+    }
+
     private void applySkin() {
         if (equippedSkin == null) return;
         float density = getResources().getDisplayMetrics().density;
@@ -167,6 +201,23 @@ public class GameView extends ConstraintLayout {
     private void updateGameFrame() {
         if (getHeight() == 0 || !isGameRunning) return;
 
+        // --- GLITCH MOD LOGIC (HARDER) ---
+        if (activeMods.contains("GLITCH")) {
+            if (System.currentTimeMillis() - lastGlitchTime > 50) { // Faster glitches
+                offsetX = (random.nextFloat() - 0.5f) * 80; // Bigger shakes
+                offsetY = (random.nextFloat() - 0.5f) * 80;
+                lastGlitchTime = System.currentTimeMillis();
+                setTranslationX(offsetX);
+                setTranslationY(offsetY);
+                // Randomly flash background color for distraction
+                if (random.nextInt(10) == 0) setBackgroundColor(Color.argb(50, 255, 0, 0));
+                else if (equippedSkin != null) setBackgroundColor(equippedSkin.backgroundColor);
+            }
+        } else {
+            setTranslationX(0);
+            setTranslationY(0);
+        }
+
         // While spinner is active, we don't spawn new notes and we don't update existing ones
         if (isSpinnerActive) return;
 
@@ -193,7 +244,14 @@ public class GameView extends ConstraintLayout {
             if (!isGameRunning) break;
             ActiveNote an = activeNotes.get(i);
             long timeDiff = an.data.getTimestamp() - currentSongTime;
-            float noteHeadY = targetY - (timeDiff * speed);
+            
+            // --- GRAVITY WARP LOGIC (Acceleration) ---
+            float progress = 1f - ((float)timeDiff / VISIBLE_DURATION);
+            if (activeMods.contains("GRAVITY")) {
+                // Exponential movement: notes speed up as they fall
+                progress = (float) Math.pow(progress, 2.5); 
+            }
+            float noteHeadY = targetY * progress;
 
             if (an.data.isSlider()) {
                 float sliderHeadY = noteHeadY;
@@ -240,11 +298,18 @@ public class GameView extends ConstraintLayout {
             } else if (an.wasHit && !an.data.isSlider()) {
                 if (isGameRunning && i < activeNotes.size()) activeNotes.remove(i);
             } else {
-                // --- TRAIL EFFECTS FOR FALLING NOTES ---
-                if (equippedSkin != null && !"none".equals(equippedSkin.effectType) && !an.wasMissed) {
-                    // Emit trail particles every few frames to save performance
-                    if (System.currentTimeMillis() % 3 == 0) {
-                        listener.onRequestTrail(an.view, equippedSkin.effectType, equippedSkin.circleColor);
+                // --- TRAIL EFFECTS AND BLIND MOD (HARDER) ---
+                if (equippedSkin != null && !an.wasMissed) {
+                    if (activeMods.contains("BLIND")) {
+                        // Disappear when 600ms away from target (MUCH EARLIER)
+                        float alpha = Math.max(0, Math.min(1, (timeDiff - 600) / 400f));
+                        an.view.setAlpha(alpha);
+                    }
+
+                    if (!"none".equals(equippedSkin.effectType)) {
+                        if (System.currentTimeMillis() % 3 == 0) {
+                            listener.onRequestTrail(an.view, equippedSkin.effectType, equippedSkin.circleColor);
+                        }
                     }
                 }
             }

@@ -12,9 +12,14 @@ public class RhythmGameManager {
     private int currentCombo = 0;
     private int maxCombo = 0;
     private boolean isGameOver = false;
+    private double scoreMultiplier = 1.0;
 
     public RhythmGameManager(SongData songData) {
         this.songData = songData;
+    }
+
+    public void setScoreMultiplier(double multiplier) {
+        this.scoreMultiplier = multiplier;
     }
 
     public void onSliderStarted() {
@@ -30,7 +35,7 @@ public class RhythmGameManager {
         currentCombo++;
         if (currentCombo > maxCombo) maxCombo = currentCombo;
 
-        float multiplier = 1.0f + (currentCombo / 10f) * 0.1f;
+        float multiplier = (1.0f + (currentCombo / 10f) * 0.1f) * (float) scoreMultiplier;
         currentScore += (int) (points * multiplier);
 
         // Accuracy Calculation: Skip 150 (slider ticks) and 1000 (spinner bonus)

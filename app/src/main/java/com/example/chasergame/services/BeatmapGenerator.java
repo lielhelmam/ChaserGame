@@ -1,7 +1,6 @@
 package com.example.chasergame.services;
 
 import com.example.chasergame.models.Note;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -9,8 +8,19 @@ import java.util.Random;
 public class BeatmapGenerator {
 
     public static List<Note> generate(int bpm, long durationMs, String difficulty) {
+        return generate(bpm, durationMs, difficulty, new ArrayList<>());
+    }
+
+    public static List<Note> generate(int bpm, long durationMs, String difficulty, List<String> mods) {
         List<Note> notes = new ArrayList<>();
         Random random = new Random();
+
+        if (mods == null) mods = new ArrayList<>();
+
+        // Overclocked mod: Speed up the BPM
+        if (mods.contains("OVERCLOCK")) {
+            bpm = (int)(bpm * 1.25);
+        }
 
         // Base beat interval
         long beatInterval = 60000 / Math.max(bpm, 60);
@@ -19,14 +29,14 @@ public class BeatmapGenerator {
         double doubleNoteChance = 0.0;
         String diff = difficulty.toLowerCase();
 
-        long[] lastSliderEndTime = new long[2]; // Track last slider end per lane
+        long[] lastSliderEndTime = new long[2]; 
         lastSliderEndTime[0] = -2000;
         lastSliderEndTime[1] = -2000;
 
         switch (diff) {
             case "beginner":
                 noteProbability = 0.3;
-                sliderChance = 0.4; // More sliders for beginners (easier to hold)
+                sliderChance = 0.4;
                 beatInterval *= 2;
                 break;
             case "easy":
@@ -60,37 +70,43 @@ public class BeatmapGenerator {
         // Generate notes
         for (long t = 2500; t < durationMs - 5000; t += beatInterval) {
 
-            // --- SPINNER LOGIC: Force spinners at 40% and 85% of the song ---
+            // SPINNER LOGIC
             if (Math.abs(t - (durationMs * 0.4)) < beatInterval / 2 ||
                     Math.abs(t - (durationMs * 0.85)) < beatInterval / 2) {
 
-                long spinnerDuration = 3000; // 3 seconds spinner
+                long spinnerDuration = 3000;
                 notes.add(new Note(t, 0, spinnerDuration, Note.Type.SPINNER));
-                t += spinnerDuration + 1000; // Skip time after spinner
+                t += spinnerDuration + 1000;
                 continue;
             }
 
-            // Check if any slider is currently active in any lane
             boolean sliderActive = (t < lastSliderEndTime[0] || t < lastSliderEndTime[1]);
 
             if (!sliderActive && random.nextDouble() < noteProbability) {
                 int mainLane = random.nextInt(2);
 
                 if (random.nextDouble() < sliderChance && t > lastSliderEndTime[mainLane] + 1000) {
-                    // Create a slider
                     long sliderDuration = beatInterval * (1 + random.nextInt(3));
                     notes.add(new Note(t, mainLane, sliderDuration, Note.Type.SLIDER));
                     lastSliderEndTime[mainLane] = t + sliderDuration;
-                    // If it's a slider, we DON'T add a double note to keep it easy
                 } else {
-                    // Normal note
                     notes.add(new Note(t, mainLane, 0, Note.Type.NORMAL));
 
-                    // Add double notes only if the first one was a normal note
-                    if (random.nextDouble() < doubleNoteChance) {
+                    // DUAL STREAM MOD: Always add second note
+                    if (mods.contains("DUAL") || (random.nextDouble() < doubleNoteChance)) {
                         int otherLane = 1 - mainLane;
                         notes.add(new Note(t, otherLane, 0, Note.Type.NORMAL));
                     }
+                }
+            }
+        }
+
+        // GRAVITY WARP MOD: Randomly shift timestamps
+        if (mods.contains("GRAVITY")) {
+            for (Note n : notes) {
+                if (n.getType() != Note.Type.SPINNER) {
+                    long shift = (long)((random.nextDouble() - 0.5) * 250); 
+                    n.setTimestamp(n.getTimestamp() + shift);
                 }
             }
         }

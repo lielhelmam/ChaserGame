@@ -391,8 +391,26 @@ public class DatabaseService implements IUserRepository, IQuestionRepository, IS
      * @param callback Callback to return the list of songs.
      */
     @Override
-    public void getSongList(@NotNull DatabaseCallback<List<SongData>> callback) {
+    public void getSongList(@org.jetbrains.annotations.NotNull DatabaseCallback<List<SongData>> callback) {
         getDataList(SONGS_PATH, SongData.class, callback);
+    }
+
+    public void getSongsSnapshot(@org.jetbrains.annotations.NotNull DatabaseCallback<List<DataSnapshot>> callback) {
+        databaseReference.child(SONGS_PATH).addListenerForSingleValueEvent(new com.google.firebase.database.ValueEventListener() {
+            @Override
+            public void onDataChange(com.google.firebase.database.DataSnapshot dataSnapshot) {
+                List<DataSnapshot> snapshots = new ArrayList<>();
+                for (com.google.firebase.database.DataSnapshot child : dataSnapshot.getChildren()) {
+                    snapshots.add(child);
+                }
+                callback.onCompleted(snapshots);
+            }
+
+            @Override
+            public void onCancelled(com.google.firebase.database.DatabaseError databaseError) {
+                callback.onFailed(databaseError.toException());
+            }
+        });
     }
 
     public void getSongListWithKeys(@NotNull DatabaseCallback<List<SongsAdminAdapter.Item>> callback) {

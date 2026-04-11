@@ -42,6 +42,8 @@ public class RhythmGameActivity extends BaseActivity implements GameView.GameEve
 
     private RhythmGameManager gameManager;
     private AudioService audioService;
+    private List<String> activeMods = new ArrayList<>();
+    private double scoreMultiplier = 1.0;
     private SongData songData;
     private Skin equippedSkin;
     private Vibrator vibrator;
@@ -58,6 +60,22 @@ public class RhythmGameActivity extends BaseActivity implements GameView.GameEve
         applySkin();
 
         String songId = getIntent().getStringExtra("SONG_ID");
+        // Get active mods and calculate multiplier
+        List<String> mods = getIntent().getStringArrayListExtra("ACTIVE_MODS");
+        if (mods != null) {
+            activeMods = mods;
+            for (String mod : activeMods) {
+                switch (mod) {
+                    case "GLITCH": scoreMultiplier *= 1.5; break;
+                    case "GRAVITY": scoreMultiplier *= 1.3; break;
+                    case "BLIND": scoreMultiplier *= 1.8; break;
+                    case "DUAL": scoreMultiplier *= 1.4; break;
+                    case "STATIC": scoreMultiplier *= 1.2; break;
+                    case "OVERCLOCK": scoreMultiplier *= 2.0; break;
+                }
+            }
+        }
+
         if (songId != null) loadSong(songId);
         else finish();
     }
@@ -114,7 +132,7 @@ public class RhythmGameActivity extends BaseActivity implements GameView.GameEve
                 int duration = audioService.prepareSong(songData.getResName());
                 if (duration <= 0) duration = 180000; // Fallback
 
-                List<Note> dynamicNotes = BeatmapGenerator.generate(songData.getBpm(), duration, songData.getDifficulty());
+                List<Note> dynamicNotes = BeatmapGenerator.generate(songData.getBpm(), duration, songData.getDifficulty(), activeMods);
                 startPlay(dynamicNotes);
             }
 
@@ -129,6 +147,8 @@ public class RhythmGameActivity extends BaseActivity implements GameView.GameEve
         audioService.playSong(songData.getResName(), this::endGame);
         int duration = audioService.getDuration();
         pbSongProgress.setMax(duration);
+        
+        gameView.setActiveMods(activeMods);
         gameView.startGame(notes, equippedSkin);
     }
 
