@@ -51,9 +51,9 @@
         android:layout_marginTop="8dp"
         android:gravity="center_vertical"
         android:orientation="vertical"
-        app:layout_constraintTop_toBottomOf="@id/pb_song_progress"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_end_toEndOf="parent">
+        app:layout_constraintTop_toBottomOf="@id/pb_song_progress">
 
         <ProgressBar
             android:id="@+id/pb_game_hp"
@@ -73,21 +73,21 @@
                 android:id="@+id/tv_game_hp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
                 android:text="HP: 10"
                 android:textColor="#FFFFFF"
                 android:textSize="10sp"
-                android:textStyle="bold"
-                android:layout_alignParentStart="true" />
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/tv_game_current_rank"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
                 android:text="Rank: S"
                 android:textColor="#FFEB3B"
                 android:textSize="12sp"
-                android:textStyle="bold"
-                android:layout_alignParentEnd="true" />
+                android:textStyle="bold" />
         </RelativeLayout>
     </LinearLayout>
 
@@ -124,5 +124,16 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/hp_container" />
+
+    <!-- ===== SPINNER VIEW (Center of screen) ===== -->
+    <com.example.chasergame.views.SpinnerView
+        android:id="@+id/spinner_view"
+        android:layout_width="300dp"
+        android:layout_height="300dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

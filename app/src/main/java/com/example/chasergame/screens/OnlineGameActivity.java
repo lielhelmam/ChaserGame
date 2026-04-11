@@ -333,7 +333,7 @@ public class OnlineGameActivity extends BaseActivity {
      */
     private void deleteAndExit() {
         if (finishing) return;
-        
+
         new AlertDialog.Builder(this)
                 .setTitle("Exit Game")
                 .setMessage("Are you sure you want to quit? This will be counted as a loss.")

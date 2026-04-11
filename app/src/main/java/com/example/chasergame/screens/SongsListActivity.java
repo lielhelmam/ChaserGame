@@ -157,7 +157,7 @@ public class SongsListActivity extends BaseActivity {
         etHpDrain.setText(String.valueOf(song.getHpDrain()));
         etHpGain.setText(String.valueOf(song.getHpGain()));
         etBpm.setText(String.valueOf(song.getBpm()));
-        
+
         // Set spinner selection
         for (int i = 0; i < levels.length; i++) {
             if (levels[i].toLowerCase().startsWith(song.getDifficulty().toLowerCase())) {
@@ -219,13 +219,33 @@ public class SongsListActivity extends BaseActivity {
     private boolean isBpmValid(int bpm, String difficulty) {
         int min, max;
         switch (difficulty.toLowerCase()) {
-            case "beginner": min = 40; max = 90; break;
-            case "easy": min = 80; max = 120; break;
-            case "medium": min = 100; max = 150; break;
-            case "hard": min = 130; max = 180; break;
-            case "insane": min = 160; max = 220; break;
-            case "expert": min = 200; max = 300; break;
-            default: min = 40; max = 300;
+            case "beginner":
+                min = 40;
+                max = 90;
+                break;
+            case "easy":
+                min = 80;
+                max = 120;
+                break;
+            case "medium":
+                min = 100;
+                max = 150;
+                break;
+            case "hard":
+                min = 130;
+                max = 180;
+                break;
+            case "insane":
+                min = 160;
+                max = 220;
+                break;
+            case "expert":
+                min = 200;
+                max = 300;
+                break;
+            default:
+                min = 40;
+                max = 300;
         }
         if (bpm < min || bpm > max) {
             Toast.makeText(this, "BPM for " + difficulty + " must be between " + min + " and " + max, Toast.LENGTH_LONG).show();

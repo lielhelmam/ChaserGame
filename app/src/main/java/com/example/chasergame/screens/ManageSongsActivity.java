@@ -13,8 +13,6 @@ import com.example.chasergame.services.DatabaseService;
 
 public class ManageSongsActivity extends BaseActivity {
 
-    private EditText etName, etResId, etBpm, etHpDrain, etHpGain;
-    private Spinner spDifficulty;
     private final String[] difficultyLevels = {
             "Beginner (40-90)",
             "Easy (80-120)",
@@ -23,6 +21,8 @@ public class ManageSongsActivity extends BaseActivity {
             "Insane (160-220)",
             "Expert (200-300)"
     };
+    private EditText etName, etResId, etBpm, etHpDrain, etHpGain;
+    private Spinner spDifficulty;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,13 +97,33 @@ public class ManageSongsActivity extends BaseActivity {
     private boolean isBpmValidForDifficulty(int bpm, String difficulty) {
         int min, max;
         switch (difficulty.toLowerCase()) {
-            case "beginner": min = 40; max = 90; break;
-            case "easy": min = 80; max = 120; break;
-            case "medium": min = 100; max = 150; break;
-            case "hard": min = 130; max = 180; break;
-            case "insane": min = 160; max = 220; break;
-            case "expert": min = 200; max = 300; break;
-            default: min = 40; max = 300;
+            case "beginner":
+                min = 40;
+                max = 90;
+                break;
+            case "easy":
+                min = 80;
+                max = 120;
+                break;
+            case "medium":
+                min = 100;
+                max = 150;
+                break;
+            case "hard":
+                min = 130;
+                max = 180;
+                break;
+            case "insane":
+                min = 160;
+                max = 220;
+                break;
+            case "expert":
+                min = 200;
+                max = 300;
+                break;
+            default:
+                min = 40;
+                max = 300;
         }
         if (bpm < min || bpm > max) {
             Toast.makeText(this, "BPM for " + difficulty + " must be between " + min + " and " + max, Toast.LENGTH_LONG).show();

@@ -17,9 +17,9 @@ import java.util.List;
 
 public class SkinsAdapter extends RecyclerView.Adapter<SkinsAdapter.ViewHolder> {
 
+    private final OnSkinActionListener listener;
     private List<Skin> skins;
     private User currentUser;
-    private final OnSkinActionListener listener;
 
     public SkinsAdapter(List<Skin> skins, User user, OnSkinActionListener listener) {
         this.skins = skins;

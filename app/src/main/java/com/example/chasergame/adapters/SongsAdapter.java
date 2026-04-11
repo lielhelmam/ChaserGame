@@ -1,6 +1,5 @@
 package com.example.chasergame.adapters;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,8 +11,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.chasergame.R;
 import com.example.chasergame.models.SongData;
-import com.example.chasergame.services.AuthService;
 import com.example.chasergame.models.User;
+import com.example.chasergame.services.AuthService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -68,7 +67,7 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsAdapter.SongViewHold
         holder.tvName.setText(song.getName());
         holder.tvDifficulty.setText(song.getDifficulty());
         holder.tvBpm.setText(song.getBpm() + " BPM");
-        
+
         // World Record (Global Top)
         String wrName = song.getTopPlayerName();
         if (wrName == null || wrName.isEmpty()) wrName = "None";
@@ -80,7 +79,7 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsAdapter.SongViewHold
             if (currentUser != null && currentUser.songHighScores != null && currentUser.songHighScores.containsKey(song.getName())) {
                 int pbScore = currentUser.songHighScores.get(song.getName());
                 String pbRank = currentUser.songRanks != null ? currentUser.songRanks.getOrDefault(song.getName(), "-") : "-";
-                
+
                 holder.tvTopRank.setText(pbRank);
                 holder.tvTopAccuracy.setText("PB: " + pbScore);
             } else {

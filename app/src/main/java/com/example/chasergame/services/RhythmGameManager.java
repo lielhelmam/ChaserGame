@@ -4,12 +4,11 @@ import com.example.chasergame.models.SongData;
 
 public class RhythmGameManager {
     private final SongData songData;
+    private final int MAX_HP = 10;
     private int currentScore = 0;
     private int totalNotesPossible = 0;
     private double currentAccuracyWeight = 0;
-    
     private int currentHp = 10;
-    private final int MAX_HP = 10;
     private int currentCombo = 0;
     private int maxCombo = 0;
     private boolean isGameOver = false;
@@ -27,21 +26,20 @@ public class RhythmGameManager {
 
     public void onNoteHit(int points) {
         if (isGameOver) return;
-        
+
         currentCombo++;
         if (currentCombo > maxCombo) maxCombo = currentCombo;
 
         float multiplier = 1.0f + (currentCombo / 10f) * 0.1f;
         currentScore += (int) (points * multiplier);
 
-        // Accuracy Calculation (Only for normal notes AND slider head)
-        // We skip 150 because it's used for slider continuous ticks/perfect finish
-        if (points != 150) { 
+        // Accuracy Calculation: Skip 150 (slider ticks) and 1000 (spinner bonus)
+        if (points != 150 && points != 1000) {
             totalNotesPossible++;
             if (points == 300) currentAccuracyWeight += 1.0;
             else if (points == 100) currentAccuracyWeight += 0.5;
         }
-        
+
         int hpGain = (points == 300) ? 1 : 0;
         currentHp = Math.min(MAX_HP, currentHp + hpGain);
     }
@@ -49,7 +47,7 @@ public class RhythmGameManager {
     public void onNoteMissed(boolean wasAlreadyStarted) {
         if (isGameOver) return;
         currentCombo = 0;
-        
+
         // If it was a normal note or a slider that wasn't even touched
         if (!wasAlreadyStarted) {
             totalNotesPossible++;
@@ -66,11 +64,25 @@ public class RhythmGameManager {
         }
     }
 
-    public int getCurrentScore() { return currentScore; }
-    public int getCurrentHp() { return currentHp; }
-    public int getCurrentCombo() { return currentCombo; }
-    public int getMaxCombo() { return maxCombo; }
-    public boolean isGameOver() { return isGameOver; }
+    public int getCurrentScore() {
+        return currentScore;
+    }
+
+    public int getCurrentHp() {
+        return currentHp;
+    }
+
+    public int getCurrentCombo() {
+        return currentCombo;
+    }
+
+    public int getMaxCombo() {
+        return maxCombo;
+    }
+
+    public boolean isGameOver() {
+        return isGameOver;
+    }
 
     public double getAccuracy() {
         if (totalNotesPossible == 0) return 100.0;

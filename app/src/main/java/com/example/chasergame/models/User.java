@@ -26,7 +26,7 @@ public class User {
     public boolean giftClaimed = false;
     public int totalRhythmScore = 0; // Cumulative score for the leaderboard
     public String profileImage; // Base64 or URL
-    
+
     // Per-Song High Scores (SongID -> Score)
     public Map<String, Integer> songHighScores = new HashMap<>();
     public Map<String, String> songRanks = new HashMap<>();

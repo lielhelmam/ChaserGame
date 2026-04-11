@@ -17,7 +17,7 @@ public class AudioService {
         }
         int resId = context.getResources().getIdentifier(resName, "raw", context.getPackageName());
         if (resId == 0) return 0;
-        
+
         mediaPlayer = MediaPlayer.create(context, resId);
         return mediaPlayer != null ? mediaPlayer.getDuration() : 0;
     }

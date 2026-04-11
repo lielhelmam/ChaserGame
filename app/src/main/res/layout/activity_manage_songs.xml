@@ -99,8 +99,8 @@
                         android:id="@+id/et_hp_drain"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
                         android:layout_marginEnd="8dp"
+                        android:layout_weight="1"
                         android:backgroundTint="@color/background_red"
                         android:hint="HP Drain (Miss)"
                         android:inputType="number"
@@ -116,6 +116,7 @@
                         android:inputType="number"
                         android:padding="12dp" />
                 </LinearLayout>
+
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

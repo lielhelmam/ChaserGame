@@ -1,10 +1,6 @@
 package com.example.chasergame.models;
 
 public class Note {
-    public enum Type {
-        NORMAL, SLIDER
-    }
-
     private long timestamp;
     private int lane;
     private long duration; // 0 for NORMAL, >0 for SLIDER
@@ -56,8 +52,12 @@ public class Note {
     public void setType(Type type) {
         this.type = type;
     }
-    
+
     public boolean isSlider() {
         return type == Type.SLIDER;
+    }
+
+    public enum Type {
+        NORMAL, SLIDER, SPINNER
     }
 }

@@ -1,6 +1,7 @@
 package com.example.chasergame.services;
 
 import com.example.chasergame.models.Note;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -14,7 +15,7 @@ public class BeatmapGenerator {
         // Base beat interval
         long beatInterval = 60000 / Math.max(bpm, 60);
         double noteProbability = 0.6;
-        double sliderChance = 0.2; 
+        double sliderChance = 0.2;
         double doubleNoteChance = 0.0;
         String diff = difficulty.toLowerCase();
 
@@ -58,22 +59,33 @@ public class BeatmapGenerator {
 
         // Generate notes
         for (long t = 2500; t < durationMs - 5000; t += beatInterval) {
+
+            // --- SPINNER LOGIC: Force spinners at 40% and 85% of the song ---
+            if (Math.abs(t - (durationMs * 0.4)) < beatInterval / 2 ||
+                    Math.abs(t - (durationMs * 0.85)) < beatInterval / 2) {
+
+                long spinnerDuration = 3000; // 3 seconds spinner
+                notes.add(new Note(t, 0, spinnerDuration, Note.Type.SPINNER));
+                t += spinnerDuration + 1000; // Skip time after spinner
+                continue;
+            }
+
             // Check if any slider is currently active in any lane
             boolean sliderActive = (t < lastSliderEndTime[0] || t < lastSliderEndTime[1]);
 
             if (!sliderActive && random.nextDouble() < noteProbability) {
                 int mainLane = random.nextInt(2);
-                
+
                 if (random.nextDouble() < sliderChance && t > lastSliderEndTime[mainLane] + 1000) {
                     // Create a slider
-                    long sliderDuration = beatInterval * (1 + random.nextInt(3)); 
+                    long sliderDuration = beatInterval * (1 + random.nextInt(3));
                     notes.add(new Note(t, mainLane, sliderDuration, Note.Type.SLIDER));
                     lastSliderEndTime[mainLane] = t + sliderDuration;
                     // If it's a slider, we DON'T add a double note to keep it easy
                 } else {
                     // Normal note
                     notes.add(new Note(t, mainLane, 0, Note.Type.NORMAL));
-                    
+
                     // Add double notes only if the first one was a normal note
                     if (random.nextDouble() < doubleNoteChance) {
                         int otherLane = 1 - mainLane;

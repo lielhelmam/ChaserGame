@@ -31,44 +31,50 @@ import java.util.Random;
 
 public class GameView extends ConstraintLayout {
 
-    private static final long VISIBLE_DURATION = 1500L; 
-    private static final int PERFECT_WINDOW = 250; 
-    private static final int GOOD_WINDOW = 500;    
-    private static final int MISS_WINDOW = 600;    
+    private static final long VISIBLE_DURATION = 1500L;
+    private static final int PERFECT_WINDOW = 250;
+    private static final int GOOD_WINDOW = 500;
+    private static final int MISS_WINDOW = 600;
     private static final int SLIDER_GRACE_PERIOD = 250;
 
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final Random random = new Random();
-
-    private FrameLayout laneLeft, laneRight;
-    private View targetLeft, targetRight;
-
-    private Skin equippedSkin;
-    private List<Note> allNotes = new ArrayList<>();
     private final List<ActiveNote> activeNotes = new ArrayList<>();
     private final Map<Integer, Boolean> lanePressed = new HashMap<>();
     private final Map<Integer, ActiveNote> activeSliders = new HashMap<>();
-
+    private FrameLayout laneLeft, laneRight;
+    private View targetLeft, targetRight;
+    private Skin equippedSkin;
+    private List<Note> allNotes = new ArrayList<>();
     private boolean isGameRunning = false;
+    private boolean isSpinnerActive = false;
     private long currentSongTime = 0;
     private long lastTickTime = 0;
     private GameEventListener listener;
-
-    private static class ActiveNote {
-        Note data;
-        View view;
-        boolean wasHit = false;
-        boolean wasMissed = false;
-
-        ActiveNote(Note data, View view) {
-            this.data = data;
-            this.view = view;
+    private final Runnable gameLoop = new Runnable() {
+        @Override
+        public void run() {
+            if (!isGameRunning) return;
+            updateGameFrame();
+            if (listener != null) listener.onGameLoopTick();
+            handler.postDelayed(this, 16);
         }
+    };
+
+    public GameView(Context context) {
+        super(context);
+        init(context);
     }
 
-    public GameView(Context context) { super(context); init(context); }
-    public GameView(Context context, AttributeSet attrs) { super(context, attrs); init(context); }
-    public GameView(Context context, AttributeSet attrs, int defStyleAttr) { super(context, attrs, defStyleAttr); init(context); }
+    public GameView(Context context, AttributeSet attrs) {
+        super(context, attrs);
+        init(context);
+    }
+
+    public GameView(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+        init(context);
+    }
 
     private void init(Context context) {
         LayoutInflater.from(context).inflate(R.layout.view_game, this, true);
@@ -80,7 +86,9 @@ public class GameView extends ConstraintLayout {
         lanePressed.put(1, false);
     }
 
-    public void setGameEventListener(GameEventListener listener) { this.listener = listener; }
+    public void setGameEventListener(GameEventListener listener) {
+        this.listener = listener;
+    }
 
     public void startGame(List<Note> notes, Skin skin) {
         this.equippedSkin = skin;
@@ -92,16 +100,6 @@ public class GameView extends ConstraintLayout {
         setupInputListeners();
         handler.post(gameLoop);
     }
-
-    private final Runnable gameLoop = new Runnable() {
-        @Override
-        public void run() {
-            if (!isGameRunning) return;
-            updateGameFrame();
-            if (listener != null) listener.onGameLoopTick();
-            handler.postDelayed(this, 16);
-        }
-    };
 
     public void syncTime(long timeMs) {
         this.currentSongTime = timeMs;
@@ -123,10 +121,10 @@ public class GameView extends ConstraintLayout {
     private void applySkin() {
         if (equippedSkin == null) return;
         float density = getResources().getDisplayMetrics().density;
-        
+
         // Background for the whole GameView
         this.setBackgroundColor(equippedSkin.backgroundColor);
-        
+
         // Targets: Outline/Stroke ONLY (Hollow)
         int strokeWidth = (int) (4 * density);
         if (targetLeft != null) {
@@ -145,7 +143,7 @@ public class GameView extends ConstraintLayout {
             gd.setCornerRadius(15 * density);
             targetRight.setBackground(gd);
         }
-        
+
         // Lanes: Transparent to avoid colored squares at the bottom
         if (laneLeft != null) laneLeft.setBackgroundColor(Color.TRANSPARENT);
         if (laneRight != null) laneRight.setBackgroundColor(Color.TRANSPARENT);
@@ -169,28 +167,37 @@ public class GameView extends ConstraintLayout {
     private void updateGameFrame() {
         if (getHeight() == 0 || !isGameRunning) return;
 
+        // While spinner is active, we don't spawn new notes and we don't update existing ones
+        if (isSpinnerActive) return;
+
         for (int i = 0; i < allNotes.size(); i++) {
             Note n = allNotes.get(i);
             if (currentSongTime >= n.getTimestamp() - VISIBLE_DURATION) {
-                spawnNote(n);
+                if (n.getType() == Note.Type.SPINNER) {
+                    clearActiveNotes(); // Remove everything else for the spinner
+                    isSpinnerActive = true;
+                    if (listener != null) listener.onRequestSpinner(n.getDuration());
+                } else {
+                    spawnNote(n);
+                }
                 allNotes.remove(i);
                 i--;
             } else break;
         }
 
         float density = getResources().getDisplayMetrics().density;
-        float targetY = (targetLeft != null) ? (targetLeft.getTop() - laneLeft.getTop() + (targetLeft.getHeight() - (60*density)) / 2f) : 0;
+        float targetY = (targetLeft != null) ? (targetLeft.getTop() - laneLeft.getTop() + (targetLeft.getHeight() - (60 * density)) / 2f) : 0;
         float speed = targetY / VISIBLE_DURATION;
 
         for (int i = activeNotes.size() - 1; i >= 0; i--) {
-            if (!isGameRunning) break; 
+            if (!isGameRunning) break;
             ActiveNote an = activeNotes.get(i);
             long timeDiff = an.data.getTimestamp() - currentSongTime;
             float noteHeadY = targetY - (timeDiff * speed);
-            
+
             if (an.data.isSlider()) {
                 float sliderHeadY = noteHeadY;
-                int sliderHeight = (int) (an.data.getDuration() * speed) + (int)(60 * density);
+                int sliderHeight = (int) (an.data.getDuration() * speed) + (int) (60 * density);
                 an.view.setTranslationY(sliderHeadY - (sliderHeight - (60 * density)));
             } else {
                 an.view.setTranslationY(noteHeadY);
@@ -201,34 +208,35 @@ public class GameView extends ConstraintLayout {
                 handleMiss(an);
                 if (isGameRunning && i < activeNotes.size()) activeNotes.remove(i);
                 continue;
-            } 
+            }
 
             if (an.wasHit && an.data.isSlider()) {
-                 long sliderEndTime = an.data.getTimestamp() + an.data.getDuration();
-                 
-                 if (!Boolean.TRUE.equals(lanePressed.get(an.data.getLane()))) {
-                     if (currentSongTime >= sliderEndTime - SLIDER_GRACE_PERIOD) {
-                         handlePerfectSlider(an);
-                         activeSliders.remove(an.data.getLane());
-                         if (isGameRunning && i < activeNotes.size()) activeNotes.remove(i);
-                     } else {
-                         handleMiss(an, true);
-                         activeSliders.remove(an.data.getLane());
-                         if (isGameRunning && i < activeNotes.size()) activeNotes.remove(i);
-                     }
-                 } else {
-                     if (currentSongTime >= sliderEndTime - SLIDER_GRACE_PERIOD) {
-                         handlePerfectSlider(an);
-                         activeSliders.remove(an.data.getLane());
-                         if (isGameRunning && i < activeNotes.size()) activeNotes.remove(i);
-                     } else {
-                         if (currentSongTime - lastTickTime > 250) { // Faster ticks for better feel
-                             if (listener != null) listener.onNoteHit(150); // Use 150 for slider ticks
-                             lastTickTime = currentSongTime;
-                         }
-                         spawnBurstParticles(an.data.getLane() == 0 ? targetLeft : targetRight, equippedSkin.circleColor);
-                     }
-                 }
+                long sliderEndTime = an.data.getTimestamp() + an.data.getDuration();
+
+                if (!Boolean.TRUE.equals(lanePressed.get(an.data.getLane()))) {
+                    if (currentSongTime >= sliderEndTime - SLIDER_GRACE_PERIOD) {
+                        handlePerfectSlider(an);
+                        activeSliders.remove(an.data.getLane());
+                        if (isGameRunning && i < activeNotes.size()) activeNotes.remove(i);
+                    } else {
+                        handleMiss(an, true);
+                        activeSliders.remove(an.data.getLane());
+                        if (isGameRunning && i < activeNotes.size()) activeNotes.remove(i);
+                    }
+                } else {
+                    if (currentSongTime >= sliderEndTime - SLIDER_GRACE_PERIOD) {
+                        handlePerfectSlider(an);
+                        activeSliders.remove(an.data.getLane());
+                        if (isGameRunning && i < activeNotes.size()) activeNotes.remove(i);
+                    } else {
+                        if (currentSongTime - lastTickTime > 250) { // Faster ticks for better feel
+                            if (listener != null)
+                                listener.onNoteHit(150); // Use 150 for slider ticks
+                            lastTickTime = currentSongTime;
+                        }
+                        spawnBurstParticles(an.data.getLane() == 0 ? targetLeft : targetRight, equippedSkin.circleColor);
+                    }
+                }
             } else if (an.wasHit && !an.data.isSlider()) {
                 if (isGameRunning && i < activeNotes.size()) activeNotes.remove(i);
             } else {
@@ -241,6 +249,20 @@ public class GameView extends ConstraintLayout {
                 }
             }
         }
+    }
+
+    private void clearActiveNotes() {
+        for (ActiveNote an : activeNotes) {
+            if (an.view != null && an.view.getParent() != null) {
+                ((ViewGroup) an.view.getParent()).removeView(an.view);
+            }
+        }
+        activeNotes.clear();
+        activeSliders.clear();
+    }
+
+    public void setSpinnerActive(boolean active) {
+        this.isSpinnerActive = active;
     }
 
     private void spawnNote(Note n) {
@@ -266,20 +288,20 @@ public class GameView extends ConstraintLayout {
             GradientDrawable head = new GradientDrawable();
             head.setShape(GradientDrawable.OVAL);
             head.setColor(mainColor);
-            head.setStroke((int)(3 * density), Color.WHITE);
+            head.setStroke((int) (3 * density), Color.WHITE);
 
             // Combine into LayerDrawable
             LayerDrawable layers = new LayerDrawable(new android.graphics.drawable.Drawable[]{body, head});
             // Position the head at the bottom of the view
             layers.setLayerInset(1, 0, sliderHeight - size, 0, 0);
-            
+
             v.setBackground(layers);
             v.setLayoutParams(new FrameLayout.LayoutParams(size, sliderHeight));
         } else {
             v.setBackgroundResource(R.drawable.note_circle);
             if (equippedSkin != null) {
                 v.getBackground().setTint(equippedSkin.circleColor);
-                
+
                 // --- ADDING SKIN VISUALS DURING FALL ---
                 String effect = equippedSkin.effectType;
                 if ("glow".equals(effect) || "electric".equals(effect)) {
@@ -298,7 +320,7 @@ public class GameView extends ConstraintLayout {
                     gd.setStroke(3, Color.WHITE);
                     v.setBackground(gd);
                 }
-                
+
                 // Continuous Animation for some skins
                 if ("electric".equals(effect)) {
                     v.animate().alpha(0.5f).setDuration(100).setUpdateListener(animation -> {
@@ -310,10 +332,10 @@ public class GameView extends ConstraintLayout {
             v.setLayoutParams(new FrameLayout.LayoutParams(size, size));
         }
 
-        ((FrameLayout.LayoutParams)v.getLayoutParams()).gravity = Gravity.CENTER_HORIZONTAL;
+        ((FrameLayout.LayoutParams) v.getLayoutParams()).gravity = Gravity.CENTER_HORIZONTAL;
         FrameLayout lane = (n.getLane() == 0) ? laneLeft : laneRight;
         lane.addView(v);
-        
+
         long timeDiff = n.getTimestamp() - currentSongTime;
         float noteHeadY = targetY - (timeDiff * speed);
         if (n.isSlider()) {
@@ -335,7 +357,10 @@ public class GameView extends ConstraintLayout {
             ActiveNote an = activeNotes.get(i);
             if (an.data.getLane() == lane && !an.wasHit && !an.wasMissed) {
                 long diff = Math.abs(currentSongTime - an.data.getTimestamp());
-                if (diff < minDiff) { minDiff = diff; best = an; }
+                if (diff < minDiff) {
+                    minDiff = diff;
+                    best = an;
+                }
             }
         }
 
@@ -350,7 +375,8 @@ public class GameView extends ConstraintLayout {
                 if (listener != null) listener.onNoteHit(pts);
                 showFeedback(pts == 300 ? "300" : "100", pts == 300 ? Color.YELLOW : Color.WHITE, lane);
                 spawnBurstParticles(lane == 0 ? targetLeft : targetRight, equippedSkin.circleColor);
-                if (best.view.getParent() != null) ((ViewGroup)best.view.getParent()).removeView(best.view);
+                if (best.view.getParent() != null)
+                    ((ViewGroup) best.view.getParent()).removeView(best.view);
             }
         }
     }
@@ -362,7 +388,8 @@ public class GameView extends ConstraintLayout {
             an.view.setBackgroundColor(Color.GRAY);
             an.view.setAlpha(0.5f);
             handler.postDelayed(() -> {
-                if (an.view.getParent() != null) ((ViewGroup)an.view.getParent()).removeView(an.view);
+                if (an.view.getParent() != null)
+                    ((ViewGroup) an.view.getParent()).removeView(an.view);
             }, 150);
         }
     }
@@ -375,7 +402,7 @@ public class GameView extends ConstraintLayout {
         showFeedback("PERFECT", Color.YELLOW, an.data.getLane());
         if (listener != null) listener.onNoteHit(150);
         an.view.animate().alpha(0).scaleX(1.1f).scaleY(1.1f).setDuration(150).withEndAction(() -> {
-            if (an.view.getParent() != null) ((ViewGroup)an.view.getParent()).removeView(an.view);
+            if (an.view.getParent() != null) ((ViewGroup) an.view.getParent()).removeView(an.view);
         }).start();
     }
 
@@ -388,18 +415,43 @@ public class GameView extends ConstraintLayout {
         FrameLayout parent = (lane == 0) ? laneLeft : laneRight;
         if (parent == null) return;
         TextView tv = new TextView(getContext());
-        tv.setText(text); tv.setTextColor(color); tv.setTextSize(24); tv.setTypeface(null, Typeface.BOLD);
-        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(-2, -2); lp.gravity = Gravity.CENTER; tv.setLayoutParams(lp);
+        tv.setText(text);
+        tv.setTextColor(color);
+        tv.setTextSize(24);
+        tv.setTypeface(null, Typeface.BOLD);
+        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(-2, -2);
+        lp.gravity = Gravity.CENTER;
+        tv.setLayoutParams(lp);
         parent.addView(tv);
         tv.animate().translationYBy(-200).alpha(0).setDuration(350).withEndAction(() -> parent.removeView(tv)).start();
     }
 
     public interface GameEventListener {
         void onNoteHit(int points);
-        default void onSliderStarted() {}
+
+        default void onSliderStarted() {
+        }
+
         void onNoteMissed(boolean wasAlreadyStarted);
+
         void onGameLoopTick();
+
+        void onRequestSpinner(long duration);
+
         void onRequestEffect(View anchor, String effectType, int color);
+
         void onRequestTrail(View anchor, String effectType, int color);
+    }
+
+    private static class ActiveNote {
+        Note data;
+        View view;
+        boolean wasHit = false;
+        boolean wasMissed = false;
+
+        ActiveNote(Note data, View view) {
+            this.data = data;
+            this.view = view;
+        }
     }
 }
