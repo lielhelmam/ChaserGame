@@ -24,9 +24,8 @@ public class RhythmGameManager {
 
     public void onSliderStarted() {
         if (isGameOver) return;
-        // Sliders are counted as a single perfect hit for accuracy if started
+        // Increment total notes, but don't give accuracy points yet
         totalNotesPossible++;
-        currentAccuracyWeight += 1.0;
     }
 
     public void onNoteHit(int points) {
@@ -38,14 +37,28 @@ public class RhythmGameManager {
         float multiplier = (1.0f + (currentCombo / 10f) * 0.1f) * (float) scoreMultiplier;
         currentScore += (int) (points * multiplier);
 
-        // Accuracy Calculation: Skip 150 (slider ticks) and 1000 (spinner bonus)
-        if (points != 150 && points != 1000) {
+        // Accuracy Calculation
+        if (points == 300) {
             totalNotesPossible++;
-            if (points == 300) currentAccuracyWeight += 1.0;
-            else if (points == 100) currentAccuracyWeight += 0.5;
+            currentAccuracyWeight += 1.0;
+        } else if (points == 100) {
+            totalNotesPossible++;
+            currentAccuracyWeight += 0.5;
+        } else if (points == 150) {
+            // This is a slider tick or slider end. 
+            // If we treat a slider as a single note for accuracy, 
+            // we should only give the weight once.
+            // But we already incremented totalNotesPossible in onSliderStarted.
+            // So we just add the weight here when a "tick" or "end" is successful.
+            // To prevent over-inflation, we'll only add a fraction or 
+            // handle it so a full slider equals 1.0 weight.
+            
+            // Fix: Give 1.0 weight for a perfect slider completion
+            // We'll call this from handlePerfectSlider
+            currentAccuracyWeight += 1.0;
         }
 
-        int hpGain = (points == 300) ? 1 : 0;
+        int hpGain = (points == 300 || points == 150) ? 1 : 0;
         currentHp = Math.min(MAX_HP, currentHp + hpGain);
     }
 
@@ -53,14 +66,13 @@ public class RhythmGameManager {
         if (isGameOver) return;
         currentCombo = 0;
 
-        // If it was a normal note or a slider that wasn't even touched
         if (!wasAlreadyStarted) {
+            // Normal note miss
             totalNotesPossible++;
-        } else {
-            // If they started a slider but let go, the weight was already added in onSliderStarted,
-            // so we don't need to add to totalNotesPossible, but we failed the weight.
-            // To simplify, we'll just let the HP drain handle the penalty.
-        }
+        } 
+        // If wasAlreadyStarted is true (slider let go), totalNotesPossible was already 
+        // incremented in onSliderStarted, but currentAccuracyWeight was NOT.
+        // This naturally drops the accuracy.
 
         currentHp -= (songData != null ? songData.getHpDrain() : 2);
         if (currentHp <= 0) {
@@ -96,10 +108,11 @@ public class RhythmGameManager {
 
     public String getRank() {
         double acc = getAccuracy();
-        if (acc >= 95) return "S";
-        if (acc >= 85) return "A";
-        if (acc >= 75) return "B";
-        if (acc >= 65) return "C";
+        if (acc >= 100.0) return "SS";
+        if (acc >= 95.0) return "S";
+        if (acc >= 90.0) return "A";
+        if (acc >= 80.0) return "B";
+        if (acc >= 70.0) return "C";
         return "D";
     }
 

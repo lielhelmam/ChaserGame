@@ -57,6 +57,11 @@ public class GameView extends ConstraintLayout {
     private long lastGlitchTime = 0;
     private float offsetX = 0, offsetY = 0;
     private final Paint staticPaint = new Paint();
+    
+    // Visualizer variables
+    private final float[] vizHeights = new float[12]; // 12 bars across the screen
+    private final Paint vizPaint = new Paint();
+    private long lastVizTick = 0;
 
     public void setActiveMods(List<String> mods) {
         this.activeMods = mods != null ? mods : new ArrayList<>();
@@ -131,6 +136,35 @@ public class GameView extends ConstraintLayout {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+
+        // --- LIVE VISUALIZER LOGIC (Upgraded) ---
+        if (isGameRunning) {
+            vizPaint.setStrokeWidth(25); // Thicker bars
+            vizPaint.setStrokeCap(Paint.Cap.ROUND);
+            int barWidth = getWidth() / (vizHeights.length + 1);
+            
+            for (int i = 0; i < vizHeights.length; i++) {
+                // Decay height
+                vizHeights[i] *= 0.94f; // Slower decay for better visibility
+                
+                // Noise bounce
+                if (System.currentTimeMillis() - lastVizTick > 80) {
+                    if (random.nextInt(4) == 0) vizHeights[i] += random.nextFloat() * 80f;
+                }
+                
+                int color = (equippedSkin != null) ? equippedSkin.targetColor : Color.CYAN;
+                vizPaint.setColor(color);
+                vizPaint.setAlpha(160); // Much more visible
+                
+                float x = barWidth * (i + 1);
+                float startY = getHeight();
+                // Taller bars (up to 500px high)
+                float endY = getHeight() - 20 - Math.min(500f, vizHeights[i]); 
+                canvas.drawLine(x, startY, x, endY, vizPaint);
+            }
+            if (System.currentTimeMillis() - lastVizTick > 80) lastVizTick = System.currentTimeMillis();
+            invalidate(); 
+        }
 
         // Draw Static Noise Mod (HARDER - Full Screen Flashes)
         if (activeMods.contains("STATIC")) {
@@ -431,6 +465,12 @@ public class GameView extends ConstraintLayout {
 
         if (best != null && minDiff <= GOOD_WINDOW) {
             best.wasHit = true;
+            
+            // Big kick to visualizer on hit
+            for (int i = 0; i < vizHeights.length; i++) {
+                vizHeights[i] += random.nextFloat() * 250f; // Higher bounce
+            }
+
             if (best.data.isSlider()) {
                 activeSliders.put(lane, best);
                 showFeedback("HOLD", Color.CYAN, lane);
