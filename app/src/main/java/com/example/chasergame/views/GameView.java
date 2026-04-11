@@ -35,7 +35,7 @@ public class GameView extends ConstraintLayout {
     private static final int PERFECT_WINDOW = 250; 
     private static final int GOOD_WINDOW = 500;    
     private static final int MISS_WINDOW = 600;    
-    private static final int SLIDER_GRACE_PERIOD = 500; 
+    private static final int SLIDER_GRACE_PERIOD = 250;
 
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final Random random = new Random();

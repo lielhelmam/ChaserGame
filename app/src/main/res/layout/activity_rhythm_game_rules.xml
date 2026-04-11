@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:background="@color/background_red"
     android:padding="24dp"
-    tools:context=".screens.SecretGameRuelsActivity">
+    tools:context=".screens.RhythmGameRulesActivity">
 
     <!-- ===== TITLE ===== -->
     <TextView

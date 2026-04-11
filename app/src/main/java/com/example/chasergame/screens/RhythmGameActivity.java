@@ -38,7 +38,7 @@ import java.util.Locale;
 public class RhythmGameActivity extends BaseActivity implements GameView.GameEventListener {
 
     private GameView gameView;
-    private TextView tvScore, tvSongName, tvAccuracy, tvHp;
+    private TextView tvScore, tvSongName, tvAccuracy, tvHp, tvCurrentRank;
     private ProgressBar pbSongProgress, pbHp;
     private ConstraintLayout rootLayout;
 
@@ -316,6 +316,7 @@ public class RhythmGameActivity extends BaseActivity implements GameView.GameEve
         tvSongName = findViewById(R.id.tv_game_song_name);
         tvAccuracy = findViewById(R.id.tv_game_accuracy);
         tvHp = findViewById(R.id.tv_game_hp);
+        tvCurrentRank = findViewById(R.id.tv_game_current_rank);
         pbSongProgress = findViewById(R.id.pb_song_progress);
         pbHp = findViewById(R.id.pb_game_hp);
         if (pbHp != null) pbHp.setMax(10);
@@ -354,8 +355,9 @@ public class RhythmGameActivity extends BaseActivity implements GameView.GameEve
                 gameManager = new RhythmGameManager(songData);
                 tvSongName.setText(songData.getName());
 
-                int duration = audioService.getDuration();
-                if (duration == 0) duration = 180000;
+                // Get exact duration from audio file before generating beatmap
+                int duration = audioService.prepareSong(songData.getResName());
+                if (duration <= 0) duration = 180000; // Fallback
                 
                 List<Note> dynamicNotes = BeatmapGenerator.generate(songData.getBpm(), duration, songData.getDifficulty());
                 startPlay(dynamicNotes);
@@ -469,7 +471,20 @@ public class RhythmGameActivity extends BaseActivity implements GameView.GameEve
     }
 
     private void updateAccuracy() {
-        tvAccuracy.setText(String.format(Locale.US, "Acc: %.1f%%", gameManager.getAccuracy()));
+        double acc = gameManager.getAccuracy();
+        tvAccuracy.setText(String.format(Locale.US, "Acc: %.1f%%", acc * 100));
+        
+        if (tvCurrentRank != null) {
+            String rank = gameManager.getRank();
+            tvCurrentRank.setText("Rank: " + rank);
+            
+            // Dynamic Rank Colors
+            if (rank.equals("S")) tvCurrentRank.setTextColor(Color.parseColor("#FFEB3B")); // Gold
+            else if (rank.equals("A")) tvCurrentRank.setTextColor(Color.parseColor("#4CAF50")); // Green
+            else if (rank.equals("B")) tvCurrentRank.setTextColor(Color.parseColor("#2196F3")); // Blue
+            else if (rank.equals("C")) tvCurrentRank.setTextColor(Color.parseColor("#FF9800")); // Orange
+            else tvCurrentRank.setTextColor(Color.parseColor("#FF5252")); // Red
+        }
     }
 
     private void vibrate(long d) {
