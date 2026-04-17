@@ -115,6 +115,7 @@ public class EditProfileActivity extends BaseActivity {
             encodedImage = user.getProfileImage();
         }
 
+        ivProfilePic.setOnClickListener(v -> showImagePickerDialog());
         btnChangePic.setOnClickListener(v -> showImagePickerDialog());
         btnCancel.setOnClickListener(v -> navigateTo(MainActivity.class, true));
         btnSave.setOnClickListener(v -> validateAndSave());

@@ -59,6 +59,12 @@ public class LeaderBoardActivity extends BaseActivity {
 
         setupMainFilters();
         setupDifficultyFilters();
+
+        // Highlight Rhythm by default
+        Button btnRhythm = findViewById(R.id.btn_leaderboard_rhythm);
+        Button btnOnline = findViewById(R.id.btn_leaderboard_online);
+        Button btnBot = findViewById(R.id.btn_leaderboard_bot);
+        updateButtonColors(btnRhythm, btnOnline, btnBot);
     }
 
     private void setupMainFilters() {

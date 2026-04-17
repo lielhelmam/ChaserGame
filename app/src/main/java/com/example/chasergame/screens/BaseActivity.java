@@ -173,6 +173,35 @@ public abstract class BaseActivity extends AppCompatActivity {
             if (topBarTitle != null) {
                 topBarTitle.setText("Hi, " + user.getUsername());
             }
+
+            // Highlight current menu item
+            highlightCurrentMenuItem();
+        }
+    }
+
+    private void highlightCurrentMenuItem() {
+        if (navigationView == null) return;
+        Menu menu = navigationView.getMenu();
+        
+        int currentId = -1;
+        Class<?> currentClass = this.getClass();
+        
+        if (currentClass.equals(MainActivity.class)) {
+            currentId = R.id.nav_home;
+        } else if (currentClass.equals(EditProfileActivity.class)) {
+            currentId = R.id.nav_profile;
+        } else if (currentClass.equals(UserProfileActivity.class)) {
+            currentId = R.id.nav_user_profile;
+        } else if (currentClass.equals(LeaderBoardActivity.class)) {
+            currentId = R.id.nav_leaderboard;
+        } else if (currentClass.equals(ShopActivity.class)) {
+            currentId = R.id.nav_shop;
+        } else if (currentClass.equals(AdminActivity.class)) {
+            currentId = R.id.nav_admin;
+        }
+        
+        if (currentId != -1) {
+            menu.findItem(currentId).setChecked(true);
         }
     }
 
