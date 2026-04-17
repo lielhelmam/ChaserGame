@@ -173,24 +173,17 @@
                                 android:layout_alignParentEnd="true"
                                 android:gravity="center_vertical">
 
-                                <TextView
-                                    android:id="@+id/tv_online_wins"
-                                    android:layout_width="wrap_content"
+                                <EditText
+                                    android:id="@+id/et_online_wins"
+                                    android:layout_width="80dp"
                                     android:layout_height="wrap_content"
-                                    android:layout_marginEnd="8dp"
-                                    android:text="@string/profile_default_zero"
+                                    android:background="@android:drawable/editbox_background"
+                                    android:gravity="center"
+                                    android:inputType="number"
+                                    android:text="0"
                                     android:textColor="@color/background_red"
-                                    android:textSize="18sp"
+                                    android:textSize="16sp"
                                     android:textStyle="bold" />
-
-                                <ImageButton
-                                    android:id="@+id/btn_edit_online_wins"
-                                    android:layout_width="32dp"
-                                    android:layout_height="32dp"
-                                    android:background="?attr/selectableItemBackgroundBorderless"
-                                    android:contentDescription="@string/profile_edit_online_wins_desc"
-                                    android:src="@android:drawable/ic_menu_edit"
-                                    app:tint="#888888" />
                             </LinearLayout>
 
                             <TextView
@@ -218,23 +211,16 @@
                                 android:layout_alignParentEnd="true"
                                 android:gravity="center_vertical">
 
-                                <TextView
-                                    android:id="@+id/tv_bot_wins_easy"
-                                    android:layout_width="wrap_content"
+                                <EditText
+                                    android:id="@+id/et_bot_wins_easy"
+                                    android:layout_width="80dp"
                                     android:layout_height="wrap_content"
-                                    android:layout_marginEnd="8dp"
-                                    android:text="@string/profile_default_zero"
+                                    android:background="@android:drawable/editbox_background"
+                                    android:gravity="center"
+                                    android:inputType="number"
+                                    android:text="0"
                                     android:textColor="#333333"
                                     android:textSize="16sp" />
-
-                                <ImageButton
-                                    android:id="@+id/btn_edit_bot_wins_easy"
-                                    android:layout_width="32dp"
-                                    android:layout_height="32dp"
-                                    android:background="?attr/selectableItemBackgroundBorderless"
-                                    android:contentDescription="@string/profile_edit_bot_wins_easy_desc"
-                                    android:src="@android:drawable/ic_menu_edit"
-                                    app:tint="#888888" />
                             </LinearLayout>
 
                             <TextView
@@ -261,23 +247,16 @@
                                 android:layout_alignParentEnd="true"
                                 android:gravity="center_vertical">
 
-                                <TextView
-                                    android:id="@+id/tv_bot_wins_normal"
-                                    android:layout_width="wrap_content"
+                                <EditText
+                                    android:id="@+id/et_bot_wins_normal"
+                                    android:layout_width="80dp"
                                     android:layout_height="wrap_content"
-                                    android:layout_marginEnd="8dp"
-                                    android:text="@string/profile_default_zero"
+                                    android:background="@android:drawable/editbox_background"
+                                    android:gravity="center"
+                                    android:inputType="number"
+                                    android:text="0"
                                     android:textColor="#333333"
                                     android:textSize="16sp" />
-
-                                <ImageButton
-                                    android:id="@+id/btn_edit_bot_wins_normal"
-                                    android:layout_width="32dp"
-                                    android:layout_height="32dp"
-                                    android:background="?attr/selectableItemBackgroundBorderless"
-                                    android:contentDescription="@string/profile_edit_bot_wins_normal_desc"
-                                    android:src="@android:drawable/ic_menu_edit"
-                                    app:tint="#888888" />
                             </LinearLayout>
 
                             <TextView
@@ -304,23 +283,16 @@
                                 android:layout_alignParentEnd="true"
                                 android:gravity="center_vertical">
 
-                                <TextView
-                                    android:id="@+id/tv_bot_wins_hard"
-                                    android:layout_width="wrap_content"
+                                <EditText
+                                    android:id="@+id/et_bot_wins_hard"
+                                    android:layout_width="80dp"
                                     android:layout_height="wrap_content"
-                                    android:layout_marginEnd="8dp"
-                                    android:text="@string/profile_default_zero"
+                                    android:background="@android:drawable/editbox_background"
+                                    android:gravity="center"
+                                    android:inputType="number"
+                                    android:text="0"
                                     android:textColor="#333333"
                                     android:textSize="16sp" />
-
-                                <ImageButton
-                                    android:id="@+id/btn_edit_bot_wins_hard"
-                                    android:layout_width="32dp"
-                                    android:layout_height="32dp"
-                                    android:background="?attr/selectableItemBackgroundBorderless"
-                                    android:contentDescription="@string/profile_edit_bot_wins_hard_desc"
-                                    android:src="@android:drawable/ic_menu_edit"
-                                    app:tint="#888888" />
                             </LinearLayout>
 
                             <TextView
@@ -347,23 +319,16 @@
                                 android:layout_alignParentEnd="true"
                                 android:gravity="center_vertical">
 
-                                <TextView
-                                    android:id="@+id/tv_rhythm_score"
-                                    android:layout_width="wrap_content"
+                                <EditText
+                                    android:id="@+id/et_rhythm_score"
+                                    android:layout_width="80dp"
                                     android:layout_height="wrap_content"
-                                    android:layout_marginEnd="8dp"
-                                    android:text="@string/profile_default_zero"
+                                    android:background="@android:drawable/editbox_background"
+                                    android:gravity="center"
+                                    android:inputType="number"
+                                    android:text="0"
                                     android:textColor="#333333"
                                     android:textSize="16sp" />
-
-                                <ImageButton
-                                    android:id="@+id/btn_edit_rhythm_score"
-                                    android:layout_width="32dp"
-                                    android:layout_height="32dp"
-                                    android:background="?attr/selectableItemBackgroundBorderless"
-                                    android:contentDescription="Edit rhythm score"
-                                    android:src="@android:drawable/ic_menu_edit"
-                                    app:tint="#888888" />
                             </LinearLayout>
 
                             <TextView
@@ -376,6 +341,55 @@
                                 android:text="Rhythm Score"
                                 android:textColor="#333333" />
                         </RelativeLayout>
+
+                        <!-- Points (Total Coins/Points) -->
+                        <RelativeLayout
+                            android:id="@+id/rl_points"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="12dp">
+
+                            <LinearLayout
+                                android:id="@+id/container_points"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentEnd="true"
+                                android:gravity="center_vertical">
+
+                                <EditText
+                                    android:id="@+id/et_profile_points"
+                                    android:layout_width="80dp"
+                                    android:layout_height="wrap_content"
+                                    android:background="@android:drawable/editbox_background"
+                                    android:gravity="center"
+                                    android:inputType="number"
+                                    android:text="0"
+                                    android:textColor="@color/background_red"
+                                    android:textSize="16sp"
+                                    android:textStyle="bold" />
+                            </LinearLayout>
+
+                                <TextView
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_alignParentStart="true"
+                                    android:layout_centerVertical="true"
+                                    android:layout_marginEnd="8dp"
+                                    android:layout_toStartOf="@id/container_points"
+                                    android:text="Shop Currencys"
+                                    android:textColor="#333333"
+                                    android:textStyle="bold" />
+                        </RelativeLayout>
+
+                        <Button
+                            android:id="@+id/btn_save_user_changes"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="16dp"
+                            android:backgroundTint="@color/background_red"
+                            android:text="Save Changes"
+                            android:textColor="#FFFFFF"
+                            android:visibility="gone" />
 
 
                     </LinearLayout>

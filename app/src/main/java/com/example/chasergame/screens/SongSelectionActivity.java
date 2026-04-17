@@ -111,9 +111,12 @@ public class SongSelectionActivity extends BaseActivity {
         }
 
         dialogView.findViewById(R.id.btn_mods_reset).setOnClickListener(v -> {
-            for (int i = 0; i < selectedMods.length; i++) selectedMods[i] = false;
+            java.util.Arrays.fill(selectedMods, false);
             activeMods.clear();
-            rvMods.getAdapter().notifyDataSetChanged();
+            RecyclerView.Adapter<?> adapter = rvMods.getAdapter();
+            if (adapter != null) {
+                adapter.notifyDataSetChanged();
+            }
             Toast.makeText(this, "Systems Restored", Toast.LENGTH_SHORT).show();
         });
 

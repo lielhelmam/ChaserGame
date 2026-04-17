@@ -40,6 +40,9 @@ public class ModsAdapter extends RecyclerView.Adapter<ModsAdapter.ViewHolder> {
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         holder.tvName.setText(names[position]);
         holder.tvDesc.setText(descs[position]);
+        
+        // Remove listener to prevent recursive calls during re-binding
+        holder.checkBox.setOnCheckedChangeListener(null);
         holder.checkBox.setChecked(selected[position]);
 
         holder.itemView.setOnClickListener(v -> {
@@ -49,8 +52,10 @@ public class ModsAdapter extends RecyclerView.Adapter<ModsAdapter.ViewHolder> {
         });
 
         holder.checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            selected[position] = isChecked;
-            updateActiveMods(position, isChecked);
+            if (selected[position] != isChecked) {
+                selected[position] = isChecked;
+                updateActiveMods(position, isChecked);
+            }
         });
     }
 

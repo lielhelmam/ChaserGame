@@ -19,7 +19,9 @@ import com.example.chasergame.models.User;
 import com.example.chasergame.services.DatabaseService;
 
 public class UserProfileActivity extends BaseActivity {
-    private TextView tvName, tvEmail, tvPassword, tvAdmin, tvOnlineWins, tvBotWinsEasy, tvBotWinsNormal, tvBotWinsHard, tvRhythmScore;
+    private TextView tvName, tvEmail, tvPassword, tvAdmin;
+    private EditText etOnlineWins, etBotWinsEasy, etBotWinsNormal, etBotWinsHard, etRhythmScore, etPoints;
+    private View btnSave;
     private ProgressBar progressBar;
 
     private String userId;
@@ -56,17 +58,15 @@ public class UserProfileActivity extends BaseActivity {
         tvAdmin = findViewById(R.id.tv_profile_admin);
         progressBar = findViewById(R.id.profile_progress);
 
-        tvOnlineWins = findViewById(R.id.tv_online_wins);
-        tvBotWinsEasy = findViewById(R.id.tv_bot_wins_easy);
-        tvBotWinsNormal = findViewById(R.id.tv_bot_wins_normal);
-        tvBotWinsHard = findViewById(R.id.tv_bot_wins_hard);
-        tvRhythmScore = findViewById(R.id.tv_rhythm_score);
+        etOnlineWins = findViewById(R.id.et_online_wins);
+        etBotWinsEasy = findViewById(R.id.et_bot_wins_easy);
+        etBotWinsNormal = findViewById(R.id.et_bot_wins_normal);
+        etBotWinsHard = findViewById(R.id.et_bot_wins_hard);
+        etRhythmScore = findViewById(R.id.et_rhythm_score);
+        etPoints = findViewById(R.id.et_profile_points);
+        btnSave = findViewById(R.id.btn_save_user_changes);
 
-        findViewById(R.id.btn_edit_online_wins).setOnClickListener(v -> showEditValueDialog("onlineWins", currentUser.getOnlineWins()));
-        findViewById(R.id.btn_edit_bot_wins_easy).setOnClickListener(v -> showEditValueDialog("botWinsEasy", currentUser.getBotWinsEasy()));
-        findViewById(R.id.btn_edit_bot_wins_normal).setOnClickListener(v -> showEditValueDialog("botWinsNormal", currentUser.getBotWinsNormal()));
-        findViewById(R.id.btn_edit_bot_wins_hard).setOnClickListener(v -> showEditValueDialog("botWinsHard", currentUser.getBotWinsHard()));
-        findViewById(R.id.btn_edit_rhythm_score).setOnClickListener(v -> showEditValueDialog("totalRhythmScore", currentUser.getTotalRhythmScore()));
+        btnSave.setOnClickListener(v -> saveAllChanges());
     }
 
     private void loadUser() {
@@ -81,6 +81,19 @@ public class UserProfileActivity extends BaseActivity {
                 }
                 currentUser = user;
                 showUserData(user);
+                
+                // Only show editing for admins
+                User loggedInUser = authService.getCurrentUser();
+                boolean isAdmin = loggedInUser != null && loggedInUser.isAdmin();
+                
+                etOnlineWins.setEnabled(isAdmin);
+                etBotWinsEasy.setEnabled(isAdmin);
+                etBotWinsNormal.setEnabled(isAdmin);
+                etBotWinsHard.setEnabled(isAdmin);
+                etRhythmScore.setEnabled(isAdmin);
+                etPoints.setEnabled(isAdmin);
+                
+                btnSave.setVisibility(isAdmin ? View.VISIBLE : View.GONE);
             }
 
             @Override
@@ -97,60 +110,39 @@ public class UserProfileActivity extends BaseActivity {
         tvPassword.setText(user.getPassword() == null ? "-" : user.getPassword());
         tvAdmin.setText((user.isAdmin() ? "Yes" : "No"));
 
-        tvOnlineWins.setText(String.valueOf(user.getOnlineWins()));
-        tvBotWinsEasy.setText(String.valueOf(user.getBotWinsEasy()));
-        tvBotWinsNormal.setText(String.valueOf(user.getBotWinsNormal()));
-        tvBotWinsHard.setText(String.valueOf(user.getBotWinsHard()));
-        tvRhythmScore.setText(String.valueOf(user.getTotalRhythmScore()));
+        etOnlineWins.setText(String.valueOf(user.getOnlineWins()));
+        etBotWinsEasy.setText(String.valueOf(user.getBotWinsEasy()));
+        etBotWinsNormal.setText(String.valueOf(user.getBotWinsNormal()));
+        etBotWinsHard.setText(String.valueOf(user.getBotWinsHard()));
+        etRhythmScore.setText(String.valueOf(user.getTotalRhythmScore()));
+        etPoints.setText(String.valueOf(user.getPoints()));
     }
 
-    private void showEditValueDialog(String field, int currentVal) {
-        final EditText input = new EditText(this);
-        input.setInputType(InputType.TYPE_CLASS_NUMBER);
-        input.setText(String.valueOf(currentVal));
-
-        new AlertDialog.Builder(this)
-                .setTitle("Edit " + field)
-                .setView(input)
-                .setPositiveButton("Save", (dialog, which) -> {
-                    String value = input.getText().toString();
-                    if (!value.isEmpty()) updateValue(field, Integer.parseInt(value));
-                })
-                .setNegativeButton("Cancel", null)
-                .show();
-    }
-
-    private void updateValue(String field, int newValue) {
+    private void saveAllChanges() {
         if (currentUser == null) return;
 
-        switch (field) {
-            case "onlineWins":
-                currentUser.setOnlineWins(newValue);
-                break;
-            case "botWinsEasy":
-                currentUser.setBotWinsEasy(newValue);
-                break;
-            case "botWinsNormal":
-                currentUser.setBotWinsNormal(newValue);
-                break;
-            case "botWinsHard":
-                currentUser.setBotWinsHard(newValue);
-                break;
-            case "totalRhythmScore":
-                currentUser.setTotalRhythmScore(newValue);
-                break;
+        try {
+            currentUser.setOnlineWins(Integer.parseInt(etOnlineWins.getText().toString().trim()));
+            currentUser.setBotWinsEasy(Integer.parseInt(etBotWinsEasy.getText().toString().trim()));
+            currentUser.setBotWinsNormal(Integer.parseInt(etBotWinsNormal.getText().toString().trim()));
+            currentUser.setBotWinsHard(Integer.parseInt(etBotWinsHard.getText().toString().trim()));
+            currentUser.setTotalRhythmScore(Integer.parseInt(etRhythmScore.getText().toString().trim()));
+            currentUser.setPoints(Integer.parseInt(etPoints.getText().toString().trim()));
+        } catch (NumberFormatException e) {
+            Toast.makeText(this, "Please enter valid numbers", Toast.LENGTH_SHORT).show();
+            return;
         }
 
         databaseService.updateUser(currentUser, new DatabaseService.DatabaseCallback<>() {
             @Override
             public void onCompleted(Void unused) {
-                Toast.makeText(UserProfileActivity.this, "Updated", Toast.LENGTH_SHORT).show();
+                Toast.makeText(UserProfileActivity.this, "Changes saved successfully", Toast.LENGTH_SHORT).show();
                 showUserData(currentUser);
             }
 
             @Override
             public void onFailed(Exception e) {
-                Toast.makeText(UserProfileActivity.this, "Update failed", Toast.LENGTH_SHORT).show();
+                Toast.makeText(UserProfileActivity.this, "Save failed", Toast.LENGTH_SHORT).show();
             }
         });
     }

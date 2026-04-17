@@ -49,13 +49,6 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
             }
         });
 
-        holder.itemView.setOnLongClickListener(v -> {
-            if (onUserClickListener != null) {
-                onUserClickListener.onLongUserClick(user);
-            }
-            return true;
-        });
-
         holder.btnDelete.setOnClickListener(v -> {
             if (onUserClickListener != null) {
                 onUserClickListener.onDeleteClick(user);
