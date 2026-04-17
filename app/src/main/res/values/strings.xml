@@ -108,4 +108,5 @@
     <string name="admin_questions_list_btn">📋 Questions List</string>
     <string name="admin_add_rhythm_song_btn">➕ Add Rhythm Song</string>
     <string name="admin_songs_list_btn">🎵 Songs List</string>
+    <string name="nav_user_profile_title">My Profile Stats</string>
 </resources>

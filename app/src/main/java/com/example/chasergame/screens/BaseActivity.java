@@ -110,6 +110,13 @@ public abstract class BaseActivity extends AppCompatActivity {
                 navigateTo(MainActivity.class, true);
             } else if (id == R.id.nav_profile) {
                 navigateTo(EditProfileActivity.class, false);
+            } else if (id == R.id.nav_user_profile) {
+                User userProfile = authService.getCurrentUser();
+                if (userProfile != null) {
+                    Intent intent = new Intent(this, UserProfileActivity.class);
+                    intent.putExtra("USER_UID", userProfile.getId());
+                    startActivity(intent);
+                }
             } else if (id == R.id.nav_leaderboard) {
                 navigateTo(LeaderBoardActivity.class, false);
             } else if (id == R.id.nav_shop) {
