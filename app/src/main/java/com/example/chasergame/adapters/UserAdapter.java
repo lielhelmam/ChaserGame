@@ -85,6 +85,14 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
     }
 
     public void updateUser(User user) {
+        // Update in fullList
+        for (int i = 0; i < fullList.size(); i++) {
+            if (fullList.get(i).getId().equals(user.getId())) {
+                fullList.set(i, user);
+                break;
+            }
+        }
+        // Update in visible list
         int index = -1;
         for (int i = 0; i < userList.size(); i++) {
             if (userList.get(i).getId().equals(user.getId())) {
@@ -92,12 +100,22 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
                 break;
             }
         }
-        if (index == -1) return;
-        userList.set(index, user);
-        notifyItemChanged(index);
+        if (index != -1) {
+            userList.set(index, user);
+            notifyItemChanged(index);
+        }
     }
 
     public void removeUser(User user) {
+        if (user == null || user.getId() == null) return;
+        // Remove from fullList
+        for (int i = 0; i < fullList.size(); i++) {
+            if (fullList.get(i).getId().equals(user.getId())) {
+                fullList.remove(i);
+                break;
+            }
+        }
+        // Remove from visible list
         int index = -1;
         for (int i = 0; i < userList.size(); i++) {
             if (userList.get(i).getId().equals(user.getId())) {
@@ -105,9 +123,10 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
                 break;
             }
         }
-        if (index == -1) return;
-        userList.remove(index);
-        notifyItemRemoved(index);
+        if (index != -1) {
+            userList.remove(index);
+            notifyItemRemoved(index);
+        }
     }
 
     public void filter(String text) {

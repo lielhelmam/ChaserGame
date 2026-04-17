@@ -43,7 +43,8 @@ public class UsersListActivity extends BaseActivity {
         setupSearchView();
         setupRecyclerView();
 
-        findViewById(R.id.toolbar).setOnClickListener(v -> navigateTo(AdminActivity.class, true));
+        androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);
+        toolbar.setNavigationOnClickListener(v -> navigateTo(AdminActivity.class, true));
     }
 
     private void setupSearchView() {
@@ -88,20 +89,24 @@ public class UsersListActivity extends BaseActivity {
     }
 
     private void confirmDelete(User user) {
+        if (user == null || user.getId() == null) return;
         new AlertDialog.Builder(this)
                 .setTitle("Delete User")
                 .setMessage("Are you sure you want to delete " + user.getUsername() + "?")
                 .setPositiveButton("Yes", (dialog, which) -> {
+                    Log.d(TAG, "Attempting to delete user: " + user.getUsername() + " with ID: " + user.getId());
                     databaseService.deleteUserById(user.getId(), new DatabaseService.DatabaseCallback<Void>() {
                         @Override
                         public void onCompleted(Void unused) {
+                            Log.d(TAG, "User deleted successfully from database");
                             userAdapter.removeUser(user);
                             Toast.makeText(UsersListActivity.this, "User deleted", Toast.LENGTH_SHORT).show();
                         }
 
                         @Override
                         public void onFailed(Exception e) {
-                            Toast.makeText(UsersListActivity.this, "Delete failed", Toast.LENGTH_SHORT).show();
+                            Log.e(TAG, "Failed to delete user", e);
+                            Toast.makeText(UsersListActivity.this, "Delete failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                         }
                     });
                 })

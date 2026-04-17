@@ -165,8 +165,8 @@ public class EditProfileActivity extends BaseActivity {
             etEmail.setError("Invalid email");
             return;
         }
-        if (!pass.isEmpty() && !Validator.isPasswordValid(pass)) {
-            etPassword.setError("Min 6 chars");
+        if (!Validator.isPasswordValid(pass)) {
+            etPassword.setError("Password must be at least 6 characters");
             return;
         }
 

@@ -95,6 +95,7 @@ public class SignupActivity extends BaseActivity {
     }
 
     private void navigateToHome(User user) {
+        authService.syncUser(user);
         Class<?> destination = user.isAdmin() ? AdminActivity.class : MainActivity.class;
         Intent intent = new Intent(this, destination);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);

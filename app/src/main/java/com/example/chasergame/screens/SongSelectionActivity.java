@@ -2,6 +2,7 @@ package com.example.chasergame.screens;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.SearchView;
 import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
@@ -87,44 +88,47 @@ public class SongSelectionActivity extends BaseActivity {
     }
 
     private void showModsDialog() {
-        com.google.android.material.dialog.MaterialAlertDialogBuilder builder = 
-            new com.google.android.material.dialog.MaterialAlertDialogBuilder(this);
-        
-        // Customizing the title with a techy feel
-        builder.setTitle("SYSTEM DISRUPTORS");
-        
-        builder.setMultiChoiceItems(modNames, selectedMods, (dialog, which, isChecked) -> {
-            selectedMods[which] = isChecked;
-            if (isChecked) activeMods.add(modKeys[which]);
-            else activeMods.remove(modKeys[which]);
+        String[] descriptions = {
+                "Visual distortion effects",
+                "Notes fall at varying speeds",
+                "Hidden notes until they are close",
+                "Double the notes to process",
+                "Screen noise interference",
+                "Insane game speed"
+        };
+
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_game_mods, null);
+        RecyclerView rvMods = dialogView.findViewById(R.id.rv_mods_list);
+        rvMods.setLayoutManager(new LinearLayoutManager(this));
+        rvMods.setAdapter(new com.example.chasergame.adapters.ModsAdapter(modNames, descriptions, modKeys, selectedMods, activeMods));
+
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setView(dialogView)
+                .create();
+
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        }
+
+        dialogView.findViewById(R.id.btn_mods_reset).setOnClickListener(v -> {
+            for (int i = 0; i < selectedMods.length; i++) selectedMods[i] = false;
+            activeMods.clear();
+            rvMods.getAdapter().notifyDataSetChanged();
+            Toast.makeText(this, "Systems Restored", Toast.LENGTH_SHORT).show();
         });
 
-        builder.setPositiveButton("ACTIVATE", (dialog, which) -> {
+        dialogView.findViewById(R.id.btn_mods_activate).setOnClickListener(v -> {
             double totalMult = 1.0;
             for (int i = 0; i < selectedMods.length; i++) {
                 if (selectedMods[i]) totalMult *= modMultipliers[i];
             }
             if (totalMult > 1.0) {
-                Toast.makeText(this, String.format(java.util.Locale.US, "SYSTEM OVERCLOCK: %.2fx", totalMult), Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, String.format(java.util.Locale.US, "CORE MULTIPLIER: %.2fx", totalMult), Toast.LENGTH_SHORT).show();
             }
+            dialog.dismiss();
         });
 
-        builder.setNeutralButton("CLEAR ALL", (dialog, which) -> {
-            for (int i = 0; i < selectedMods.length; i++) selectedMods[i] = false;
-            activeMods.clear();
-            Toast.makeText(this, "Systems Restored", Toast.LENGTH_SHORT).show();
-        });
-
-        androidx.appcompat.app.AlertDialog dialog = builder.create();
-        if (dialog.getWindow() != null) {
-            // Using the new more opaque cyber background
-            dialog.getWindow().setBackgroundDrawableResource(R.drawable.dialog_cyber_bg);
-        }
         dialog.show();
-        
-        // Style the buttons after show()
-        dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE).setTextColor(android.graphics.Color.parseColor("#00FFFF"));
-        dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_NEUTRAL).setTextColor(android.graphics.Color.GRAY);
     }
 
     @Override
