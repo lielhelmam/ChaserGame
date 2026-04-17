@@ -7,6 +7,7 @@ import android.widget.Button;
 import androidx.appcompat.app.AlertDialog;
 
 import com.example.chasergame.R;
+import com.example.chasergame.services.DatabaseService;
 
 public class LandingActivity extends BaseActivity {
 
@@ -19,14 +20,32 @@ public class LandingActivity extends BaseActivity {
         hideTopBar();
 
         if (authService.isUserLoggedIn()) {
-            Intent intent = authService.getNextActivityIntent();
-            if (intent != null) {
-                startActivity(intent);
-                finish();
-            }
+            com.example.chasergame.models.User localUser = authService.getCurrentUser();
+            databaseService.getUser(localUser.getId(), new DatabaseService.DatabaseCallback<com.example.chasergame.models.User>() {
+                @Override
+                public void onCompleted(com.example.chasergame.models.User freshUser) {
+                    if (freshUser != null) {
+                        authService.syncUser(freshUser);
+                    }
+                    navigateToNext();
+                }
+
+                @Override
+                public void onFailed(Exception e) {
+                    navigateToNext();
+                }
+            });
         }
 
         setupButtons();
+    }
+
+    private void navigateToNext() {
+        Intent intent = authService.getNextActivityIntent();
+        if (intent != null) {
+            startActivity(intent);
+            finish();
+        }
     }
 
     private void setupButtons() {

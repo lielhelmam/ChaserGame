@@ -126,6 +126,7 @@ public class RhythmGameActivity extends BaseActivity implements GameView.GameEve
                 }
 
                 gameManager = new RhythmGameManager(songData);
+                gameManager.setScoreMultiplier(scoreMultiplier);
                 tvSongName.setText(songData.getName());
 
                 // Get exact duration from audio file before generating beatmap
