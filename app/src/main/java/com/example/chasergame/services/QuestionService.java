@@ -13,7 +13,7 @@ public class QuestionService {
     }
 
     public void getAllQuestions(DatabaseService.DatabaseCallback<List<QuestionsAdapter.Item>> callback) {
-        questionRepository.getQuestionList(new DatabaseService.DatabaseCallback<List<QuestionsAdapter.Item>>() {
+        questionRepository.getQuestionList(new DatabaseService.DatabaseCallback<>() {
             @Override
             public void onCompleted(List<QuestionsAdapter.Item> items) {
                 // Sort by numeric key

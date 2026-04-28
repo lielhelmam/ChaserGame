@@ -62,7 +62,7 @@ public class AuthService {
      * @param callback Callback for the database operation.
      */
     public void updateUserAndSync(User user, DatabaseService.DatabaseCallback<Void> callback) {
-        userRepository.updateUser(user, new DatabaseService.DatabaseCallback<Void>() {
+        userRepository.updateUser(user, new DatabaseService.DatabaseCallback<>() {
             @Override
             public void onCompleted(Void result) {
                 User current = getCurrentUser();
@@ -92,7 +92,7 @@ public class AuthService {
      * @param callback Callback to handle the result of the login attempt.
      */
     public void login(@NotNull String username, @NotNull String password, @NotNull DatabaseService.DatabaseCallback<User> callback) {
-        userRepository.getUserByUsernameAndPassword(username, password, new DatabaseService.DatabaseCallback<User>() {
+        userRepository.getUserByUsernameAndPassword(username, password, new DatabaseService.DatabaseCallback<>() {
             @Override
             public void onCompleted(User user) {
                 if (user != null) {
@@ -122,7 +122,7 @@ public class AuthService {
      * @param callback Callback to handle the result of the registration.
      */
     public void register(@NotNull User user, @NotNull DatabaseService.DatabaseCallback<Void> callback) {
-        userRepository.checkIfEmailExists(user.getEmail(), new DatabaseService.DatabaseCallback<Boolean>() {
+        userRepository.checkIfEmailExists(user.getEmail(), new DatabaseService.DatabaseCallback<>() {
             @Override
             public void onCompleted(Boolean exists) {
                 if (exists) {
@@ -152,7 +152,7 @@ public class AuthService {
         user.setUsername(name);
         user.setEmail(email);
         user.setPassword(pass);
-        userRepository.updateUser(user, new DatabaseService.DatabaseCallback<Void>() {
+        userRepository.updateUser(user, new DatabaseService.DatabaseCallback<>() {
             @Override
             public void onCompleted(Void unused) {
                 syncUser(user);

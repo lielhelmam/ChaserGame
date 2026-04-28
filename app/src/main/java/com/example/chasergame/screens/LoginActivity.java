@@ -14,8 +14,6 @@ import com.example.chasergame.utils.Validator;
 
 public class LoginActivity extends BaseActivity implements View.OnClickListener {
     private EditText etUsername, etPassword;
-    private Button btnLogin;
-    private TextView tvRegister;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,8 +29,8 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
 
         etUsername = findViewById(R.id.LoginEnterUserName);
         etPassword = findViewById(R.id.Login_EnterPassword);
-        btnLogin = findViewById(R.id.btn_login_check);
-        tvRegister = findViewById(R.id.Login_tv_register);
+        Button btnLogin = findViewById(R.id.btn_login_check);
+        TextView tvRegister = findViewById(R.id.Login_tv_register);
 
         if (btnLogin != null) btnLogin.setOnClickListener(this);
         if (tvRegister != null) tvRegister.setOnClickListener(this);
@@ -70,7 +68,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     }
 
     private void loginUser(String username, String password) {
-        authService.login(username, password, new DatabaseService.DatabaseCallback<User>() {
+        authService.login(username, password, new DatabaseService.DatabaseCallback<>() {
             @Override
             public void onCompleted(User user) {
                 if (user == null) {

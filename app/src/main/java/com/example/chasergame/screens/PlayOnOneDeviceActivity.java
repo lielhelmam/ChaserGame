@@ -96,7 +96,7 @@ public class PlayOnOneDeviceActivity extends BaseActivity {
 
     private void loadData() {
         tvQuestion.setText("Loading questions...");
-        questionService.getAllQuestions(new DatabaseService.DatabaseCallback<List<QuestionsAdapter.Item>>() {
+        questionService.getAllQuestions(new DatabaseService.DatabaseCallback<>() {
             @Override
             public void onCompleted(List<QuestionsAdapter.Item> items) {
                 questionsList = items;
@@ -116,6 +116,7 @@ public class PlayOnOneDeviceActivity extends BaseActivity {
     }
 
     private void askReadyToStart() {
+        if (isFinishing() || isDestroyed()) return;
         new AlertDialog.Builder(this)
                 .setTitle("Ready?")
                 .setMessage("Start Player " + gameEngine.getCurrentPlayer() + " turn?")
@@ -188,6 +189,8 @@ public class PlayOnOneDeviceActivity extends BaseActivity {
     private void endGame(String msg, boolean p1Won) {
         gameTimer.cancel();
         // Removed win counting for one device games
+
+        if (isFinishing() || isDestroyed()) return;
 
         new AlertDialog.Builder(this)
                 .setTitle("Game Over")

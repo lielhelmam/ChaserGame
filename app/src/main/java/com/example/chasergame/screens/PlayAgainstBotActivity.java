@@ -104,7 +104,7 @@ public class PlayAgainstBotActivity extends BaseActivity {
 
     private void loadData() {
         tvQuestion.setText("Loading questions...");
-        questionService.getAllQuestions(new DatabaseService.DatabaseCallback<List<QuestionsAdapter.Item>>() {
+        questionService.getAllQuestions(new DatabaseService.DatabaseCallback<>() {
             @Override
             public void onCompleted(List<QuestionsAdapter.Item> items) {
                 questionsList = items;
@@ -206,7 +206,7 @@ public class PlayAgainstBotActivity extends BaseActivity {
                     user.setBotWinsNormal(user.getBotWinsNormal() + 1);
                 else user.setBotWinsHard(user.getBotWinsHard() + 1);
 
-                databaseService.updateUserWins(user.getId(), winField, new DatabaseService.DatabaseCallback<Void>() {
+                databaseService.updateUserWins(user.getId(), winField, new DatabaseService.DatabaseCallback<>() {
                     @Override
                     public void onCompleted(Void unused) {
                         authService.syncUser(user);
@@ -218,6 +218,8 @@ public class PlayAgainstBotActivity extends BaseActivity {
                 });
             }
         }
+
+        if (isFinishing() || isDestroyed()) return;
 
         new AlertDialog.Builder(this)
                 .setTitle(playerWon ? "Victory!" : "Game Over")

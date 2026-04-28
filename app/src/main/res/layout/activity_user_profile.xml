@@ -369,16 +369,16 @@
                                     android:textStyle="bold" />
                             </LinearLayout>
 
-                                <TextView
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_alignParentStart="true"
-                                    android:layout_centerVertical="true"
-                                    android:layout_marginEnd="8dp"
-                                    android:layout_toStartOf="@id/container_points"
-                                    android:text="Shop Currencys"
-                                    android:textColor="#333333"
-                                    android:textStyle="bold" />
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentStart="true"
+                                android:layout_centerVertical="true"
+                                android:layout_marginEnd="8dp"
+                                android:layout_toStartOf="@id/container_points"
+                                android:text="Shop Currencys"
+                                android:textColor="#333333"
+                                android:textStyle="bold" />
                         </RelativeLayout>
 
                         <Button

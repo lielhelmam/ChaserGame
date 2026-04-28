@@ -75,7 +75,7 @@ public class SongsListActivity extends BaseActivity {
     }
 
     private void loadSongs() {
-        songService.getAllSongs(new DatabaseService.DatabaseCallback<List<SongData>>() {
+        songService.getAllSongs(new DatabaseService.DatabaseCallback<>() {
             @Override
             public void onCompleted(List<SongData> songs) {
                 List<SongsAdminAdapter.Item> items = new ArrayList<>();
@@ -86,7 +86,7 @@ public class SongsListActivity extends BaseActivity {
 
                 // Let's call a more specific method or update DatabaseService to provide keys with SongData
                 // For simplicity in this step, I'll update DatabaseService's getSongList to return Items.
-                databaseService.getSongListWithKeys(new DatabaseService.DatabaseCallback<List<SongsAdminAdapter.Item>>() {
+                databaseService.getSongListWithKeys(new DatabaseService.DatabaseCallback<>() {
                     @Override
                     public void onCompleted(List<SongsAdminAdapter.Item> items) {
                         adapter.setItems(items);
@@ -110,20 +110,18 @@ public class SongsListActivity extends BaseActivity {
         new AlertDialog.Builder(this)
                 .setTitle("Delete Song")
                 .setMessage("Are you sure you want to delete this song?")
-                .setPositiveButton("Delete", (d, w) -> {
-                    songService.deleteSong(key, new DatabaseService.DatabaseCallback<Void>() {
-                        @Override
-                        public void onCompleted(Void object) {
-                            Toast.makeText(SongsListActivity.this, "Song deleted.", Toast.LENGTH_SHORT).show();
-                            loadSongs();
-                        }
+                .setPositiveButton("Delete", (d, w) -> songService.deleteSong(key, new DatabaseService.DatabaseCallback<>() {
+                    @Override
+                    public void onCompleted(Void object) {
+                        Toast.makeText(SongsListActivity.this, "Song deleted.", Toast.LENGTH_SHORT).show();
+                        loadSongs();
+                    }
 
-                        @Override
-                        public void onFailed(Exception e) {
-                            Toast.makeText(SongsListActivity.this, "Delete failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                        }
-                    });
-                })
+                    @Override
+                    public void onFailed(Exception e) {
+                        Toast.makeText(SongsListActivity.this, "Delete failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    }
+                }))
                 .setNegativeButton("Cancel", null)
                 .show();
     }
@@ -199,7 +197,7 @@ public class SongsListActivity extends BaseActivity {
                     // Validate BPM
                     if (!isBpmValid(bpm, difficulty)) return;
 
-                    songService.updateSong(key, name, difficulty, resName, bpm, hpDrain, hpGain, new DatabaseService.DatabaseCallback<Void>() {
+                    songService.updateSong(key, name, difficulty, resName, bpm, hpDrain, hpGain, new DatabaseService.DatabaseCallback<>() {
                         @Override
                         public void onCompleted(Void object) {
                             Toast.makeText(SongsListActivity.this, "Song updated.", Toast.LENGTH_SHORT).show();

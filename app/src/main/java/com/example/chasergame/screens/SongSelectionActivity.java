@@ -5,13 +5,9 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.SearchView;
 import android.widget.Toast;
-import androidx.appcompat.app.AlertDialog;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -21,17 +17,21 @@ import com.example.chasergame.models.SongData;
 import com.example.chasergame.services.DatabaseService;
 import com.google.firebase.database.DataSnapshot;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 public class SongSelectionActivity extends BaseActivity {
 
-    private SongsAdapter adapter;
-    private List<DataSnapshot> songSnapshots = new ArrayList<>();
-    
     // Mods logic
     private final String[] modNames = {"Neural Glitch (1.5x)", "Gravity Warp (1.3x)", "Blind (1.8x)", "Dual Stream (1.4x)", "Static (1.2x)", "Overclocked (2.0x)"};
     private final String[] modKeys = {"GLITCH", "GRAVITY", "BLIND", "DUAL", "STATIC", "OVERCLOCK"};
     private final double[] modMultipliers = {1.5, 1.3, 1.8, 1.4, 1.2, 2.0};
     private final boolean[] selectedMods = new boolean[modNames.length];
-    private Set<String> activeMods = new HashSet<>();
+    private final Set<String> activeMods = new HashSet<>();
+    private SongsAdapter adapter;
+    private List<DataSnapshot> songSnapshots = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,9 +78,9 @@ public class SongSelectionActivity extends BaseActivity {
             Intent intent = new Intent(this, ShopActivity.class);
             startActivity(intent);
         });
-        
+
         findViewById(R.id.btn_game_mods).setOnClickListener(v -> showModsDialog());
-        
+
         findViewById(R.id.btn_back_to_rules).setOnClickListener(v -> {
             Intent intent = new Intent(this, RhythmGameRulesActivity.class);
             startActivity(intent);
@@ -131,7 +131,9 @@ public class SongSelectionActivity extends BaseActivity {
             dialog.dismiss();
         });
 
-        dialog.show();
+        if (!isFinishing() && !isDestroyed()) {
+            dialog.show();
+        }
     }
 
     @Override
@@ -141,7 +143,7 @@ public class SongSelectionActivity extends BaseActivity {
     }
 
     private void loadSongs() {
-        databaseService.getSongsSnapshot(new DatabaseService.DatabaseCallback<List<DataSnapshot>>() {
+        databaseService.getSongsSnapshot(new DatabaseService.DatabaseCallback<>() {
             @Override
             public void onCompleted(List<DataSnapshot> snapshots) {
                 songSnapshots = snapshots;

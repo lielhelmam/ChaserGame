@@ -89,13 +89,14 @@ public class UsersListActivity extends BaseActivity {
     }
 
     private void confirmDelete(User user) {
+        if (isFinishing() || isDestroyed()) return;
         if (user == null || user.getId() == null) return;
         new AlertDialog.Builder(this)
                 .setTitle("Delete User")
                 .setMessage("Are you sure you want to delete " + user.getUsername() + "?")
                 .setPositiveButton("Yes", (dialog, which) -> {
                     Log.d(TAG, "Attempting to delete user: " + user.getUsername() + " with ID: " + user.getId());
-                    databaseService.deleteUserById(user.getId(), new DatabaseService.DatabaseCallback<Void>() {
+                    databaseService.deleteUserById(user.getId(), new DatabaseService.DatabaseCallback<>() {
                         @Override
                         public void onCompleted(Void unused) {
                             Log.d(TAG, "User deleted successfully from database");
@@ -115,6 +116,7 @@ public class UsersListActivity extends BaseActivity {
     }
 
     private void showEditPointsDialog(User user) {
+        if (isFinishing() || isDestroyed()) return;
         final EditText input = new EditText(this);
         input.setInputType(InputType.TYPE_CLASS_NUMBER);
         input.setText(String.valueOf(user.getPoints()));
@@ -126,7 +128,7 @@ public class UsersListActivity extends BaseActivity {
                     String newPointsStr = input.getText().toString();
                     if (!newPointsStr.isEmpty()) {
                         user.setPoints(Integer.parseInt(newPointsStr));
-                        authService.updateUserAndSync(user, new DatabaseService.DatabaseCallback<Void>() {
+                        authService.updateUserAndSync(user, new DatabaseService.DatabaseCallback<>() {
                             @Override
                             public void onCompleted(Void unused) {
                                 userAdapter.updateUser(user);
@@ -146,7 +148,7 @@ public class UsersListActivity extends BaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        databaseService.getUserList(new DatabaseService.DatabaseCallback<List<User>>() {
+        databaseService.getUserList(new DatabaseService.DatabaseCallback<>() {
             @Override
             public void onCompleted(List<User> users) {
                 userAdapter.setUserList(users);

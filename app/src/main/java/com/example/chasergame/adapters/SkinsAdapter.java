@@ -18,7 +18,7 @@ import java.util.List;
 public class SkinsAdapter extends RecyclerView.Adapter<SkinsAdapter.ViewHolder> {
 
     private final OnSkinActionListener listener;
-    private List<Skin> skins;
+    private final List<Skin> skins;
     private User currentUser;
 
     public SkinsAdapter(List<Skin> skins, User user, OnSkinActionListener listener) {
@@ -77,7 +77,7 @@ public class SkinsAdapter extends RecyclerView.Adapter<SkinsAdapter.ViewHolder> 
             boolean canAfford = currentUser.getPoints() >= skin.price;
             holder.btnAction.setEnabled(canAfford);
 
-            // Set color based on affordability: Blue if can buy, Red if cannot
+            // Set color based on affordability: Blue if you can buy, Red if cannot
             int color = canAfford ? 0xFF2196F3 : 0xFFB71C1C;
             holder.btnAction.setBackgroundTintList(android.content.res.ColorStateList.valueOf(color));
 
@@ -99,9 +99,13 @@ public class SkinsAdapter extends RecyclerView.Adapter<SkinsAdapter.ViewHolder> 
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView tvName, tvEffect;
-        View previewBg, previewCircle, previewTarget;
-        Button btnAction, btnEdit;
+        final TextView tvName;
+        final TextView tvEffect;
+        final View previewBg;
+        final View previewCircle;
+        final View previewTarget;
+        final Button btnAction;
+        final Button btnEdit;
 
         ViewHolder(View v) {
             super(v);

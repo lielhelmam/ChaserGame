@@ -5,7 +5,6 @@ import android.graphics.Color;
 import android.graphics.Path;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
@@ -13,6 +12,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
@@ -66,12 +66,24 @@ public class RhythmGameActivity extends BaseActivity implements GameView.GameEve
             activeMods = mods;
             for (String mod : activeMods) {
                 switch (mod) {
-                    case "GLITCH": scoreMultiplier *= 1.5; break;
-                    case "GRAVITY": scoreMultiplier *= 1.3; break;
-                    case "BLIND": scoreMultiplier *= 1.8; break;
-                    case "DUAL": scoreMultiplier *= 1.4; break;
-                    case "STATIC": scoreMultiplier *= 1.2; break;
-                    case "OVERCLOCK": scoreMultiplier *= 2.0; break;
+                    case "GLITCH":
+                        scoreMultiplier *= 1.5;
+                        break;
+                    case "GRAVITY":
+                        scoreMultiplier *= 1.3;
+                        break;
+                    case "BLIND":
+                        scoreMultiplier *= 1.8;
+                        break;
+                    case "DUAL":
+                        scoreMultiplier *= 1.4;
+                        break;
+                    case "STATIC":
+                        scoreMultiplier *= 1.2;
+                        break;
+                    case "OVERCLOCK":
+                        scoreMultiplier *= 2.0;
+                        break;
                 }
             }
         }
@@ -116,7 +128,7 @@ public class RhythmGameActivity extends BaseActivity implements GameView.GameEve
     }
 
     private void loadSong(String songId) {
-        databaseService.getSongById(songId, new DatabaseService.DatabaseCallback<SongData>() {
+        databaseService.getSongById(songId, new DatabaseService.DatabaseCallback<>() {
             @Override
             public void onCompleted(SongData song) {
                 songData = song;
@@ -146,7 +158,7 @@ public class RhythmGameActivity extends BaseActivity implements GameView.GameEve
 
     private void startPlay(List<Note> notes) {
         audioService.playSong(songData.getResName(), this::endGame);
-        
+
         // --- OVERCLOCK MOD: Physical Speed Increase ---
         if (activeMods.contains("OVERCLOCK")) {
             audioService.setPlaybackSpeed(2.0f);
@@ -156,7 +168,7 @@ public class RhythmGameActivity extends BaseActivity implements GameView.GameEve
 
         int duration = audioService.getDuration();
         pbSongProgress.setMax(duration);
-        
+
         gameView.setActiveMods(activeMods);
         gameView.startGame(notes, equippedSkin);
     }
@@ -205,8 +217,7 @@ public class RhythmGameActivity extends BaseActivity implements GameView.GameEve
         int hp = gameManager.getCurrentHp();
         if (tvHp != null) tvHp.setText("HP: " + hp);
         if (pbHp != null) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) pbHp.setProgress(hp, true);
-            else pbHp.setProgress(hp);
+            pbHp.setProgress(hp, true);
         }
     }
 
@@ -291,22 +302,29 @@ public class RhythmGameActivity extends BaseActivity implements GameView.GameEve
             tvCurrentRank.setText("Rank: " + rank);
 
             // Dynamic Rank Colors
-            if (rank.equals("S")) tvCurrentRank.setTextColor(Color.parseColor("#FFEB3B")); // Gold
-            else if (rank.equals("A"))
-                tvCurrentRank.setTextColor(Color.parseColor("#4CAF50")); // Green
-            else if (rank.equals("B"))
-                tvCurrentRank.setTextColor(Color.parseColor("#2196F3")); // Blue
-            else if (rank.equals("C"))
-                tvCurrentRank.setTextColor(Color.parseColor("#FF9800")); // Orange
-            else tvCurrentRank.setTextColor(Color.parseColor("#FF5252")); // Red
+            switch (rank) {
+                case "S":
+                    tvCurrentRank.setTextColor(Color.parseColor("#FFEB3B")); // Gold
+                    break;
+                case "A":
+                    tvCurrentRank.setTextColor(Color.parseColor("#4CAF50")); // Green
+                    break;
+                case "B":
+                    tvCurrentRank.setTextColor(Color.parseColor("#2196F3")); // Blue
+                    break;
+                case "C":
+                    tvCurrentRank.setTextColor(Color.parseColor("#FF9800")); // Orange
+                    break;
+                default:
+                    tvCurrentRank.setTextColor(Color.parseColor("#FF5252")); // Red
+                    break;
+            }
         }
     }
 
     private void vibrate(long d) {
         if (vibrator != null && vibrator.hasVibrator()) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                vibrator.vibrate(VibrationEffect.createOneShot(d, VibrationEffect.DEFAULT_AMPLITUDE));
-            else vibrator.vibrate(d);
+            vibrator.vibrate(VibrationEffect.createOneShot(d, VibrationEffect.DEFAULT_AMPLITUDE));
         }
     }
 
@@ -354,6 +372,8 @@ public class RhythmGameActivity extends BaseActivity implements GameView.GameEve
             }
         }
 
+        if (isFinishing() || isDestroyed()) return;
+
         new AlertDialog.Builder(this)
                 .setTitle(isDead ? "Game Over!" : "Level Complete!")
                 .setMessage(String.format(Locale.US, "Rank: %s\nScore: %d\nAccuracy: %.1f%%\nMax Combo: %d\nPoints Earned: %d\n%s",
@@ -382,16 +402,23 @@ public class RhythmGameActivity extends BaseActivity implements GameView.GameEve
 
     // --- CANVAS EFFECTS CLASSES ---
     private static class Particle {
-        float x, y, vx, vy, alpha, size, scale;
-        int color;
-        long lifeTime, maxLife;
-        String type;
+        final float size;
+        final int color;
+        final long maxLife;
+        final String type;
+        final float[] historyX = new float[6];
+        final float[] historyY = new float[6];
+        final float rotationSpeed;
+        float x;
+        float y;
+        float vx;
+        float vy;
+        float alpha;
+        float scale;
+        long lifeTime;
         float friction = 0.96f;
-        float rotation = 0f;
-        float rotationSpeed = 0f;
+        float rotation;
         int shapeType = 0;
-        float[] historyX = new float[6];
-        float[] historyY = new float[6];
         boolean isDebris = false;
 
         Particle(float x, float y, float angle, float speed, int color, long life, String type, float size) {
@@ -454,8 +481,11 @@ public class RhythmGameActivity extends BaseActivity implements GameView.GameEve
     }
 
     private static class Shockwave {
-        float x, y, radius, maxRadius;
-        int color;
+        final float x;
+        final float y;
+        final float maxRadius;
+        final int color;
+        float radius;
         float alpha = 1f;
 
         Shockwave(float x, float y, float maxRadius, int color) {
@@ -535,7 +565,7 @@ public class RhythmGameActivity extends BaseActivity implements GameView.GameEve
         }
 
         @Override
-        protected void onDraw(android.graphics.Canvas canvas) {
+        protected void onDraw(@NonNull android.graphics.Canvas canvas) {
             long now = System.currentTimeMillis();
             long dt = Math.min(32, now - lastFrameTime);
             lastFrameTime = now;

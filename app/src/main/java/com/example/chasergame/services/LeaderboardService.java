@@ -14,7 +14,7 @@ public class LeaderboardService {
     }
 
     public void loadAllLeaderboards(LeaderboardCallback callback) {
-        userRepository.getUserList(new DatabaseService.DatabaseCallback<List<User>>() {
+        userRepository.getUserList(new DatabaseService.DatabaseCallback<>() {
             @Override
             public void onCompleted(List<User> users) {
                 if (users == null) {

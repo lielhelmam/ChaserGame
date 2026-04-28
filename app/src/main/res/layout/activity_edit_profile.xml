@@ -54,10 +54,10 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:background="#DDDDDD"
-                    android:contentDescription="@string/edit_profile_pic_desc"
-                    android:scaleType="centerCrop"
                     android:clickable="true"
-                    android:focusable="true"/>
+                    android:contentDescription="@string/edit_profile_pic_desc"
+                    android:focusable="true"
+                    android:scaleType="centerCrop" />
 
                 <ImageButton
                     android:id="@+id/btn_change_pic"
@@ -66,9 +66,9 @@
                     android:layout_gravity="bottom|end"
                     android:background="@android:drawable/btn_default_small"
                     android:backgroundTint="#333333"
-                    android:src="@android:drawable/ic_menu_camera"
                     android:contentDescription="@string/edit_profile_change_pic_desc"
-                    android:padding="8dp" />
+                    android:padding="8dp"
+                    android:src="@android:drawable/ic_menu_camera" />
             </FrameLayout>
 
             <!-- Username -->

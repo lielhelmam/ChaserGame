@@ -21,7 +21,7 @@ public class LandingActivity extends BaseActivity {
 
         if (authService.isUserLoggedIn()) {
             com.example.chasergame.models.User localUser = authService.getCurrentUser();
-            databaseService.getUser(localUser.getId(), new DatabaseService.DatabaseCallback<com.example.chasergame.models.User>() {
+            databaseService.getUser(localUser.getId(), new DatabaseService.DatabaseCallback<>() {
                 @Override
                 public void onCompleted(com.example.chasergame.models.User freshUser) {
                     if (freshUser != null) {

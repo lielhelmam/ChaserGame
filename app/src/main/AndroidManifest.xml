@@ -101,9 +101,6 @@
             android:name=".screens.AdminActivity"
             android:exported="false" />
         <activity
-            android:name=".screens.CreatetriviaActivity"
-            android:exported="false" />
-        <activity
             android:name=".screens.MainActivity"
             android:exported="false" />
         <activity

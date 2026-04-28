@@ -80,7 +80,7 @@ public class ManageSongsActivity extends BaseActivity {
             return;
         }
 
-        songService.addSong(name, difficulty, resName, bpm, hpDrain, hpGain, new DatabaseService.DatabaseCallback<Void>() {
+        songService.addSong(name, difficulty, resName, bpm, hpDrain, hpGain, new DatabaseService.DatabaseCallback<>() {
             @Override
             public void onCompleted(Void unused) {
                 Toast.makeText(ManageSongsActivity.this, "Song saved successfully!", Toast.LENGTH_SHORT).show();

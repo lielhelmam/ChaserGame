@@ -398,7 +398,7 @@ public class DatabaseService implements IUserRepository, IQuestionRepository, IS
     public void getSongsSnapshot(@org.jetbrains.annotations.NotNull DatabaseCallback<List<DataSnapshot>> callback) {
         databaseReference.child(SONGS_PATH).addListenerForSingleValueEvent(new com.google.firebase.database.ValueEventListener() {
             @Override
-            public void onDataChange(com.google.firebase.database.DataSnapshot dataSnapshot) {
+            public void onDataChange(@NonNull com.google.firebase.database.DataSnapshot dataSnapshot) {
                 List<DataSnapshot> snapshots = new ArrayList<>();
                 for (com.google.firebase.database.DataSnapshot child : dataSnapshot.getChildren()) {
                     snapshots.add(child);
@@ -407,7 +407,7 @@ public class DatabaseService implements IUserRepository, IQuestionRepository, IS
             }
 
             @Override
-            public void onCancelled(com.google.firebase.database.DatabaseError databaseError) {
+            public void onCancelled(@NonNull com.google.firebase.database.DatabaseError databaseError) {
                 callback.onFailed(databaseError.toException());
             }
         });

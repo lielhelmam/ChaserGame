@@ -122,6 +122,7 @@ public class EditProfileActivity extends BaseActivity {
     }
 
     private void showImagePickerDialog() {
+        if (isFinishing() || isDestroyed()) return;
         String[] options = {"Camera", "Gallery"};
         new AlertDialog.Builder(this)
                 .setTitle("Select Profile Image")
@@ -173,7 +174,7 @@ public class EditProfileActivity extends BaseActivity {
 
         boolean emailChanged = user.getEmail() == null || !user.getEmail().equalsIgnoreCase(email);
         if (emailChanged) {
-            databaseService.checkIfEmailExists(email, new DatabaseService.DatabaseCallback<Boolean>() {
+            databaseService.checkIfEmailExists(email, new DatabaseService.DatabaseCallback<>() {
                 @Override
                 public void onCompleted(Boolean exists) {
                     if (exists) etEmail.setError("Email exists");
@@ -191,7 +192,7 @@ public class EditProfileActivity extends BaseActivity {
 
     private void performUpdate(String name, String email, String pass) {
         user.setProfileImage(encodedImage);
-        authService.updateProfile(user, name, email, pass, new DatabaseService.DatabaseCallback<Void>() {
+        authService.updateProfile(user, name, email, pass, new DatabaseService.DatabaseCallback<>() {
             @Override
             public void onCompleted(Void unused) {
                 Toast.makeText(EditProfileActivity.this, "Profile updated", Toast.LENGTH_SHORT).show();

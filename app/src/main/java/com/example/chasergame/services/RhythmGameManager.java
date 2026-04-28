@@ -4,7 +4,6 @@ import com.example.chasergame.models.SongData;
 
 public class RhythmGameManager {
     private final SongData songData;
-    private final int MAX_HP = 10;
     private int currentScore = 0;
     private int totalNotesPossible = 0;
     private double currentAccuracyWeight = 0;
@@ -23,7 +22,6 @@ public class RhythmGameManager {
     }
 
     public void onSliderStarted() {
-        if (isGameOver) return;
         // Logic for starting a slider (e.g., sound or visual)
         // We no longer increment totalNotesPossible here to avoid early Acc drops.
     }
@@ -48,11 +46,10 @@ public class RhythmGameManager {
             // Slider completion - counted as a full note for accuracy
             totalNotesPossible++;
             currentAccuracyWeight += 1.0;
-        } else if (points == 20) {
-            // Slider tick - strictly for score, does not affect accuracy %
         }
 
         int hpGain = (points == 300 || points == 150) ? 1 : 0;
+        int MAX_HP = 10;
         currentHp = Math.min(MAX_HP, currentHp + hpGain);
     }
 

@@ -1,6 +1,7 @@
 package com.example.chasergame.services;
 
 import com.example.chasergame.models.Note;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -19,7 +20,7 @@ public class BeatmapGenerator {
 
         // Overclocked mod: Speed up the BPM
         if (mods.contains("OVERCLOCK")) {
-            bpm = (int)(bpm * 1.25);
+            bpm = (int) (bpm * 1.25);
         }
 
         // Base beat interval
@@ -29,7 +30,7 @@ public class BeatmapGenerator {
         double doubleNoteChance = 0.0;
         String diff = difficulty.toLowerCase();
 
-        long[] lastSliderEndTime = new long[2]; 
+        long[] lastSliderEndTime = new long[2];
         lastSliderEndTime[0] = -2000;
         lastSliderEndTime[1] = -2000;
 
@@ -71,8 +72,8 @@ public class BeatmapGenerator {
         for (long t = 2500; t < durationMs - 5000; t += beatInterval) {
 
             // SPINNER LOGIC
-            if (Math.abs(t - (durationMs * 0.4)) < beatInterval / 2 ||
-                    Math.abs(t - (durationMs * 0.85)) < beatInterval / 2) {
+            if (Math.abs(t - (durationMs * 0.4)) < (double) beatInterval / 2 ||
+                    Math.abs(t - (durationMs * 0.85)) < (double) beatInterval / 2) {
 
                 long spinnerDuration = 3000;
                 notes.add(new Note(t, 0, spinnerDuration, Note.Type.SPINNER));
@@ -105,7 +106,7 @@ public class BeatmapGenerator {
         if (mods.contains("GRAVITY")) {
             for (Note n : notes) {
                 if (n.getType() != Note.Type.SPINNER) {
-                    long shift = (long)((random.nextDouble() - 0.5) * 250); 
+                    long shift = (long) ((random.nextDouble() - 0.5) * 250);
                     n.setTimestamp(n.getTimestamp() + shift);
                 }
             }

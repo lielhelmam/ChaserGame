@@ -68,7 +68,7 @@ public class ShopActivity extends BaseActivity {
 
     private void refreshUserData() {
         if (currentUser != null && currentUser.getId() != null) {
-            databaseService.getUser(currentUser.getId(), new DatabaseService.DatabaseCallback<User>() {
+            databaseService.getUser(currentUser.getId(), new DatabaseService.DatabaseCallback<>() {
                 @Override
                 public void onCompleted(User updatedUser) {
                     if (updatedUser != null) {
@@ -94,7 +94,7 @@ public class ShopActivity extends BaseActivity {
     }
 
     private void claimGift() {
-        shopService.claimGift(currentUser, new DatabaseService.DatabaseCallback<Void>() {
+        shopService.claimGift(currentUser, new DatabaseService.DatabaseCallback<>() {
             @Override
             public void onCompleted(Void unused) {
                 updateUI();
@@ -121,7 +121,7 @@ public class ShopActivity extends BaseActivity {
         adapter = new SkinsAdapter(skins, currentUser, new SkinsAdapter.OnSkinActionListener() {
             @Override
             public void onBuy(Skin skin) {
-                shopService.buySkin(currentUser, skin, new DatabaseService.DatabaseCallback<Void>() {
+                shopService.buySkin(currentUser, skin, new DatabaseService.DatabaseCallback<>() {
                     @Override
                     public void onCompleted(Void unused) {
                         updateUI();
@@ -138,7 +138,7 @@ public class ShopActivity extends BaseActivity {
 
             @Override
             public void onEquip(Skin skin) {
-                shopService.equipSkin(currentUser, skin.id, new DatabaseService.DatabaseCallback<Void>() {
+                shopService.equipSkin(currentUser, skin.id, new DatabaseService.DatabaseCallback<>() {
                     @Override
                     public void onCompleted(Void unused) {
                         adapter.updateUser(currentUser);
@@ -185,7 +185,7 @@ public class ShopActivity extends BaseActivity {
                     int bg = PRESET_COLORS[spBg.getSelectedItemPosition()];
                     String effect = spEffect.getSelectedItem().toString();
 
-                    shopService.updateCustomSkin(currentUser, circle, target, bg, effect, new DatabaseService.DatabaseCallback<Void>() {
+                    shopService.updateCustomSkin(currentUser, circle, target, bg, effect, new DatabaseService.DatabaseCallback<>() {
                         @Override
                         public void onCompleted(Void unused) {
                             adapter.updateUser(currentUser);

@@ -6,7 +6,7 @@ plugins {
 android {
     namespace 'com.example.chasergame'
     compileSdk {
-        version = release(36)
+        version = release(37)
     }
 
     defaultConfig {
@@ -48,5 +48,4 @@ dependencies {
        This is used in the SharedPreferenceUtil.java class to parse the object to and from JSON data.
    */
     implementation libs.gson
-
 }

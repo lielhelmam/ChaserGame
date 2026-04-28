@@ -60,7 +60,7 @@ public class AddQuestionActivity extends BaseActivity {
                 new ArrayList<>(Arrays.asList(w1, w2))
         );
 
-        questionService.addQuestion(question, new DatabaseService.DatabaseCallback<Void>() {
+        questionService.addQuestion(question, new DatabaseService.DatabaseCallback<>() {
             @Override
             public void onCompleted(Void object) {
                 Toast.makeText(AddQuestionActivity.this, "Question saved", Toast.LENGTH_SHORT).show();

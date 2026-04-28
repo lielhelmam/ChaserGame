@@ -10,11 +10,18 @@ import android.graphics.SweepGradient;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
+
+import androidx.annotation.NonNull;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 public class SpinnerView extends View {
+    private final int spinsRequired = 3;
+    private final RectF arcBounds = new RectF();
+    private final List<SpinnerParticle> particles = new ArrayList<>();
+    private final Random random = new Random();
     private Paint outerPaint, progressPaint, innerPaint, textPaint, glowPaint, timePaint, particlePaint;
     private float totalRotation = 0;
     private float lastTouchAngle = 0;
@@ -22,12 +29,8 @@ public class SpinnerView extends View {
     private long startTime = 0;
     private long endTime = 0;
     private SpinnerListener listener;
-    private int spinsRequired = 3;
     private float visualRotation = 0;
     private float pulseScale = 1.0f;
-    private RectF arcBounds = new RectF();
-    private List<SpinnerParticle> particles = new ArrayList<>();
-    private Random random = new Random();
 
     public SpinnerView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -88,7 +91,7 @@ public class SpinnerView extends View {
     }
 
     @Override
-    protected void onDraw(Canvas canvas) {
+    protected void onDraw(@NonNull Canvas canvas) {
         if (!isActive) return;
 
         long now = System.currentTimeMillis();
@@ -101,9 +104,9 @@ public class SpinnerView extends View {
         drawHexGrid(canvas, cx, cy, radius);
 
         // 2. Draw Time Limit Ring (Outer)
-        float timeProgress = 1.0f - (float)(now - startTime) / (endTime - startTime);
+        float timeProgress = 1.0f - (float) (now - startTime) / (endTime - startTime);
         if (timeProgress > 0) {
-            canvas.drawArc(cx - radius - 30, cy - radius - 30, cx + radius + 30, cy + radius + 30, 
+            canvas.drawArc(cx - radius - 30, cy - radius - 30, cx + radius + 30, cy + radius + 30,
                     -90, timeProgress * 360f, false, timePaint);
         }
 
@@ -115,13 +118,13 @@ public class SpinnerView extends View {
         float progress = Math.min(1.0f, totalRotation / (360f * spinsRequired));
         int colorStart = Color.parseColor("#00FFFF"); // Cyan
         int colorEnd = Color.parseColor("#FF00FF");   // Magenta
-        
+
         // Setup Gradient on the fly for rotation
-        SweepGradient gradient = new SweepGradient(cx, cy, 
-                new int[]{colorStart, colorEnd, colorStart}, 
+        SweepGradient gradient = new SweepGradient(cx, cy,
+                new int[]{colorStart, colorEnd, colorStart},
                 new float[]{0, 0.5f, 1f});
         progressPaint.setShader(gradient);
-        
+
         canvas.save();
         canvas.rotate(visualRotation, cx, cy);
         canvas.drawArc(arcBounds, -90, progress * 360f, false, progressPaint);
@@ -142,7 +145,7 @@ public class SpinnerView extends View {
 
         // 7. Text Overlay
         textPaint.setTextSize(70f * pulseScale);
-        textPaint.setAlpha(progress >= 1.0 ? 255 : (int)(150 + 105 * Math.sin(now / 100.0)));
+        textPaint.setAlpha(progress >= 1.0 ? 255 : (int) (150 + 105 * Math.sin(now / 100.0)));
         canvas.drawText(progress >= 1.0 ? "MAX POWER!!" : "OVERDRIVE!!", cx, cy + 25, textPaint);
 
         if (now > endTime) {
@@ -162,7 +165,7 @@ public class SpinnerView extends View {
         for (float x = cx - radius; x < cx + radius; x += size * 1.5f) {
             for (float y = cy - radius; y < cy + radius; y += size * 0.86f) {
                 // Check if inside circle
-                if (Math.sqrt(Math.pow(x-cx, 2) + Math.pow(y-cy, 2)) < radius) {
+                if (Math.sqrt(Math.pow(x - cx, 2) + Math.pow(y - cy, 2)) < radius) {
                     drawHex(canvas, x, y, size * 0.5f, hexPaint);
                 }
             }
@@ -223,9 +226,9 @@ public class SpinnerView extends View {
                     float cx = getWidth() / 2f;
                     float cy = getHeight() / 2f;
                     float radius = (Math.min(cx, cy) * 0.75f);
-                    float rad = (float)Math.toRadians(angle);
-                    float px = cx + (float)Math.cos(rad) * radius;
-                    float py = cy + (float)Math.sin(rad) * radius;
+                    float rad = (float) Math.toRadians(angle);
+                    float px = cx + (float) Math.cos(rad) * radius;
+                    float py = cy + (float) Math.sin(rad) * radius;
                     particles.add(new SpinnerParticle(px, py));
                 }
 
@@ -235,10 +238,20 @@ public class SpinnerView extends View {
         return true;
     }
 
+    public interface SpinnerListener {
+        void onSpin(float progress);
+
+        void onFinished(boolean success);
+    }
+
     private class SpinnerParticle {
-        float x, y, vx, vy, size;
+        final float vx;
+        final float vy;
+        final int color;
+        float x;
+        float y;
+        float size;
         int alpha = 255;
-        int color;
 
         SpinnerParticle(float x, float y) {
             this.x = x;
@@ -255,10 +268,5 @@ public class SpinnerView extends View {
             alpha -= 15;
             size *= 0.95f;
         }
-    }
-
-    public interface SpinnerListener {
-        void onSpin(float progress);
-        void onFinished(boolean success);
     }
 }

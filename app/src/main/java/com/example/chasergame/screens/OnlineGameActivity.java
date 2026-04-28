@@ -202,7 +202,7 @@ public class OnlineGameActivity extends BaseActivity {
         gameService.validateAnswer(key, (isCorrect, correct) -> {
             showAnswerColors(key, correct, clickedBtn);
             if (isCorrect) {
-                gameService.submitAnswer(isPlayer1 ? "p1" : "p2", questionService, new DatabaseService.DatabaseCallback<Void>() {
+                gameService.submitAnswer(isPlayer1 ? "p1" : "p2", questionService, new DatabaseService.DatabaseCallback<>() {
                     @Override
                     public void onCompleted(Void unused) {
                     }
@@ -267,7 +267,7 @@ public class OnlineGameActivity extends BaseActivity {
      * @param w The winner of the game.
      */
     private void showGameOverDialog(String w) {
-        if (finishing) return;
+        if (isFinishing() || isDestroyed() || finishing) return;
         finishing = true;
         boolean win = (isPlayer1 && "P1".equals(w)) || (!isPlayer1 && "P2".equals(w));
         if (win)
@@ -332,14 +332,14 @@ public class OnlineGameActivity extends BaseActivity {
      * Deletes the room if the user is the host and navigates back to the home screen.
      */
     private void deleteAndExit() {
-        if (finishing) return;
+        if (isFinishing() || isDestroyed() || finishing) return;
 
         new AlertDialog.Builder(this)
                 .setTitle("Exit Game")
                 .setMessage("Are you sure you want to quit? This will be counted as a loss.")
                 .setPositiveButton("Exit", (dialog, which) -> {
                     finishing = true;
-                    gameService.forfeitGame(isPlayer1 ? "p1" : "p2", new DatabaseService.DatabaseCallback<Void>() {
+                    gameService.forfeitGame(isPlayer1 ? "p1" : "p2", new DatabaseService.DatabaseCallback<>() {
                         @Override
                         public void onCompleted(Void unused) {
                             gameService.stopListening();

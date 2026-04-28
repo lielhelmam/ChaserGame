@@ -80,7 +80,7 @@ public class SignupActivity extends BaseActivity {
         String uid = databaseService.generateUserId();
         User user = new User(uid, fName, password, email, false, 0, 0);
 
-        authService.register(user, new DatabaseService.DatabaseCallback<Void>() {
+        authService.register(user, new DatabaseService.DatabaseCallback<>() {
             @Override
             public void onCompleted(Void unused) {
                 navigateToHome(user);

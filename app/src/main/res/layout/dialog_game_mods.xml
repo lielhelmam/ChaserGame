@@ -12,13 +12,13 @@
         android:layout_height="wrap_content"
         android:fontFamily="sans-serif-black"
         android:gravity="center"
-        android:text="SYSTEM MODS"
-        android:textColor="#00FFFF"
-        android:textSize="24sp"
         android:shadowColor="#00FFFF"
         android:shadowDx="0"
         android:shadowDy="0"
-        android:shadowRadius="10" />
+        android:shadowRadius="10"
+        android:text="SYSTEM MODS"
+        android:textColor="#00FFFF"
+        android:textSize="24sp" />
 
     <View
         android:layout_width="match_parent"

@@ -51,7 +51,6 @@ public abstract class BaseActivity extends AppCompatActivity {
     };
 
     protected NavigationView navigationView;
-    private FrameLayout contentFrame;
     private TextView topBarTitle;
     private View topBar;
 
@@ -70,7 +69,7 @@ public abstract class BaseActivity extends AppCompatActivity {
     @Override
     public void setContentView(@LayoutRes int layoutResID) {
         drawerLayout = (DrawerLayout) getLayoutInflater().inflate(R.layout.activity_base, null);
-        contentFrame = drawerLayout.findViewById(R.id.content_frame);
+        FrameLayout contentFrame = drawerLayout.findViewById(R.id.content_frame);
         topBarTitle = drawerLayout.findViewById(R.id.text_top_bar_title);
         navigationView = drawerLayout.findViewById(R.id.nav_view);
         topBar = drawerLayout.findViewById(R.id.top_bar);
@@ -182,10 +181,10 @@ public abstract class BaseActivity extends AppCompatActivity {
     private void highlightCurrentMenuItem() {
         if (navigationView == null) return;
         Menu menu = navigationView.getMenu();
-        
+
         int currentId = -1;
         Class<?> currentClass = this.getClass();
-        
+
         if (currentClass.equals(MainActivity.class)) {
             currentId = R.id.nav_home;
         } else if (currentClass.equals(EditProfileActivity.class)) {
@@ -199,7 +198,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         } else if (currentClass.equals(AdminActivity.class)) {
             currentId = R.id.nav_admin;
         }
-        
+
         if (currentId != -1) {
             menu.findItem(currentId).setChecked(true);
         }
@@ -228,6 +227,7 @@ public abstract class BaseActivity extends AppCompatActivity {
     }
 
     private void showLogoutDialog() {
+        if (isFinishing() || isDestroyed()) return;
         new AlertDialog.Builder(this)
                 .setTitle("Logout")
                 .setMessage("Are you sure you want to logout?")

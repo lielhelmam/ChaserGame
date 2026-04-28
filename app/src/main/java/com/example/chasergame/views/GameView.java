@@ -7,7 +7,6 @@ import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.LayerDrawable;
-import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.AttributeSet;
@@ -19,6 +18,7 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.example.chasergame.R;
@@ -34,17 +34,20 @@ import java.util.Random;
 public class GameView extends ConstraintLayout {
 
     private static final long VISIBLE_DURATION_DEFAULT = 1500L;
-    private long visibleDuration = VISIBLE_DURATION_DEFAULT;
     private static final int PERFECT_WINDOW = 250;
     private static final int GOOD_WINDOW = 500;
     private static final int MISS_WINDOW = 600;
     private static final int SLIDER_GRACE_PERIOD = 250;
-
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final Random random = new Random();
     private final List<ActiveNote> activeNotes = new ArrayList<>();
     private final Map<Integer, Boolean> lanePressed = new HashMap<>();
     private final Map<Integer, ActiveNote> activeSliders = new HashMap<>();
+    private final Paint staticPaint = new Paint();
+    // Visualizer variables
+    private final float[] vizHeights = new float[12]; // 12 bars across the screen
+    private final Paint vizPaint = new Paint();
+    private long visibleDuration = VISIBLE_DURATION_DEFAULT;
     private FrameLayout laneLeft, laneRight;
     private View targetLeft, targetRight;
     private Skin equippedSkin;
@@ -56,23 +59,6 @@ public class GameView extends ConstraintLayout {
     private GameEventListener listener;
     private List<String> activeMods = new ArrayList<>();
     private long lastGlitchTime = 0;
-    private float offsetX = 0, offsetY = 0;
-    private final Paint staticPaint = new Paint();
-    
-    // Visualizer variables
-    private final float[] vizHeights = new float[12]; // 12 bars across the screen
-    private final Paint vizPaint = new Paint();
-    private long lastVizTick = 0;
-
-    public void setActiveMods(List<String> mods) {
-        this.activeMods = mods != null ? mods : new ArrayList<>();
-        // Adjust visible duration if Overclock is active to keep note density manageable
-        if (this.activeMods.contains("OVERCLOCK")) {
-            this.visibleDuration = 1000L; // Notes appear for 1s instead of 1.5s
-        } else {
-            this.visibleDuration = VISIBLE_DURATION_DEFAULT;
-        }
-    }
     private final Runnable gameLoop = new Runnable() {
         @Override
         public void run() {
@@ -82,6 +68,7 @@ public class GameView extends ConstraintLayout {
             handler.postDelayed(this, 16);
         }
     };
+    private long lastVizTick = 0;
 
     public GameView(Context context) {
         super(context);
@@ -96,6 +83,16 @@ public class GameView extends ConstraintLayout {
     public GameView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         init(context);
+    }
+
+    public void setActiveMods(List<String> mods) {
+        this.activeMods = mods != null ? mods : new ArrayList<>();
+        // Adjust visible duration if Overclock is active to keep note density manageable
+        if (this.activeMods.contains("OVERCLOCK")) {
+            this.visibleDuration = 1000L; // Notes appear for 1s instead of 1.5s
+        } else {
+            this.visibleDuration = VISIBLE_DURATION_DEFAULT;
+        }
     }
 
     private void init(Context context) {
@@ -141,7 +138,7 @@ public class GameView extends ConstraintLayout {
     }
 
     @Override
-    protected void onDraw(Canvas canvas) {
+    protected void onDraw(@NonNull Canvas canvas) {
         super.onDraw(canvas);
 
         // --- LIVE VISUALIZER LOGIC (Upgraded) ---
@@ -149,28 +146,29 @@ public class GameView extends ConstraintLayout {
             vizPaint.setStrokeWidth(25); // Thicker bars
             vizPaint.setStrokeCap(Paint.Cap.ROUND);
             int barWidth = getWidth() / (vizHeights.length + 1);
-            
+
             for (int i = 0; i < vizHeights.length; i++) {
                 // Decay height
                 vizHeights[i] *= 0.94f; // Slower decay for better visibility
-                
+
                 // Noise bounce
                 if (System.currentTimeMillis() - lastVizTick > 80) {
                     if (random.nextInt(4) == 0) vizHeights[i] += random.nextFloat() * 80f;
                 }
-                
+
                 int color = (equippedSkin != null) ? equippedSkin.targetColor : Color.CYAN;
                 vizPaint.setColor(color);
                 vizPaint.setAlpha(160); // Much more visible
-                
+
                 float x = barWidth * (i + 1);
                 float startY = getHeight();
                 // Taller bars (up to 500px high)
-                float endY = getHeight() - 20 - Math.min(500f, vizHeights[i]); 
+                float endY = getHeight() - 20 - Math.min(500f, vizHeights[i]);
                 canvas.drawLine(x, startY, x, endY, vizPaint);
             }
-            if (System.currentTimeMillis() - lastVizTick > 80) lastVizTick = System.currentTimeMillis();
-            invalidate(); 
+            if (System.currentTimeMillis() - lastVizTick > 80)
+                lastVizTick = System.currentTimeMillis();
+            invalidate();
         }
 
         // Draw Static Noise Mod (HARDER - Full Screen Flashes)
@@ -189,7 +187,7 @@ public class GameView extends ConstraintLayout {
                 staticPaint.setAlpha(150);
                 canvas.drawRect(0, 0, getWidth(), getHeight(), staticPaint);
             }
-            invalidate(); 
+            invalidate();
         }
     }
 
@@ -245,8 +243,8 @@ public class GameView extends ConstraintLayout {
         // --- GLITCH MOD LOGIC (HARDER) ---
         if (activeMods.contains("GLITCH")) {
             if (System.currentTimeMillis() - lastGlitchTime > 50) { // Faster glitches
-                offsetX = (random.nextFloat() - 0.5f) * 80; // Bigger shakes
-                offsetY = (random.nextFloat() - 0.5f) * 80;
+                float offsetX = (random.nextFloat() - 0.5f) * 80; // Bigger shakes
+                float offsetY = (random.nextFloat() - 0.5f) * 80;
                 lastGlitchTime = System.currentTimeMillis();
                 setTranslationX(offsetX);
                 setTranslationY(offsetY);
@@ -259,7 +257,7 @@ public class GameView extends ConstraintLayout {
             setTranslationY(0);
         }
 
-        // While spinner is active, we don't spawn new notes and we don't update existing ones
+        // While spinner is active, we don't spawn new notes, and we don't update existing ones
         if (isSpinnerActive) return;
 
         for (int i = 0; i < allNotes.size(); i++) {
@@ -285,19 +283,18 @@ public class GameView extends ConstraintLayout {
             if (!isGameRunning) break;
             ActiveNote an = activeNotes.get(i);
             long timeDiff = an.data.getTimestamp() - currentSongTime;
-            
+
             // --- GRAVITY WARP LOGIC (Acceleration) ---
-            float progress = 1f - ((float)timeDiff / visibleDuration);
+            float progress = 1f - ((float) timeDiff / visibleDuration);
             if (activeMods.contains("GRAVITY")) {
                 // Exponential movement: notes speed up as they fall
-                progress = (float) Math.pow(progress, 2.5); 
+                progress = (float) Math.pow(progress, 2.5);
             }
             float noteHeadY = targetY * progress;
 
             if (an.data.isSlider()) {
-                float sliderHeadY = noteHeadY;
                 int sliderHeight = (int) (an.data.getDuration() * speed) + (int) (60 * density);
-                an.view.setTranslationY(sliderHeadY - (sliderHeight - (60 * density)));
+                an.view.setTranslationY(noteHeadY - (sliderHeight - (60 * density)));
             } else {
                 an.view.setTranslationY(noteHeadY);
             }
@@ -315,13 +312,11 @@ public class GameView extends ConstraintLayout {
                 if (!Boolean.TRUE.equals(lanePressed.get(an.data.getLane()))) {
                     if (currentSongTime >= sliderEndTime - SLIDER_GRACE_PERIOD) {
                         handlePerfectSlider(an);
-                        activeSliders.remove(an.data.getLane());
-                        if (isGameRunning && i < activeNotes.size()) activeNotes.remove(i);
                     } else {
                         handleMiss(an, true);
-                        activeSliders.remove(an.data.getLane());
-                        if (isGameRunning && i < activeNotes.size()) activeNotes.remove(i);
                     }
+                    activeSliders.remove(an.data.getLane());
+                    if (isGameRunning && i < activeNotes.size()) activeNotes.remove(i);
                 } else {
                     if (currentSongTime >= sliderEndTime - SLIDER_GRACE_PERIOD) {
                         handlePerfectSlider(an);
@@ -412,10 +407,8 @@ public class GameView extends ConstraintLayout {
                 String effect = equippedSkin.effectType;
                 if ("glow".equals(effect) || "electric".equals(effect)) {
                     v.setElevation(10 * density);
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                        v.setOutlineAmbientShadowColor(equippedSkin.circleColor);
-                        v.setOutlineSpotShadowColor(equippedSkin.circleColor);
-                    }
+                    v.setOutlineAmbientShadowColor(equippedSkin.circleColor);
+                    v.setOutlineSpotShadowColor(equippedSkin.circleColor);
                 } else if ("ghost".equals(effect)) {
                     v.setAlpha(0.6f);
                 } else if ("bubbles".equals(effect)) {
@@ -472,7 +465,7 @@ public class GameView extends ConstraintLayout {
 
         if (best != null && minDiff <= GOOD_WINDOW) {
             best.wasHit = true;
-            
+
             // Big kick to visualizer on hit
             for (int i = 0; i < vizHeights.length; i++) {
                 vizHeights[i] += random.nextFloat() * 250f; // Higher bounce
@@ -556,8 +549,8 @@ public class GameView extends ConstraintLayout {
     }
 
     private static class ActiveNote {
-        Note data;
-        View view;
+        final Note data;
+        final View view;
         boolean wasHit = false;
         boolean wasMissed = false;
 

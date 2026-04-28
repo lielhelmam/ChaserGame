@@ -40,7 +40,7 @@ public class ModsAdapter extends RecyclerView.Adapter<ModsAdapter.ViewHolder> {
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         holder.tvName.setText(names[position]);
         holder.tvDesc.setText(descs[position]);
-        
+
         // Remove listener to prevent recursive calls during re-binding
         holder.checkBox.setOnCheckedChangeListener(null);
         holder.checkBox.setChecked(selected[position]);
@@ -70,8 +70,9 @@ public class ModsAdapter extends RecyclerView.Adapter<ModsAdapter.ViewHolder> {
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView tvName, tvDesc;
-        CheckBox checkBox;
+        final TextView tvName;
+        final TextView tvDesc;
+        final CheckBox checkBox;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);

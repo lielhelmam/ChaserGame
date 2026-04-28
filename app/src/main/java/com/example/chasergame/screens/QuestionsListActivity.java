@@ -72,7 +72,7 @@ public class QuestionsListActivity extends BaseActivity {
     }
 
     private void loadQuestions() {
-        questionService.getAllQuestions(new DatabaseService.DatabaseCallback<List<QuestionsAdapter.Item>>() {
+        questionService.getAllQuestions(new DatabaseService.DatabaseCallback<>() {
             @Override
             public void onCompleted(List<QuestionsAdapter.Item> items) {
                 adapter.setItems(items);
@@ -86,28 +86,28 @@ public class QuestionsListActivity extends BaseActivity {
     }
 
     private void confirmDelete(String key) {
+        if (isFinishing() || isDestroyed()) return;
         new AlertDialog.Builder(this)
                 .setTitle("Delete question")
                 .setMessage("Are you sure?")
-                .setPositiveButton("Delete", (d, w) -> {
-                    questionService.deleteQuestion(key, new DatabaseService.DatabaseCallback<Void>() {
-                        @Override
-                        public void onCompleted(Void object) {
-                            Toast.makeText(QuestionsListActivity.this, "Deleted", Toast.LENGTH_SHORT).show();
-                            loadQuestions();
-                        }
+                .setPositiveButton("Delete", (d, w) -> questionService.deleteQuestion(key, new DatabaseService.DatabaseCallback<>() {
+                    @Override
+                    public void onCompleted(Void object) {
+                        Toast.makeText(QuestionsListActivity.this, "Deleted", Toast.LENGTH_SHORT).show();
+                        loadQuestions();
+                    }
 
-                        @Override
-                        public void onFailed(Exception e) {
-                            Toast.makeText(QuestionsListActivity.this, "Delete failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                        }
-                    });
-                })
+                    @Override
+                    public void onFailed(Exception e) {
+                        Toast.makeText(QuestionsListActivity.this, "Delete failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    }
+                }))
                 .setNegativeButton("Cancel", null)
                 .show();
     }
 
     private void showEditDialog(String key, Question q) {
+        if (isFinishing() || isDestroyed()) return;
         android.view.View v = getLayoutInflater().inflate(R.layout.dialog_edit_question, null);
 
         android.widget.EditText etQ = v.findViewById(R.id.et_edit_question);
@@ -117,7 +117,7 @@ public class QuestionsListActivity extends BaseActivity {
 
         etQ.setText(q.getQuestion());
         etR.setText(q.getRightAnswer());
-        if (q.getWrongAnswers() != null && q.getWrongAnswers().size() > 0)
+        if (q.getWrongAnswers() != null && !q.getWrongAnswers().isEmpty())
             etW1.setText(q.getWrongAnswers().get(0));
         if (q.getWrongAnswers() != null && q.getWrongAnswers().size() > 1)
             etW2.setText(q.getWrongAnswers().get(1));
@@ -135,7 +135,7 @@ public class QuestionsListActivity extends BaseActivity {
                             ))
                     );
 
-                    questionService.updateQuestion(key, updated, new DatabaseService.DatabaseCallback<Void>() {
+                    questionService.updateQuestion(key, updated, new DatabaseService.DatabaseCallback<>() {
                         @Override
                         public void onCompleted(Void object) {
                             Toast.makeText(QuestionsListActivity.this, "Updated", Toast.LENGTH_SHORT).show();

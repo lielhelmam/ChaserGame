@@ -19,10 +19,10 @@ import java.util.List;
 
 public class SongsAdapter extends RecyclerView.Adapter<SongsAdapter.SongViewHolder> {
 
+    private final OnSongClickListener listener;
+    private final AuthService authService;
     private List<SongData> songList;
     private List<SongData> songListFull; // Original full list for filtering
-    private OnSongClickListener listener;
-    private AuthService authService;
 
     public SongsAdapter(List<SongData> songList, AuthService authService, OnSongClickListener listener) {
         this.songList = songList;
@@ -103,8 +103,13 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsAdapter.SongViewHold
     }
 
     static class SongViewHolder extends RecyclerView.ViewHolder {
-        TextView tvName, tvDifficulty, tvBpm, tvTopScore, tvTopAccuracy, tvTopRank;
-        LinearLayout itemLayout;
+        final TextView tvName;
+        final TextView tvDifficulty;
+        final TextView tvBpm;
+        final TextView tvTopScore;
+        final TextView tvTopAccuracy;
+        final TextView tvTopRank;
+        final LinearLayout itemLayout;
 
         public SongViewHolder(@NonNull View itemView) {
             super(itemView);

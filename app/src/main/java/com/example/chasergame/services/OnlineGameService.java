@@ -24,7 +24,6 @@ public class OnlineGameService {
     private static boolean isTimeSynced = false;
     private final DatabaseReference roomRef;
     private final DatabaseReference gameRef;
-    private final String playerId;
     private ValueEventListener gameListener;
     private ValueEventListener timeOffsetListener;
 
@@ -36,7 +35,6 @@ public class OnlineGameService {
      * @param playerId The ID of the current player.
      */
     public OnlineGameService(String roomId, String playerId) {
-        this.playerId = playerId;
         this.roomRef = FirebaseDatabase.getInstance().getReference("rooms").child(roomId);
         this.gameRef = roomRef.child("game");
         listenToServerTime();
@@ -243,7 +241,7 @@ public class OnlineGameService {
      * @param questionService Service used to retrieve questions.
      */
     public void setNewQuestion(QuestionService questionService) {
-        questionService.getAllQuestions(new DatabaseService.DatabaseCallback<List<com.example.chasergame.adapters.QuestionsAdapter.Item>>() {
+        questionService.getAllQuestions(new DatabaseService.DatabaseCallback<>() {
             @Override
             public void onCompleted(List<com.example.chasergame.adapters.QuestionsAdapter.Item> items) {
                 if (items.isEmpty()) return;
