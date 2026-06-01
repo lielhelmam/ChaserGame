@@ -84,7 +84,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
-                android:text="Rank: S"
+                android:text="Rank: SS"
                 android:textColor="#FFEB3B"
                 android:textSize="12sp"
                 android:textStyle="bold" />
@@ -95,14 +95,27 @@
         android:id="@+id/tv_game_score"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="20dp"
+        android:layout_marginEnd="12dp"
         android:text="Score: 0"
         android:textColor="#FFFFFF"
         android:textSize="22sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="@id/top_bar_bg"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/btn_exit_game"
         app:layout_constraintTop_toTopOf="@id/top_bar_bg" />
+
+    <ImageButton
+        android:id="@+id/btn_exit_game"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginEnd="12dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="Exit Game"
+        android:src="@android:drawable/ic_menu_close_clear_cancel"
+        app:layout_constraintBottom_toBottomOf="@id/top_bar_bg"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/top_bar_bg"
+        app:tint="#FFFFFF" />
 
     <!-- ===== PROGRESS BAR ===== -->
     <ProgressBar

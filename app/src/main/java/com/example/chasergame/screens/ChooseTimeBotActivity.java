@@ -22,7 +22,7 @@ public class ChooseTimeBotActivity extends BaseActivity {
         if (pickerMinutes != null) {
             pickerMinutes.setMinValue(0);
             pickerMinutes.setMaxValue(10);
-            pickerMinutes.setValue(2);
+            pickerMinutes.setValue(0);
         }
 
         if (pickerSeconds != null) {

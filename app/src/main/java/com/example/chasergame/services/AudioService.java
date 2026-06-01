@@ -50,6 +50,12 @@ public class AudioService {
         }
     }
 
+    public void resume() {
+        if (mediaPlayer != null && !mediaPlayer.isPlaying()) {
+            mediaPlayer.start();
+        }
+    }
+
     public void setPlaybackSpeed(float speed) {
         if (mediaPlayer != null) {
             try {

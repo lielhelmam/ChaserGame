@@ -137,6 +137,18 @@ public class GameView extends ConstraintLayout {
         activeSliders.clear();
     }
 
+    public void pause() {
+        isGameRunning = false;
+        handler.removeCallbacks(gameLoop);
+    }
+
+    public void resume() {
+        if (!isGameRunning) {
+            isGameRunning = true;
+            handler.post(gameLoop);
+        }
+    }
+
     @Override
     protected void onDraw(@NonNull Canvas canvas) {
         super.onDraw(canvas);

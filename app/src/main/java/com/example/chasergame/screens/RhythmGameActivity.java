@@ -55,6 +55,9 @@ public class RhythmGameActivity extends BaseActivity implements GameView.GameEve
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_rhythm_game);
 
+        hideTopBar();
+        hideNavigationDrawer();
+
         initViews();
         resolveSkin();
         applySkin();
@@ -109,6 +112,8 @@ public class RhythmGameActivity extends BaseActivity implements GameView.GameEve
         gameView.setGameEventListener(this);
         vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         audioService = new AudioService(this);
+
+        findViewById(R.id.btn_exit_game).setOnClickListener(v -> showExitDialog());
 
         // Add Canvas Overlay
         effectOverlay = new EffectOverlayView(this);
@@ -391,6 +396,25 @@ public class RhythmGameActivity extends BaseActivity implements GameView.GameEve
             user.points += points;
             authService.updateUserAndSync(user, null);
         }
+    }
+
+    private void showExitDialog() {
+        audioService.pause();
+        gameView.pause(); // Assuming GameView has a pause method or similar
+
+        new AlertDialog.Builder(this)
+                .setTitle("Exit Game")
+                .setMessage("Are you sure you want to quit?")
+                .setPositiveButton("Yes", (dialog, which) -> finish())
+                .setNegativeButton("No", (dialog, which) -> {
+                    audioService.resume();
+                    gameView.resume();
+                })
+                .setOnCancelListener(dialog -> {
+                    audioService.resume();
+                    gameView.resume();
+                })
+                .show();
     }
 
     @Override
