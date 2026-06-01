@@ -1,6 +1,7 @@
 package com.example.chasergame.screens;
 
 import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.View;
@@ -35,7 +36,6 @@ public class PlayAgainstBotActivity extends BaseActivity {
     private FrameLayout progressContainer;
     private TextView markerP1, markerP2, tvTurn, tvTimer, tvScoreP1, tvScoreP2, tvTarget, tvQuestion;
     private Button btnA, btnB, btnC;
-    private int defaultBtnColor;
 
     private GameEngine gameEngine;
     private BotService botService;
@@ -88,8 +88,6 @@ public class PlayAgainstBotActivity extends BaseActivity {
         btnA = findViewById(R.id.Bot_btnAnswerA);
         btnB = findViewById(R.id.Bot_btnAnswerB);
         btnC = findViewById(R.id.Bot_btnAnswerC);
-
-        defaultBtnColor = btnA.getBackgroundTintList().getDefaultColor();
 
         btnA.setOnClickListener(v -> onAnswerClicked(btnA));
         btnB.setOnClickListener(v -> onAnswerClicked(btnB));
@@ -173,7 +171,7 @@ public class PlayAgainstBotActivity extends BaseActivity {
     private void onAnswerClicked(Button btn) {
         boolean correct = btn.getText().toString().equals(currentCorrect);
         setInputsEnabled(false);
-        btn.setBackgroundTintList(ColorStateList.valueOf(correct ? 0xFF2E7D32 : 0xFFC62828));
+        btn.setBackgroundTintList(ColorStateList.valueOf(correct ? Color.GREEN : Color.RED));
 
         if (correct) {
             gameEngine.onCorrectAnswer();
@@ -271,7 +269,7 @@ public class PlayAgainstBotActivity extends BaseActivity {
     }
 
     private void resetButtonColors() {
-        ColorStateList c = ColorStateList.valueOf(defaultBtnColor);
+        ColorStateList c = ColorStateList.valueOf(Color.parseColor("#333333"));
         btnA.setBackgroundTintList(c);
         btnB.setBackgroundTintList(c);
         btnC.setBackgroundTintList(c);
