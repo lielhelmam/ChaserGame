@@ -14,6 +14,19 @@ public class AudioService {
     private BackgroundAudioService backgroundService;
     private boolean isBound = false;
     
+    private OnServiceBoundListener boundListener;
+
+    public interface OnServiceBoundListener {
+        void onServiceBound();
+    }
+
+    public void setOnServiceBoundListener(OnServiceBoundListener listener) {
+        this.boundListener = listener;
+        if (isBound && boundListener != null) {
+            boundListener.onServiceBound();
+        }
+    }
+    
     // Playback state for when service is not yet connected
     private String pendingResName;
     private AudioListener pendingListener;
@@ -28,6 +41,10 @@ public class AudioService {
             backgroundService = binder.getService();
             isBound = true;
             
+            if (boundListener != null) {
+                boundListener.onServiceBound();
+            }
+
             if (startPending && pendingResName != null) {
                 Log.i(TAG, "onServiceConnected: Executing pending request for " + pendingResName);
                 playSong(pendingResName, pendingListener);
@@ -168,6 +185,14 @@ public class AudioService {
         if (isBound && backgroundService != null) {
             backgroundService.stop();
         }
+    }
+
+    public String getCurrentSongName() {
+        return (isBound && backgroundService != null) ? backgroundService.getCurrentSongName() : null;
+    }
+
+    public boolean isPlaying() {
+        return isBound && backgroundService != null && backgroundService.isPlaying();
     }
 
     public void release() {

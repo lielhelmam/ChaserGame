@@ -2,6 +2,7 @@ package com.example.chasergame.screens;
 
 import android.os.Bundle;
 import android.widget.EditText;
+import android.widget.SearchView;
 import android.widget.Toast;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -28,6 +29,7 @@ public class CreatePlaylistActivity extends BaseActivity {
         setContentView(R.layout.activity_create_playlist);
 
         etName = findViewById(R.id.et_playlist_name);
+        SearchView searchView = findViewById(R.id.sv_selectable_songs);
         RecyclerView rv = findViewById(R.id.rv_selectable_songs);
         rv.setLayoutManager(new LinearLayoutManager(this));
 
@@ -42,6 +44,20 @@ public class CreatePlaylistActivity extends BaseActivity {
                     adapter.setSelectedIds(existingPlaylist.getSongIds());
                 }
                 rv.setAdapter(adapter);
+
+                searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                    @Override
+                    public boolean onQueryTextSubmit(String query) {
+                        adapter.filter(query);
+                        return false;
+                    }
+
+                    @Override
+                    public boolean onQueryTextChange(String newText) {
+                        adapter.filter(newText);
+                        return false;
+                    }
+                });
             }
 
             @Override

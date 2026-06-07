@@ -27,6 +27,10 @@ public class BackgroundAudioService extends Service {
     private final IBinder binder = new LocalBinder();
     private PowerManager.WakeLock wakeLock;
     private PlaybackListener currentListener;
+    
+    // Global state tracking
+    private String currentSongName;
+    private boolean isCurrentlyPlaying;
 
     public interface PlaybackListener {
         void onSongCompleted();
@@ -75,6 +79,8 @@ public class BackgroundAudioService extends Service {
 
     public void playSong(int resId, String name, PlaybackListener listener) {
         Log.i(TAG, "playSong: Requesting playback of " + name + " (ResID: " + resId + ")");
+        this.currentSongName = name;
+        this.isCurrentlyPlaying = true;
         
         if (resId == 0) {
             Log.e(TAG, "playSong: Invalid resource ID (0). Cannot play " + name);
@@ -132,6 +138,7 @@ public class BackgroundAudioService extends Service {
     public void pause() {
         if (mediaPlayer != null && mediaPlayer.isPlaying()) {
             mediaPlayer.pause();
+            isCurrentlyPlaying = false;
             Log.i(TAG, "pause: Playback paused");
         }
     }
@@ -139,12 +146,15 @@ public class BackgroundAudioService extends Service {
     public void resume() {
         if (mediaPlayer != null && !mediaPlayer.isPlaying()) {
             mediaPlayer.start();
+            isCurrentlyPlaying = true;
             Log.i(TAG, "resume: Playback resumed");
         }
     }
 
     public void stop() {
         Log.i(TAG, "stop: Stopping service and playback");
+        isCurrentlyPlaying = false;
+        currentSongName = null;
         if (mediaPlayer != null) {
             if (mediaPlayer.isPlaying()) mediaPlayer.stop();
             mediaPlayer.release();
@@ -175,6 +185,14 @@ public class BackgroundAudioService extends Service {
                 Log.e(TAG, "setPlaybackSpeed: Error setting speed to " + speed, e);
             }
         }
+    }
+
+    public String getCurrentSongName() {
+        return currentSongName;
+    }
+
+    public boolean isPlaying() {
+        return isCurrentlyPlaying && mediaPlayer != null && mediaPlayer.isPlaying();
     }
 
     private void createNotificationChannel() {

@@ -20,11 +20,13 @@ import java.util.Set;
 
 public class SelectableSongsAdapter extends RecyclerView.Adapter<SelectableSongsAdapter.VH> {
 
-    private final List<DataSnapshot> snapshots;
+    private final List<DataSnapshot> allSnapshots;
+    private final List<DataSnapshot> visibleSnapshots;
     private final Set<String> selectedIds = new HashSet<>();
 
     public SelectableSongsAdapter(List<DataSnapshot> snapshots) {
-        this.snapshots = snapshots;
+        this.allSnapshots = snapshots;
+        this.visibleSnapshots = new ArrayList<>(snapshots);
     }
 
     @NonNull
@@ -36,7 +38,7 @@ public class SelectableSongsAdapter extends RecyclerView.Adapter<SelectableSongs
 
     @Override
     public void onBindViewHolder(@NonNull VH holder, int position) {
-        DataSnapshot snap = snapshots.get(position);
+        DataSnapshot snap = visibleSnapshots.get(position);
         SongData song = snap.getValue(SongData.class);
         String id = snap.getKey();
 
@@ -54,7 +56,24 @@ public class SelectableSongsAdapter extends RecyclerView.Adapter<SelectableSongs
 
     @Override
     public int getItemCount() {
-        return snapshots.size();
+        return visibleSnapshots.size();
+    }
+
+    public void filter(String query) {
+        visibleSnapshots.clear();
+        if (query == null || query.trim().isEmpty()) {
+            visibleSnapshots.addAll(allSnapshots);
+        } else {
+            String lowerQuery = query.toLowerCase().trim();
+            for (DataSnapshot snap : allSnapshots) {
+                SongData song = snap.getValue(SongData.class);
+                if (song != null && song.getName() != null &&
+                        song.getName().toLowerCase().contains(lowerQuery)) {
+                    visibleSnapshots.add(snap);
+                }
+            }
+        }
+        notifyDataSetChanged();
     }
 
     public List<String> getSelectedIds() {

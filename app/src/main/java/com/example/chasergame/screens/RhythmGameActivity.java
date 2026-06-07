@@ -87,9 +87,10 @@ public class RhythmGameActivity extends BaseActivity implements GameView.GameEve
             loadSong(songId);
         } else {
             finish();
+            return;
         }
 
-        // Get active mods... (keep existing mods logic)
+        // Get active mods...
         List<String> mods = getIntent().getStringArrayListExtra("ACTIVE_MODS");
         if (mods != null) {
             activeMods = mods;
@@ -116,9 +117,6 @@ public class RhythmGameActivity extends BaseActivity implements GameView.GameEve
                 }
             }
         }
-
-        if (songId != null) loadSong(songId);
-        else finish();
     }
 
     private void initViews() {
@@ -413,6 +411,10 @@ public class RhythmGameActivity extends BaseActivity implements GameView.GameEve
                     break;
             }
         }
+
+        String songIdFromIntent = getIntent().getStringExtra("SONG_ID");
+        if (songIdFromIntent != null) loadSong(songIdFromIntent);
+        else finish();
     }
 
     private void vibrate(long d) {
