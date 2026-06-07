@@ -1,6 +1,7 @@
 package com.example.chasergame.screens;
 
 import android.os.Bundle;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.SearchView;
 import android.widget.Toast;
@@ -35,6 +36,8 @@ public class CreatePlaylistActivity extends BaseActivity {
 
         existingPlaylist = (Playlist) getIntent().getSerializableExtra("PLAYLIST_TO_EDIT");
 
+        CheckBox cbSelectAll = findViewById(R.id.cb_select_all);
+
         databaseService.getSongsSnapshot(new DatabaseService.DatabaseCallback<>() {
             @Override
             public void onCompleted(List<DataSnapshot> snapshots) {
@@ -44,6 +47,12 @@ public class CreatePlaylistActivity extends BaseActivity {
                     adapter.setSelectedIds(existingPlaylist.getSongIds());
                 }
                 rv.setAdapter(adapter);
+
+                cbSelectAll.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                    if (buttonView.isPressed()) { // Only trigger if user clicked it
+                        adapter.selectAll(isChecked);
+                    }
+                });
 
                 searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
                     @Override

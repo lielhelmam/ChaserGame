@@ -100,10 +100,34 @@
                 android:id="@+id/btn_admin_songs_list"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
+                android:layout_marginBottom="12dp"
                 android:backgroundTint="@color/background_red"
                 android:text="@string/admin_songs_list_btn"
                 android:textColor="#FFFFFF"
                 android:textSize="16sp"
+                android:textStyle="bold"
+                app:cornerRadius="16dp" />
+
+            <Button
+                android:id="@+id/btn_admin_migrate_audio"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginBottom="12dp"
+                android:backgroundTint="#FF9800"
+                android:text="MIGRATE AUDIO NAMES"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                app:cornerRadius="16dp" />
+
+            <Button
+                android:id="@+id/btn_admin_auto_import"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:backgroundTint="#4CAF50"
+                android:text="AUTO-IMPORT ALL SONGS"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp"
                 android:textStyle="bold"
                 app:cornerRadius="16dp" />
 

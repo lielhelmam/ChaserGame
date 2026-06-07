@@ -88,6 +88,17 @@ public class SelectableSongsAdapter extends RecyclerView.Adapter<SelectableSongs
         }
     }
 
+    public void selectAll(boolean isSelected) {
+        for (DataSnapshot snap : visibleSnapshots) {
+            String id = snap.getKey();
+            if (id != null) {
+                if (isSelected) selectedIds.add(id);
+                else selectedIds.remove(id);
+            }
+        }
+        notifyDataSetChanged();
+    }
+
     static class VH extends RecyclerView.ViewHolder {
         TextView tvName, tvDiff;
         CheckBox checkBox;
