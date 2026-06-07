@@ -74,19 +74,27 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsAdapter.SongViewHold
         holder.tvTopScore.setText("WR: " + song.getTopScore() + " (" + wrName + ")");
 
         // Personal Best & Rank
+        int pbScore = 0;
+        String pbRank = "-";
         if (authService != null) {
             User currentUser = authService.getCurrentUser();
             if (currentUser != null && currentUser.songHighScores != null && currentUser.songHighScores.containsKey(song.getName())) {
-                int pbScore = currentUser.songHighScores.get(song.getName());
-                String pbRank = currentUser.songRanks != null ? currentUser.songRanks.getOrDefault(song.getName(), "-") : "-";
-
-                holder.tvTopRank.setText(pbRank);
-                holder.tvTopAccuracy.setText("PB: " + pbScore);
-            } else {
-                holder.tvTopRank.setText("-");
-                holder.tvTopAccuracy.setText("PB: 0");
+                pbScore = currentUser.songHighScores.get(song.getName());
+                pbRank = currentUser.songRanks != null ? currentUser.songRanks.getOrDefault(song.getName(), "-") : "-";
             }
         }
+        holder.tvTopRank.setText(pbRank);
+        holder.tvTopAccuracy.setText("PB: " + pbScore);
+
+        // UI Styling: Set Difficulty Badge Color
+        int diffColor = 0xFFFFFFFF; // Default White
+        String diff = song.getDifficulty().toLowerCase();
+        if (diff.contains("easy")) diffColor = 0xFF4CAF50; // Green
+        else if (diff.contains("normal")) diffColor = 0xFF2196F3; // Blue
+        else if (diff.contains("hard")) diffColor = 0xFFFF9800; // Orange
+        else if (diff.contains("insane") || diff.contains("expert")) diffColor = 0xFFF44336; // Red
+        
+        holder.tvDifficulty.setTextColor(diffColor);
 
         holder.itemLayout.setOnClickListener(v -> {
             if (listener != null) listener.onSongClick(song);

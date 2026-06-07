@@ -10,18 +10,31 @@
 
     <!-- ===== TOP BAR: TITLE & SHOP ===== -->
     <!-- ===== TOP BAR: TITLE ===== -->
-    <TextView
-        android:id="@+id/tv_select_song_title"
+    <RelativeLayout
+        android:id="@+id/rl_header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:fontFamily="sans-serif-black"
-        android:text="Song Selection"
-        android:textColor="#FFFFFF"
-        android:textSize="28sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/tv_select_song_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-black"
+            android:text="Music Library"
+            android:textColor="#FFFFFF"
+            android:textSize="28sp" />
+
+        <ImageButton
+            android:id="@+id/btn_my_playlists"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_alignParentEnd="true"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@android:drawable/ic_menu_slideshow"
+            app:tint="#1DB954" />
+    </RelativeLayout>
 
     <!-- ===== BUTTONS ROW (Below Title) ===== -->
     <LinearLayout
@@ -30,9 +43,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
         android:orientation="horizontal"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tv_select_song_title">
+        app:layout_constraintTop_toBottomOf="@id/rl_header">
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_game_mods"
@@ -41,12 +52,10 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
             android:layout_weight="1"
-            android:text="⚡ Mods"
+            android:text="MODS"
             android:textColor="#00FFFF"
-            android:textSize="12sp"
-            app:cornerRadius="12dp"
-            app:strokeColor="#00FFFF"
-            app:strokeWidth="2dp" />
+            app:cornerRadius="8dp"
+            app:strokeColor="#00FFFF" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_go_to_shop"
@@ -54,10 +63,9 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:backgroundTint="#FFEB3B"
-            android:text="🛒 Shop"
+            android:text="SHOP"
             android:textColor="#222222"
-            android:textSize="12sp"
-            app:cornerRadius="12dp" />
+            app:cornerRadius="8dp" />
     </LinearLayout>
 
     <!-- ===== SEARCH BAR (Below Buttons) ===== -->

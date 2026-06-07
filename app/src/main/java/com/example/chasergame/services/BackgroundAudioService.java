@@ -1,0 +1,216 @@
+package com.example.chasergame.services;
+
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.Service;
+import android.content.Intent;
+import android.media.MediaPlayer;
+import android.os.Binder;
+import android.os.Build;
+import android.os.IBinder;
+import android.os.PowerManager;
+import android.util.Log;
+
+import androidx.annotation.Nullable;
+import androidx.core.app.NotificationCompat;
+
+import com.example.chasergame.R;
+
+public class BackgroundAudioService extends Service {
+
+    private static final String TAG = "CHASER_AUDIO_SVC";
+    private static final String CHANNEL_ID = "MusicServiceChannel";
+    private static final int NOTIFICATION_ID = 1;
+    
+    private MediaPlayer mediaPlayer;
+    private final IBinder binder = new LocalBinder();
+    private PowerManager.WakeLock wakeLock;
+    private PlaybackListener currentListener;
+
+    public interface PlaybackListener {
+        void onSongCompleted();
+        void onError(String message);
+    }
+
+    public class LocalBinder extends Binder {
+        public BackgroundAudioService getService() {
+            return BackgroundAudioService.this;
+        }
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        Log.i(TAG, "onCreate: BackgroundAudioService created");
+        createNotificationChannel();
+        
+        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+        if (powerManager != null) {
+            wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "ChaserGame:MusicWakeLock");
+            Log.d(TAG, "onCreate: WakeLock initialized");
+        }
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        String songName = intent != null ? intent.getStringExtra("SONG_NAME") : null;
+        Log.i(TAG, "onStartCommand: Received start request. Song name in intent: " + songName);
+        
+        startForeground(NOTIFICATION_ID, createNotification(songName != null ? "Ready: " + songName : "Ready to play"));
+        
+        if (wakeLock != null && !wakeLock.isHeld()) {
+            wakeLock.acquire(30 * 60 * 1000L);
+            Log.d(TAG, "onStartCommand: WakeLock acquired");
+        }
+        return START_NOT_STICKY;
+    }
+
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent) {
+        Log.i(TAG, "onBind: Client bound to service");
+        return binder;
+    }
+
+    public void playSong(int resId, String name, PlaybackListener listener) {
+        Log.i(TAG, "playSong: Requesting playback of " + name + " (ResID: " + resId + ")");
+        
+        if (resId == 0) {
+            Log.e(TAG, "playSong: Invalid resource ID (0). Cannot play " + name);
+            if (listener != null) listener.onError("Invalid resource ID for " + name);
+            // DO NOT return here, let's try to notify user why it failed
+            return;
+        }
+
+        if (mediaPlayer != null) {
+            Log.d(TAG, "playSong: Releasing existing MediaPlayer");
+            mediaPlayer.release();
+        }
+        
+        try {
+            mediaPlayer = MediaPlayer.create(this, resId);
+            if (mediaPlayer != null) {
+                Log.i(TAG, "playSong: MediaPlayer created successfully for " + name);
+                this.currentListener = listener;
+                mediaPlayer.setLooping(false);
+                
+                mediaPlayer.setOnCompletionListener(mp -> {
+                    Log.i(TAG, "onCompletion: Song " + name + " finished");
+                    if (currentListener != null) {
+                        currentListener.onSongCompleted();
+                    }
+                });
+
+                mediaPlayer.setOnErrorListener((mp, what, extra) -> {
+                    String errorMsg = "MediaPlayer Error: what=" + what + " extra=" + extra;
+                    Log.e(TAG, "playSong: " + errorMsg + " for song " + name);
+                    if (currentListener != null) {
+                        currentListener.onError(errorMsg);
+                    }
+                    return false;
+                });
+
+                mediaPlayer.start();
+                Log.i(TAG, "playSong: MediaPlayer started playing " + name);
+                
+                // Update notification
+                NotificationManager manager = getSystemService(NotificationManager.class);
+                if (manager != null) {
+                    manager.notify(NOTIFICATION_ID, createNotification("Playing: " + name));
+                }
+            } else {
+                Log.e(TAG, "playSong: MediaPlayer.create returned null for resource " + resId + " (" + name + ")");
+                if (listener != null) listener.onError("Failed to create MediaPlayer for " + name);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "playSong: Exception while playing " + name, e);
+            if (listener != null) listener.onError("Exception: " + e.getMessage());
+        }
+    }
+
+    public void pause() {
+        if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+            mediaPlayer.pause();
+            Log.i(TAG, "pause: Playback paused");
+        }
+    }
+
+    public void resume() {
+        if (mediaPlayer != null && !mediaPlayer.isPlaying()) {
+            mediaPlayer.start();
+            Log.i(TAG, "resume: Playback resumed");
+        }
+    }
+
+    public void stop() {
+        Log.i(TAG, "stop: Stopping service and playback");
+        if (mediaPlayer != null) {
+            if (mediaPlayer.isPlaying()) mediaPlayer.stop();
+            mediaPlayer.release();
+            mediaPlayer = null;
+        }
+        stopForeground(true);
+        stopSelf();
+    }
+
+    public int getDuration() {
+        int duration = (mediaPlayer != null) ? mediaPlayer.getDuration() : 0;
+        Log.v(TAG, "getDuration: " + duration);
+        return duration;
+    }
+
+    public int getCurrentPosition() {
+        int pos = (mediaPlayer != null) ? mediaPlayer.getCurrentPosition() : 0;
+        Log.v(TAG, "getCurrentPosition: " + pos);
+        return pos;
+    }
+
+    public void setPlaybackSpeed(float speed) {
+        if (mediaPlayer != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            try {
+                mediaPlayer.setPlaybackParams(mediaPlayer.getPlaybackParams().setSpeed(speed));
+                Log.i(TAG, "setPlaybackSpeed: Speed set to " + speed);
+            } catch (Exception e) {
+                Log.e(TAG, "setPlaybackSpeed: Error setting speed to " + speed, e);
+            }
+        }
+    }
+
+    private void createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel serviceChannel = new NotificationChannel(
+                    CHANNEL_ID,
+                    "Music Service Channel",
+                    NotificationManager.IMPORTANCE_LOW
+            );
+            NotificationManager manager = getSystemService(NotificationManager.class);
+            if (manager != null) {
+                manager.createNotificationChannel(serviceChannel);
+            }
+        }
+    }
+
+    private Notification createNotification(String content) {
+        return new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setContentTitle("Chaser Rhythm")
+                .setContentText(content)
+                .setSmallIcon(R.drawable.icon)
+                .setPriority(NotificationCompat.PRIORITY_LOW)
+                .setOngoing(true)
+                .build();
+    }
+
+    @Override
+    public void onDestroy() {
+        Log.i(TAG, "onDestroy: BackgroundAudioService being destroyed");
+        super.onDestroy();
+        if (mediaPlayer != null) {
+            mediaPlayer.release();
+            mediaPlayer = null;
+        }
+        if (wakeLock != null && wakeLock.isHeld()) {
+            wakeLock.release();
+        }
+    }
+}

@@ -10,6 +10,7 @@ import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
@@ -49,6 +50,11 @@ public class RhythmGameActivity extends BaseActivity implements GameView.GameEve
     private Vibrator vibrator;
     private EffectOverlayView effectOverlay;
 
+    private List<String> songQueue = new ArrayList<>();
+    private int currentQueueIndex = 0;
+    private boolean isLoopEnabled = false;
+    private boolean isPlaylistMode = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -63,7 +69,27 @@ public class RhythmGameActivity extends BaseActivity implements GameView.GameEve
         applySkin();
 
         String songId = getIntent().getStringExtra("SONG_ID");
-        // Get active mods and calculate multiplier
+        String songNameParam = getIntent().getStringExtra("SONG_NAME_PARAM");
+        ArrayList<String> queue = getIntent().getStringArrayListExtra("SONG_QUEUE");
+        isLoopEnabled = getIntent().getBooleanExtra("IS_LOOP", false);
+
+        if (queue != null && !queue.isEmpty()) {
+            android.util.Log.d("GAME_DEBUG", "Queue received: " + queue.size() + " items");
+            this.songQueue = new ArrayList<>(queue);
+            this.currentQueueIndex = 0;
+            this.isPlaylistMode = true;
+            loadSongFromQueue();
+        } else if (songNameParam != null) {
+            isPlaylistMode = false;
+            loadSongByName(songNameParam);
+        } else if (songId != null) {
+            isPlaylistMode = false;
+            loadSong(songId);
+        } else {
+            finish();
+        }
+
+        // Get active mods... (keep existing mods logic)
         List<String> mods = getIntent().getStringArrayListExtra("ACTIVE_MODS");
         if (mods != null) {
             activeMods = mods;
@@ -132,26 +158,81 @@ public class RhythmGameActivity extends BaseActivity implements GameView.GameEve
         // Handled by GameView
     }
 
+    private void loadSongByName(String name) {
+        databaseService.getSongListWithKeys(new DatabaseService.DatabaseCallback<>() {
+            @Override
+            public void onCompleted(List<com.example.chasergame.adapters.SongsAdminAdapter.Item> items) {
+                for (com.example.chasergame.adapters.SongsAdminAdapter.Item item : items) {
+                    if (item.value.getName().equals(name)) {
+                        songData = item.value;
+                        setupAndStartGame();
+                        return;
+                    }
+                }
+                finish();
+            }
+
+            @Override
+            public void onFailed(Exception e) {
+                finish();
+            }
+        });
+    }
+
+    private void loadSongFromQueue() {
+        if (songQueue == null || songQueue.isEmpty()) {
+            finish();
+            return;
+        }
+
+        if (currentQueueIndex >= songQueue.size()) {
+            if (isLoopEnabled) {
+                currentQueueIndex = 0;
+            } else {
+                // Done with playlist
+                finish();
+                return;
+            }
+        }
+        
+        String nextSongId = songQueue.get(currentQueueIndex);
+        android.util.Log.d("RhythmGame", "Queue: Loading song index " + currentQueueIndex + " ID: " + nextSongId);
+        loadSong(nextSongId);
+    }
+
+    private void setupAndStartGame() {
+        gameManager = new RhythmGameManager(songData);
+        gameManager.setScoreMultiplier(scoreMultiplier);
+        tvSongName.setText(songData.getName());
+
+        int duration = audioService.prepareSong(songData.getResName());
+        if (duration <= 0) duration = 180000;
+
+        List<Note> dynamicNotes = BeatmapGenerator.generate(songData.getBpm(), duration, songData.getDifficulty(), activeMods);
+        startPlay(dynamicNotes);
+    }
+
     private void loadSong(String songId) {
+        if (songId == null) {
+            Toast.makeText(this, "Error: Invalid Song ID", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
         databaseService.getSongById(songId, new DatabaseService.DatabaseCallback<>() {
             @Override
             public void onCompleted(SongData song) {
-                songData = song;
-                if (songData == null) {
-                    finish();
+                if (song == null) {
+                    Toast.makeText(RhythmGameActivity.this, "Song not found in DB: " + songId, Toast.LENGTH_LONG).show();
+                    if (isPlaylistMode) {
+                        currentQueueIndex++;
+                        loadSongFromQueue();
+                    } else {
+                        finish();
+                    }
                     return;
                 }
-
-                gameManager = new RhythmGameManager(songData);
-                gameManager.setScoreMultiplier(scoreMultiplier);
-                tvSongName.setText(songData.getName());
-
-                // Get exact duration from audio file before generating beatmap
-                int duration = audioService.prepareSong(songData.getResName());
-                if (duration <= 0) duration = 180000; // Fallback
-
-                List<Note> dynamicNotes = BeatmapGenerator.generate(songData.getBpm(), duration, songData.getDifficulty(), activeMods);
-                startPlay(dynamicNotes);
+                songData = song;
+                setupAndStartGame();
             }
 
             @Override
@@ -162,6 +243,13 @@ public class RhythmGameActivity extends BaseActivity implements GameView.GameEve
     }
 
     private void startPlay(List<Note> notes) {
+        if (songData == null || songData.getResName() == null) {
+            android.util.Log.e("RhythmGameActivity", "Cannot start play: songData or ResName is null");
+            finish();
+            return;
+        }
+
+        android.util.Log.i("RhythmGameActivity", "Starting play for: " + songData.getResName());
         audioService.playSong(songData.getResName(), this::endGame);
 
         // --- OVERCLOCK MOD: Physical Speed Increase ---
@@ -334,8 +422,22 @@ public class RhythmGameActivity extends BaseActivity implements GameView.GameEve
     }
 
     private void endGame() {
+        if (gameManager == null) return; // Safety
+
         audioService.pause();
         gameView.stop();
+
+        // Check if there are more songs in the queue
+        if (songQueue != null && !songQueue.isEmpty() && currentQueueIndex < songQueue.size() - 1) {
+            currentQueueIndex++;
+            loadSongFromQueue();
+            return;
+        } else if (isLoopEnabled && songQueue != null && !songQueue.isEmpty()) {
+            currentQueueIndex = 0;
+            loadSongFromQueue();
+            return;
+        }
+
         boolean isDead = gameManager.isGameOver();
         int score = !isDead ? gameManager.getCurrentScore() : 0;
         int earned = gameManager.calculateEarnedPoints();
@@ -398,9 +500,18 @@ public class RhythmGameActivity extends BaseActivity implements GameView.GameEve
         }
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        // Pause ONLY if we are NOT in playlist mode
+        if (!isPlaylistMode && audioService != null) {
+            audioService.pause();
+        }
+    }
+
     private void showExitDialog() {
         audioService.pause();
-        gameView.pause(); // Assuming GameView has a pause method or similar
+        gameView.pause();
 
         new AlertDialog.Builder(this)
                 .setTitle("Exit Game")
@@ -420,7 +531,17 @@ public class RhythmGameActivity extends BaseActivity implements GameView.GameEve
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        audioService.release();
+        if (audioService != null) {
+            try {
+                // If NOT in playlist mode, stop the service entirely
+                if (!isPlaylistMode) {
+                    audioService.stopService();
+                }
+                audioService.release();
+            } catch (Exception e) {
+                // Already unbound or other issue
+            }
+        }
         if (gameView != null) gameView.stop();
     }
 

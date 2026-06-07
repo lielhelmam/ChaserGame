@@ -29,7 +29,8 @@ public class DatabaseService implements IUserRepository, IQuestionRepository, IS
 
     private static final String USERS_PATH = "users",
             QUESTIONS_PATH = "questions",
-            SONGS_PATH = "rhythm_songs";
+            SONGS_PATH = "rhythm_songs",
+            PLAYLISTS_PATH = "playlists";
 
     private static DatabaseService instance;
     private final DatabaseReference databaseReference;
@@ -461,6 +462,26 @@ public class DatabaseService implements IUserRepository, IQuestionRepository, IS
     public void updateSong(@NotNull String songId, @NotNull SongData song, @Nullable DatabaseCallback<Void> callback) {
         writeData(SONGS_PATH + "/" + songId, song, callback);
     }
+    // endregion
+
+    // region Playlist Section
+
+    public void createPlaylist(String userId, com.example.chasergame.models.Playlist playlist, DatabaseCallback<Void> callback) {
+        if (playlist.getId() == null) {
+            String id = generateNewId(USERS_PATH + "/" + userId + "/" + PLAYLISTS_PATH);
+            playlist.setId(id);
+        }
+        writeData(USERS_PATH + "/" + userId + "/" + PLAYLISTS_PATH + "/" + playlist.getId(), playlist, callback);
+    }
+
+    public void getUserPlaylists(String userId, DatabaseCallback<List<com.example.chasergame.models.Playlist>> callback) {
+        getDataList(USERS_PATH + "/" + userId + "/" + PLAYLISTS_PATH, com.example.chasergame.models.Playlist.class, callback);
+    }
+
+    public void deletePlaylist(String userId, String playlistId, DatabaseCallback<Void> callback) {
+        deleteData(USERS_PATH + "/" + userId + "/" + PLAYLISTS_PATH + "/" + playlistId, callback);
+    }
+
     // endregion
 
     public interface DatabaseCallback<T> {

@@ -79,6 +79,11 @@ public class SongSelectionActivity extends BaseActivity {
             startActivity(intent);
         });
 
+        findViewById(R.id.btn_my_playlists).setOnClickListener(v -> {
+            Intent intent = new Intent(this, MyPlaylistsActivity.class);
+            startActivity(intent);
+        });
+
         findViewById(R.id.btn_game_mods).setOnClickListener(v -> showModsDialog());
 
         findViewById(R.id.btn_back_to_rules).setOnClickListener(v -> {
