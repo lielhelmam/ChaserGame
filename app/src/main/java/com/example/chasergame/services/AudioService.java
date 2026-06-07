@@ -86,6 +86,10 @@ public class AudioService {
         Log.d(TAG, "bindService command sent");
     }
 
+    public boolean isBound() {
+        return isBound && backgroundService != null;
+    }
+
     public int prepareSong(String resName) {
         Log.d(TAG, "prepareSong: Checking duration for " + resName);
         if (resName == null || resName.isEmpty()) {

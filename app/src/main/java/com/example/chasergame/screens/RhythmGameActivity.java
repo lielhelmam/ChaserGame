@@ -43,6 +43,7 @@ public class RhythmGameActivity extends BaseActivity implements GameView.GameEve
 
     private RhythmGameManager gameManager;
     private AudioService audioService;
+    private List<Note> pendingNotes; // Store notes if service is not ready
     private List<String> activeMods = new ArrayList<>();
     private double scoreMultiplier = 1.0;
     private SongData songData;
@@ -136,6 +137,12 @@ public class RhythmGameActivity extends BaseActivity implements GameView.GameEve
         gameView.setGameEventListener(this);
         vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         audioService = new AudioService(this);
+        audioService.setOnServiceBoundListener(() -> {
+            if (pendingNotes != null) {
+                startPlay(pendingNotes);
+                pendingNotes = null;
+            }
+        });
 
         findViewById(R.id.btn_exit_game).setOnClickListener(v -> showExitDialog());
 
@@ -244,6 +251,12 @@ public class RhythmGameActivity extends BaseActivity implements GameView.GameEve
         if (songData == null || songData.getResName() == null) {
             android.util.Log.e("RhythmGameActivity", "Cannot start play: songData or ResName is null");
             finish();
+            return;
+        }
+
+        if (!audioService.isBound()) {
+            android.util.Log.i("RhythmGameActivity", "Service not bound, deferring startPlay");
+            pendingNotes = notes;
             return;
         }
 
@@ -411,10 +424,6 @@ public class RhythmGameActivity extends BaseActivity implements GameView.GameEve
                     break;
             }
         }
-
-        String songIdFromIntent = getIntent().getStringExtra("SONG_ID");
-        if (songIdFromIntent != null) loadSong(songIdFromIntent);
-        else finish();
     }
 
     private void vibrate(long d) {
