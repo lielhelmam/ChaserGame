@@ -1,15 +1,24 @@
 package com.example.chasergame.screens;
 
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 
 import com.example.chasergame.R;
 import com.example.chasergame.services.DatabaseService;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 public class ManageSongsActivity extends BaseActivity {
 
@@ -23,6 +32,18 @@ public class ManageSongsActivity extends BaseActivity {
     };
     private EditText etName, etResId, etBpm, etHpDrain, etHpGain;
     private Spinner spDifficulty;
+    private TextView tvSelectedFile;
+    private ProgressBar pbUpload;
+    private Uri selectedFileUri;
+    private String uploadedAudioUrl;
+
+    private final ActivityResultLauncher<String> pickAudioLauncher =
+            registerForActivityResult(new ActivityResultContracts.GetContent(), uri -> {
+                if (uri != null) {
+                    selectedFileUri = uri;
+                    tvSelectedFile.setText("Selected: " + uri.getPath());
+                }
+            });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,20 +56,49 @@ public class ManageSongsActivity extends BaseActivity {
         etBpm = findViewById(R.id.et_song_bpm);
         etHpDrain = findViewById(R.id.et_hp_drain);
         etHpGain = findViewById(R.id.et_hp_gain);
+        tvSelectedFile = findViewById(R.id.tv_selected_file);
+        pbUpload = findViewById(R.id.pb_upload);
 
         setupSpinner();
 
+        findViewById(R.id.btn_pick_audio).setOnClickListener(v -> pickAudioLauncher.launch("audio/*"));
+
         Button btnSave = findViewById(R.id.btn_save_song);
-        btnSave.setOnClickListener(v -> saveSong());
+        btnSave.setOnClickListener(v -> {
+            if (selectedFileUri != null) {
+                uploadFileAndSave();
+            } else {
+                saveSong(null);
+            }
+        });
     }
 
-    private void setupSpinner() {
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, difficultyLevels);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spDifficulty.setAdapter(adapter);
+    private void uploadFileAndSave() {
+        pbUpload.setVisibility(View.VISIBLE);
+        pbUpload.setProgress(0);
+
+        String fileName = "rhythm_songs/" + System.currentTimeMillis() + ".mp3";
+        StorageReference storageRef = FirebaseStorage.getInstance().getReference().child(fileName);
+
+        storageRef.putFile(selectedFileUri)
+                .addOnProgressListener(snapshot -> {
+                    double progress = (100.0 * snapshot.getBytesTransferred()) / snapshot.getTotalByteCount();
+                    pbUpload.setProgress((int) progress);
+                })
+                .addOnSuccessListener(taskSnapshot -> {
+                    storageRef.getDownloadUrl().addOnSuccessListener(uri -> {
+                        uploadedAudioUrl = uri.toString();
+                        pbUpload.setVisibility(View.GONE);
+                        saveSong(uploadedAudioUrl);
+                    });
+                })
+                .addOnFailureListener(e -> {
+                    pbUpload.setVisibility(View.GONE);
+                    Toast.makeText(this, "Upload failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
     }
 
-    private void saveSong() {
+    private void saveSong(String audioUrl) {
         String name = etName.getText().toString().trim();
         String selectedDifficulty = spDifficulty.getSelectedItem().toString();
         // Extract base difficulty name (everything before the first space)
@@ -59,9 +109,9 @@ public class ManageSongsActivity extends BaseActivity {
         String drainStr = etHpDrain.getText().toString().trim();
         String gainStr = etHpGain.getText().toString().trim();
 
-        if (TextUtils.isEmpty(name) || TextUtils.isEmpty(resName) ||
+        if (TextUtils.isEmpty(name) || (TextUtils.isEmpty(resName) && TextUtils.isEmpty(audioUrl)) ||
                 TextUtils.isEmpty(bpmStr) || TextUtils.isEmpty(drainStr) || TextUtils.isEmpty(gainStr)) {
-            Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Please fill all fields (Resource Name or Pick a File)", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -80,7 +130,7 @@ public class ManageSongsActivity extends BaseActivity {
             return;
         }
 
-        songService.addSong(name, difficulty, resName, bpm, hpDrain, hpGain, new DatabaseService.DatabaseCallback<>() {
+        songService.addSong(name, difficulty, resName, audioUrl, bpm, hpDrain, hpGain, new DatabaseService.DatabaseCallback<>() {
             @Override
             public void onCompleted(Void unused) {
                 Toast.makeText(ManageSongsActivity.this, "Song saved successfully!", Toast.LENGTH_SHORT).show();
@@ -92,6 +142,12 @@ public class ManageSongsActivity extends BaseActivity {
                 Toast.makeText(ManageSongsActivity.this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void setupSpinner() {
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, difficultyLevels);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spDifficulty.setAdapter(adapter);
     }
 
     private boolean isBpmValidForDifficulty(int bpm, String difficulty) {

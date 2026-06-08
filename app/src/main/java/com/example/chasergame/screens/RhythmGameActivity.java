@@ -210,11 +210,19 @@ public class RhythmGameActivity extends BaseActivity implements GameView.GameEve
         gameManager.setScoreMultiplier(scoreMultiplier);
         tvSongName.setText(songData.getName());
 
-        int duration = audioService.prepareSong(songData.getResName());
-        if (duration <= 0) duration = 180000;
+        if (songData.getAudioUrl() != null && !songData.getAudioUrl().isEmpty()) {
+            audioService.prepareSongRemote(songData.getAudioUrl(), duration -> {
+                if (duration <= 0) duration = 180000;
+                List<Note> dynamicNotes = BeatmapGenerator.generate(songData.getBpm(), duration, songData.getDifficulty(), activeMods);
+                startPlay(dynamicNotes);
+            });
+        } else {
+            int duration = audioService.prepareSong(songData.getResName());
+            if (duration <= 0) duration = 180000;
 
-        List<Note> dynamicNotes = BeatmapGenerator.generate(songData.getBpm(), duration, songData.getDifficulty(), activeMods);
-        startPlay(dynamicNotes);
+            List<Note> dynamicNotes = BeatmapGenerator.generate(songData.getBpm(), duration, songData.getDifficulty(), activeMods);
+            startPlay(dynamicNotes);
+        }
     }
 
     private void loadSong(String songId) {
@@ -248,8 +256,8 @@ public class RhythmGameActivity extends BaseActivity implements GameView.GameEve
     }
 
     private void startPlay(List<Note> notes) {
-        if (songData == null || songData.getResName() == null) {
-            android.util.Log.e("RhythmGameActivity", "Cannot start play: songData or ResName is null");
+        if (songData == null || (songData.getResName() == null && songData.getAudioUrl() == null)) {
+            android.util.Log.e("RhythmGameActivity", "Cannot start play: songData or sound source is null");
             finish();
             return;
         }
@@ -260,8 +268,13 @@ public class RhythmGameActivity extends BaseActivity implements GameView.GameEve
             return;
         }
 
-        android.util.Log.i("RhythmGameActivity", "Starting play for: " + songData.getResName());
-        audioService.playSong(songData.getResName(), this::endGame);
+        if (songData.getAudioUrl() != null && !songData.getAudioUrl().isEmpty()) {
+            android.util.Log.i("RhythmGameActivity", "Starting remote play for: " + songData.getName());
+            audioService.playSongRemote(songData.getAudioUrl(), songData.getName(), this::endGame);
+        } else {
+            android.util.Log.i("RhythmGameActivity", "Starting local play for: " + songData.getResName());
+            audioService.playSong(songData.getResName(), this::endGame);
+        }
 
         // --- OVERCLOCK MOD: Physical Speed Increase ---
         if (activeMods.contains("OVERCLOCK")) {

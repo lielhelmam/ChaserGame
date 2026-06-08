@@ -197,7 +197,7 @@ public class SongsListActivity extends BaseActivity {
                     // Validate BPM
                     if (!isBpmValid(bpm, difficulty)) return;
 
-                    songService.updateSong(key, name, difficulty, resName, bpm, hpDrain, hpGain, new DatabaseService.DatabaseCallback<>() {
+                    songService.updateSong(key, name, difficulty, resName, song.getAudioUrl(), bpm, hpDrain, hpGain, new DatabaseService.DatabaseCallback<>() {
                         @Override
                         public void onCompleted(Void object) {
                             Toast.makeText(SongsListActivity.this, "Song updated.", Toast.LENGTH_SHORT).show();

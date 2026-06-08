@@ -90,6 +90,10 @@ public class AudioService {
         return isBound && backgroundService != null;
     }
 
+    public interface OnDurationReadyListener {
+        void onDurationReady(int duration);
+    }
+
     public int prepareSong(String resName) {
         Log.d(TAG, "prepareSong: Checking duration for " + resName);
         if (resName == null || resName.isEmpty()) {
@@ -117,6 +121,37 @@ public class AudioService {
             if (tempMp != null) tempMp.release();
         }
         return 0;
+    }
+
+    public void prepareSongRemote(String url, OnDurationReadyListener listener) {
+        Log.d(TAG, "prepareSongRemote: Checking duration for " + url);
+        if (url == null || url.isEmpty()) {
+            Log.e(TAG, "prepareSongRemote: Null or empty URL provided");
+            if (listener != null) listener.onDurationReady(0);
+            return;
+        }
+
+        android.media.MediaPlayer tempMp = new android.media.MediaPlayer();
+        try {
+            tempMp.setDataSource(url);
+            tempMp.setOnPreparedListener(mp -> {
+                int duration = mp.getDuration();
+                Log.d(TAG, "prepareSongRemote: Duration for " + url + " is " + duration + "ms");
+                if (listener != null) listener.onDurationReady(duration);
+                mp.release();
+            });
+            tempMp.setOnErrorListener((mp, what, extra) -> {
+                Log.e(TAG, "prepareSongRemote: Error preparing MediaPlayer for " + url);
+                if (listener != null) listener.onDurationReady(0);
+                mp.release();
+                return true;
+            });
+            tempMp.prepareAsync();
+        } catch (Exception e) {
+            Log.e(TAG, "prepareSongRemote: Error getting duration for " + url, e);
+            tempMp.release();
+            if (listener != null) listener.onDurationReady(0);
+        }
     }
 
     public void playSong(String resName, AudioListener listener) {
@@ -154,6 +189,25 @@ public class AudioService {
             pendingResName = resName;
             pendingListener = listener;
             startPending = true;
+        }
+    }
+
+    public void playSongRemote(String url, String name, AudioListener listener) {
+        if (isBound && backgroundService != null) {
+            backgroundService.playSongRemote(url, name, new BackgroundAudioService.PlaybackListener() {
+                @Override
+                public void onSongCompleted() {
+                    if (listener != null) listener.onCompletion();
+                }
+
+                @Override
+                public void onError(String error) {
+                    Log.e(TAG, "playSongRemote: Error from background service: " + error);
+                    Toast.makeText(context, "Playback Error: " + error, Toast.LENGTH_SHORT).show();
+                }
+            });
+        } else {
+            Log.w(TAG, "playSongRemote: Service not bound yet, cannot play " + name);
         }
     }
 

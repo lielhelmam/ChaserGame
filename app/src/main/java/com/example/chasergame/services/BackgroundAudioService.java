@@ -78,14 +78,21 @@ public class BackgroundAudioService extends Service {
     }
 
     public void playSong(int resId, String name, PlaybackListener listener) {
-        Log.i(TAG, "playSong: Requesting playback of " + name + " (ResID: " + resId + ")");
+        playSongInternal(resId, null, name, listener);
+    }
+
+    public void playSongRemote(String url, String name, PlaybackListener listener) {
+        playSongInternal(0, url, name, listener);
+    }
+
+    private void playSongInternal(int resId, String url, String name, PlaybackListener listener) {
+        Log.i(TAG, "playSongInternal: Requesting playback of " + name + (url != null ? " (URL: " + url + ")" : " (ResID: " + resId + ")"));
         this.currentSongName = name;
         this.isCurrentlyPlaying = true;
         
-        if (resId == 0) {
-            Log.e(TAG, "playSong: Invalid resource ID (0). Cannot play " + name);
-            if (listener != null) listener.onError("Invalid resource ID for " + name);
-            // DO NOT return here, let's try to notify user why it failed
+        if (resId == 0 && url == null) {
+            Log.e(TAG, "playSong: Invalid source (0/null). Cannot play " + name);
+            if (listener != null) listener.onError("Invalid source for " + name);
             return;
         }
 
@@ -95,9 +102,19 @@ public class BackgroundAudioService extends Service {
         }
         
         try {
-            mediaPlayer = MediaPlayer.create(this, resId);
+            if (url != null) {
+                mediaPlayer = new MediaPlayer();
+                mediaPlayer.setDataSource(url);
+                mediaPlayer.prepareAsync();
+                mediaPlayer.setOnPreparedListener(mp -> {
+                    Log.i(TAG, "playSong: Remote MediaPlayer prepared successfully for " + name);
+                    mp.start();
+                });
+            } else {
+                mediaPlayer = MediaPlayer.create(this, resId);
+            }
+
             if (mediaPlayer != null) {
-                Log.i(TAG, "playSong: MediaPlayer created successfully for " + name);
                 this.currentListener = listener;
                 mediaPlayer.setLooping(false);
                 
@@ -117,8 +134,10 @@ public class BackgroundAudioService extends Service {
                     return false;
                 });
 
-                mediaPlayer.start();
-                Log.i(TAG, "playSong: MediaPlayer started playing " + name);
+                if (url == null) {
+                    mediaPlayer.start();
+                    Log.i(TAG, "playSong: MediaPlayer started playing " + name);
+                }
                 
                 // Update notification
                 NotificationManager manager = getSystemService(NotificationManager.class);
@@ -126,7 +145,7 @@ public class BackgroundAudioService extends Service {
                     manager.notify(NOTIFICATION_ID, createNotification("Playing: " + name));
                 }
             } else {
-                Log.e(TAG, "playSong: MediaPlayer.create returned null for resource " + resId + " (" + name + ")");
+                Log.e(TAG, "playSong: MediaPlayer.create returned null for " + name);
                 if (listener != null) listener.onError("Failed to create MediaPlayer for " + name);
             }
         } catch (Exception e) {

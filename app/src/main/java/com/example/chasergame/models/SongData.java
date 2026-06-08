@@ -11,6 +11,7 @@ public class SongData {
     private int bpm = 120;
     private int hpDrain = 1;
     private int hpGain = 1;
+    private String audioUrl;
 
     // Leaderboard Data
     private int topScore = 0;
@@ -93,6 +94,14 @@ public class SongData {
 
     public void setHpGain(int hpGain) {
         this.hpGain = hpGain;
+    }
+
+    public String getAudioUrl() {
+        return audioUrl;
+    }
+
+    public void setAudioUrl(String audioUrl) {
+        this.audioUrl = audioUrl;
     }
 
     public int getTopScore() {

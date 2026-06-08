@@ -30,9 +30,10 @@ public class SongService {
     /**
      * Adds a new song to the database with automatic beatmap generation parameters and HP system.
      */
-    public void addSong(String name, String difficulty, String resName, int bpm, int hpDrain, int hpGain, DatabaseService.DatabaseCallback<Void> callback) {
+    public void addSong(String name, String difficulty, String resName, String audioUrl, int bpm, int hpDrain, int hpGain, DatabaseService.DatabaseCallback<Void> callback) {
         SongData song = new SongData(name, difficulty, 0, null, hpDrain, hpGain);
         song.setResName(resName);
+        song.setAudioUrl(audioUrl);
         song.setBpm(bpm);
         songRepository.addSong(song, callback);
     }
@@ -40,9 +41,10 @@ public class SongService {
     /**
      * Updates an existing song's details in the database including HP parameters.
      */
-    public void updateSong(String songId, String name, String difficulty, String resName, int bpm, int hpDrain, int hpGain, DatabaseService.DatabaseCallback<Void> callback) {
+    public void updateSong(String songId, String name, String difficulty, String resName, String audioUrl, int bpm, int hpDrain, int hpGain, DatabaseService.DatabaseCallback<Void> callback) {
         SongData updatedSong = new SongData(name, difficulty, 0, null, hpDrain, hpGain);
         updatedSong.setResName(resName);
+        updatedSong.setAudioUrl(audioUrl);
         updatedSong.setBpm(bpm);
         songRepository.updateSong(songId, updatedSong, callback);
     }
