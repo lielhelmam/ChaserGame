@@ -256,7 +256,16 @@ public class DatabaseService implements IUserRepository, IQuestionRepository, IS
      */
     @Override
     public void updateUser(@NotNull final User user, @Nullable final DatabaseCallback<Void> callback) {
-        writeData(USERS_PATH + "/" + user.getId(), user, callback);
+        databaseReference.child(USERS_PATH).child(user.getId()).updateChildren(user.toMap())
+                .addOnCompleteListener(task -> {
+                    if (callback != null) {
+                        if (task.isSuccessful()) {
+                            callback.onCompleted(null);
+                        } else {
+                            callback.onFailed(task.getException());
+                        }
+                    }
+                });
     }
 
     /**

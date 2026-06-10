@@ -230,6 +230,34 @@ public class User {
         this.customEffectType = customEffectType;
     }
 
+    public Map<String, Object> toMap() {
+        HashMap<String, Object> result = new HashMap<>();
+        result.put("id", id);
+        result.put("username", username);
+        result.put("password", password);
+        result.put("email", email);
+        result.put("isAdmin", isAdmin);
+        result.put("onlineWins", onlineWins);
+        result.put("botWins", botWins);
+        result.put("botWinsEasy", botWinsEasy);
+        result.put("botWinsNormal", botWinsNormal);
+        result.put("botWinsHard", botWinsHard);
+        result.put("points", points);
+        result.put("equippedSkin", equippedSkin);
+        result.put("ownedSkins", ownedSkins);
+        result.put("giftClaimed", giftClaimed);
+        result.put("totalRhythmScore", totalRhythmScore);
+        result.put("profileImage", profileImage);
+        result.put("songHighScores", songHighScores);
+        result.put("songRanks", songRanks);
+        result.put("songAccuracies", songAccuracies);
+        result.put("customCircleColor", customCircleColor);
+        result.put("customTargetColor", customTargetColor);
+        result.put("customBackgroundColor", customBackgroundColor);
+        result.put("customEffectType", customEffectType);
+        return result;
+    }
+
     @NonNull
     @Override
     public String toString() {
