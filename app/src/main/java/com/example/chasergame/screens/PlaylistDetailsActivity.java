@@ -7,6 +7,7 @@ import android.os.Looper;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
+import androidx.appcompat.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -72,6 +73,21 @@ public class PlaylistDetailsActivity extends BaseActivity {
 
         loadSongs();
         initMiniPlayer();
+
+        SearchView searchView = findViewById(R.id.sv_playlist_songs);
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                adapter.filter(query);
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                adapter.filter(newText);
+                return false;
+            }
+        });
 
         ImageButton btnShuffle = findViewById(R.id.btn_shuffle);
         btnShuffle.setOnClickListener(v -> {

@@ -90,33 +90,15 @@
                     android:textSize="12sp"
                     android:textStyle="bold" />
 
-                <Button
-                    android:id="@+id/btn_pick_audio"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="8dp"
-                    android:backgroundTint="#666666"
-                    android:text="Pick Audio File (.mp3)"
-                    android:textColor="#FFFFFF"
-                    app:cornerRadius="12dp" />
-
-                <TextView
-                    android:id="@+id/tv_selected_file"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="8dp"
-                    android:text="No file selected"
-                    android:textAlignment="center"
-                    android:textColor="#666666"
-                    android:textSize="12sp" />
-
-                <ProgressBar
-                    android:id="@+id/pb_upload"
-                    style="?android:attr/progressBarStyleHorizontal"
+                <EditText
+                    android:id="@+id/et_audio_url"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="16dp"
-                    android:visibility="gone" />
+                    android:backgroundTint="@color/background_red"
+                    android:hint="Remote Audio URL (e.g. https://.../song.mp3)"
+                    android:padding="12dp"
+                    android:inputType="textUri" />
 
                 <TextView
                     android:layout_width="match_parent"
